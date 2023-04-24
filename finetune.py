@@ -24,6 +24,7 @@ parser.add_argument("--logging_steps", type=int, default=100,     help="打印�
 parser.add_argument("--warmup_steps",  type=int, default=50,      help="训练预热步数")
 parser.add_argument("--num_workers",   type=int, default=8,       help="读取数据的线程数量")
 parser.add_argument("--learning_rate", type=float,  default=1e-3, help="学习率大小")
+parser.add_argument("--use_8bit",      type=bool,   default=True, help="是否将模型量化为8位")
 parser.add_argument("--num_train_epochs", type=int, default=3,    help="训练的轮数")
 parser.add_argument("--task",     type=str, default="transcribe", choices=['transcribe', 'translate'], help="模型的任务")
 parser.add_argument("--resume_from_checkpoint",      type=str, default=None, help="恢复训练的检查点路径")
@@ -61,12 +62,23 @@ audio_data = audio_data.with_transform(prepare_dataset)
 data_collator = DataCollatorSpeechSeq2SeqWithPadding(processor=processor)
 
 # 获取Whisper模型
-model = WhisperForConditionalGeneration.from_pretrained(args.base_model, load_in_8bit=True, device_map="auto")
-model.config.forced_decoder_ids = None
-model.config.suppress_tokens = []
+device_map = "auto"
+world_size = int(os.environ.get("WORLD_SIZE", 1))
+ddp = world_size != 1
+if ddp:
+    device_map = {"": int(os.environ.get("LOCAL_RANK") or 0)}
+    args.per_device_train_batch_size = args.per_device_train_batch_size * world_size
 
-# 转化为Lora模型
-model = prepare_model_for_int8_training(model, output_embedding_layer_name="proj_out")
+if args.use_8bit:
+    model = WhisperForConditionalGeneration.from_pretrained(args.base_model, load_in_8bit=True, device_map=device_map)
+    model.config.forced_decoder_ids = None
+    model.config.suppress_tokens = []
+    # 转化为Lora模型
+    model = prepare_model_for_int8_training(model, output_embedding_layer_name="proj_out")
+else:
+    model = WhisperForConditionalGeneration.from_pretrained(args.base_model, device_map=device_map).half()
+    model.config.forced_decoder_ids = None
+    model.config.suppress_tokens = []
 config = LoraConfig(r=32, lora_alpha=64, target_modules=["q_proj", "v_proj"], lora_dropout=0.05, bias="none")
 model = get_peft_model(model, config)
 # 打印训练参数
