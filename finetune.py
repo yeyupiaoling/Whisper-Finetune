@@ -1,8 +1,9 @@
 import argparse
 import os
 
+import torch
 from datasets import load_dataset, Audio
-from peft import LoraConfig, get_peft_model
+from peft import LoraConfig, get_peft_model, set_peft_model_state_dict
 from peft import prepare_model_for_int8_training
 from transformers import Seq2SeqTrainer
 from transformers import Seq2SeqTrainingArguments
@@ -83,6 +84,10 @@ else:
     model.config.suppress_tokens = []
 config = LoraConfig(r=32, lora_alpha=64, target_modules=["q_proj", "v_proj"], lora_dropout=0.05, bias="none")
 model = get_peft_model(model, config)
+# 恢复训练时加载Lora参数
+if args.resume_from_checkpoint:
+    adapters_dict = torch.load(f'{args.resume_from_checkpoint}/pytorch_model.bin')
+    set_peft_model_state_dict(model=model, peft_model_state_dict=adapters_dict)
 # 打印训练参数
 print("="*70)
 model.print_trainable_parameters()
@@ -118,6 +123,7 @@ trainer = Seq2SeqTrainer(args=training_args,
                          callbacks=[SavePeftModelCallback])
 model.config.use_cache = False
 
+print("如果加载恢复训练参数，出现miss keys警告，请忽略它。")
 # 开始训练
 trainer.train(resume_from_checkpoint=args.resume_from_checkpoint)
 

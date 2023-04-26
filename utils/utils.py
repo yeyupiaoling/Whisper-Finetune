@@ -1,6 +1,7 @@
 import distutils.util
 import hashlib
 import os
+import shutil
 import tarfile
 import urllib.request
 
@@ -76,6 +77,12 @@ class SavePeftModelCallback(TrainerCallback):
                 control: TrainerControl,
                 **kwargs, ):
         checkpoint_folder = os.path.join(args.output_dir, f"{PREFIX_CHECKPOINT_DIR}-{state.global_step}")
-        peft_model_path = os.path.join(checkpoint_folder, "adapter_model")
-        kwargs["model"].save_pretrained(peft_model_path)
+        peft_model_dir = os.path.join(checkpoint_folder, "adapter_model")
+        kwargs["model"].save_pretrained(peft_model_dir)
+        # 更换恢复训练时的模型参数
+        peft_model_path = os.path.join(checkpoint_folder, "adapter_model/adapter_model.bin")
+        pytorch_model_path = os.path.join(checkpoint_folder, "pytorch_model.bin")
+        if os.path.exists(pytorch_model_path):
+            os.remove(pytorch_model_path)
+        shutil.copy(peft_model_path, pytorch_model_path)
         return control
