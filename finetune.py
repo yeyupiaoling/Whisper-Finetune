@@ -26,7 +26,7 @@ parser.add_argument("--eval_steps",    type=int, default=10000,   help="多少�
 parser.add_argument("--save_steps",    type=int, default=10000,   help="多少步数保存模型一次")
 parser.add_argument("--num_workers",   type=int, default=8,       help="读取数据的线程数量")
 parser.add_argument("--learning_rate", type=float,  default=1e-3, help="学习率大小")
-parser.add_argument("--use_8bit",      type=bool,   default=True, help="是否将模型量化为8位")
+parser.add_argument("--use_8bit",      type=bool,   default=False, help="是否将模型量化为8位")
 parser.add_argument("--num_train_epochs", type=int, default=3,    help="训练的轮数")
 parser.add_argument("--language",      type=str, default="Chinese", help="设置语言")
 parser.add_argument("--task",     type=str, default="transcribe", choices=['transcribe', 'translate'], help="模型的任务")
