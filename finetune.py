@@ -2,18 +2,17 @@ import argparse
 import os
 
 from datasets import load_dataset, Audio
-from transformers import Seq2SeqTrainer, TrainerCallback, TrainingArguments, TrainerState, TrainerControl
+from peft import LoraConfig, get_peft_model
+from peft import prepare_model_for_int8_training
+from transformers import Seq2SeqTrainer
 from transformers import Seq2SeqTrainingArguments
 from transformers import WhisperFeatureExtractor
 from transformers import WhisperForConditionalGeneration
 from transformers import WhisperProcessor
 from transformers import WhisperTokenizer
-from transformers.trainer_utils import PREFIX_CHECKPOINT_DIR
 
-from peft import LoraConfig, get_peft_model
-from peft import prepare_model_for_int8_training
 from utils.data_utils import DataCollatorSpeechSeq2SeqWithPadding
-from utils.utils import print_arguments
+from utils.utils import print_arguments, SavePeftModelCallback
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--train_data",    type=str, default="dataset/train.json",       help="训练数据集的路径")
@@ -22,6 +21,8 @@ parser.add_argument("--base_model",    type=str, default="openai/whisper-large-v
 parser.add_argument("--output_path",   type=str, default="models/whisper-large-v2-lora", help="训练保存模型的路径")
 parser.add_argument("--logging_steps", type=int, default=100,     help="打印日志步数")
 parser.add_argument("--warmup_steps",  type=int, default=50,      help="训练预热步数")
+parser.add_argument("--eval_steps",    type=int, default=200,     help="多少步数评估一次")
+parser.add_argument("--save_steps",    type=int, default=200,     help="多少步数保存模型一次")
 parser.add_argument("--num_workers",   type=int, default=8,       help="读取数据的线程数量")
 parser.add_argument("--learning_rate", type=float,  default=1e-3, help="学习率大小")
 parser.add_argument("--use_8bit",      type=bool,   default=True, help="是否将模型量化为8位")
@@ -94,34 +95,18 @@ training_args = Seq2SeqTrainingArguments(output_dir="output",
                                          learning_rate=args.learning_rate,
                                          warmup_steps=args.warmup_steps,
                                          num_train_epochs=args.num_train_epochs,
-                                         save_strategy="epoch",
-                                         evaluation_strategy="epoch",
+                                         save_strategy="steps",
+                                         evaluation_strategy="steps",
                                          fp16=True,
                                          report_to=["tensorboard"],
+                                         save_steps=args.save_steps,
+                                         eval_steps=args.eval_steps,
                                          dataloader_num_workers=args.num_workers,
                                          per_device_eval_batch_size=args.per_device_eval_batch_size,
                                          generation_max_length=args.generation_max_length,
                                          logging_steps=args.logging_steps,
                                          remove_unused_columns=False,
                                          label_names=["labels"])
-
-
-# 保存模型时的回调函数
-class SavePeftModelCallback(TrainerCallback):
-    def on_save(self,
-                args: TrainingArguments,
-                state: TrainerState,
-                control: TrainerControl,
-                **kwargs, ):
-        checkpoint_folder = os.path.join(args.output_dir, f"{PREFIX_CHECKPOINT_DIR}-{state.global_step}")
-        peft_model_path = os.path.join(checkpoint_folder, "adapter_model")
-        kwargs["model"].save_pretrained(peft_model_path)
-        # 删除不必要的模型
-        pytorch_model_path = os.path.join(checkpoint_folder, "pytorch_model.bin")
-        if os.path.exists(pytorch_model_path):
-            os.remove(pytorch_model_path)
-        return control
-
 
 # 定义训练器
 trainer = Seq2SeqTrainer(args=training_args,

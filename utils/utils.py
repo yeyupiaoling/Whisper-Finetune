@@ -5,6 +5,8 @@ import tarfile
 import urllib.request
 
 from tqdm import tqdm
+from transformers import TrainerCallback, TrainingArguments, TrainerState, TrainerControl
+from transformers.trainer_utils import PREFIX_CHECKPOINT_DIR
 
 
 def print_arguments(args):
@@ -64,3 +66,16 @@ def unpack(filepath, target_dir, rm_tar=False):
     tar.close()
     if rm_tar:
         os.remove(filepath)
+
+
+# 保存模型时的回调函数
+class SavePeftModelCallback(TrainerCallback):
+    def on_save(self,
+                args: TrainingArguments,
+                state: TrainerState,
+                control: TrainerControl,
+                **kwargs, ):
+        checkpoint_folder = os.path.join(args.output_dir, f"{PREFIX_CHECKPOINT_DIR}-{state.global_step}")
+        peft_model_path = os.path.join(checkpoint_folder, "adapter_model")
+        kwargs["model"].save_pretrained(peft_model_path)
+        return control
