@@ -20,10 +20,10 @@ parser.add_argument("--train_data",    type=str, default="dataset/train.json",  
 parser.add_argument("--test_data",     type=str, default="dataset/test.json",        help="测试数据集的路径")
 parser.add_argument("--base_model",    type=str, default="openai/whisper-tiny",      help="Whisper的基础模型")
 parser.add_argument("--output_path",   type=str, default="models/whisper-tiny-lora", help="训练保存模型的路径")
-parser.add_argument("--logging_steps", type=int, default=100,     help="打印日志步数")
 parser.add_argument("--warmup_steps",  type=int, default=50,      help="训练预热步数")
-parser.add_argument("--eval_steps",    type=int, default=200,     help="多少步数评估一次")
-parser.add_argument("--save_steps",    type=int, default=200,     help="多少步数保存模型一次")
+parser.add_argument("--logging_steps", type=int, default=100,     help="打印日志步数")
+parser.add_argument("--eval_steps",    type=int, default=10000,   help="多少步数评估一次")
+parser.add_argument("--save_steps",    type=int, default=10000,   help="多少步数保存模型一次")
 parser.add_argument("--num_workers",   type=int, default=8,       help="读取数据的线程数量")
 parser.add_argument("--learning_rate", type=float,  default=1e-3, help="学习率大小")
 parser.add_argument("--use_8bit",      type=bool,   default=True, help="是否将模型量化为8位")
@@ -106,6 +106,8 @@ training_args = Seq2SeqTrainingArguments(output_dir="output",
                                          report_to=["tensorboard"],
                                          save_steps=args.save_steps,
                                          eval_steps=args.eval_steps,
+                                         save_total_limit=5,
+                                         load_best_model_at_end=True,
                                          dataloader_num_workers=args.num_workers,
                                          per_device_eval_batch_size=args.per_device_eval_batch_size,
                                          generation_max_length=args.generation_max_length,
