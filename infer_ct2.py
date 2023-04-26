@@ -8,6 +8,7 @@ from utils.utils import print_arguments
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--audio_path",  type=str,  default="dataset/test.wav",        help="预测的音频路径")
+parser.add_argument("--language",    type=int, default="Chinese",                  help="设置语言")
 parser.add_argument("--model_path",  type=str,  default="models/whisper-large-v2-ct2", help="转换后的模型路径，转换方式看文档")
 parser.add_argument("--use_gpu",     type=bool, default=True,   help="是否使用gpu进行预测")
 parser.add_argument("--use_int8",    type=bool, default=False,  help="是否使用int8进行预测")
@@ -32,7 +33,7 @@ _, _ = model.transcribe("dataset/test.wav", beam_size=5)
 
 # 语音识别
 def run_recognize(path):
-    segments, info = model.transcribe(path, beam_size=args.beam_size)
+    segments, info = model.transcribe(path, beam_size=args.beam_size, language=args.language)
     results = []
     result_text = ''
     for segment in segments:

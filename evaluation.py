@@ -18,6 +18,7 @@ parser.add_argument("--test_data",   type=str, default="dataset/test.json",     
 parser.add_argument("--model_path",  type=str, default="models/whisper-large-v2-finetune", help="合并模型的路径，或者是huggingface上模型的名称")
 parser.add_argument("--batch_size",  type=int, default=16,        help="评估的batch size")
 parser.add_argument("--num_workers", type=int, default=8,         help="读取数据的线程数量")
+parser.add_argument("--language",    type=int, default="Chinese", help="设置语言")
 parser.add_argument("--task",       type=str, default="transcribe", choices=['transcribe', 'translate'], help="模型的任务")
 parser.add_argument("--metric",     type=str, default="cer",        choices=['cer', 'wer'],              help="评估方式")
 args = parser.parse_args()
@@ -28,8 +29,8 @@ assert 'openai' == os.path.dirname(args.model_path) or os.path.exists(args.model
     f"模型文件{args.model_path}不存在，请检查是否已经成功合并模型，或者是否为huggingface存在模型"
 # 获取Whisper的特征提取器、编码器和解码器
 feature_extractor = WhisperFeatureExtractor.from_pretrained(args.model_path)
-tokenizer = WhisperTokenizer.from_pretrained(args.model_path, task=args.task)
-processor = WhisperProcessor.from_pretrained(args.model_path, task=args.task)
+tokenizer = WhisperTokenizer.from_pretrained(args.model_path, language=args.language, task=args.task)
+processor = WhisperProcessor.from_pretrained(args.model_path, language=args.language, task=args.task)
 
 
 # 数据预处理
@@ -71,7 +72,6 @@ for step, batch in enumerate(tqdm(eval_dataloader)):
                     max_new_tokens=255).cpu().numpy())
             labels = batch["labels"].cpu().numpy()
             labels = np.where(labels != -100, labels, tokenizer.pad_token_id)
-            labels = np.where(labels!= -100, labels, tokenizer.pad_token_id)
             # 将预测和实际的token转换为文本
             decoded_preds = tokenizer.batch_decode(generated_tokens, skip_special_tokens=True)
             decoded_labels = tokenizer.batch_decode(labels, skip_special_tokens=True)

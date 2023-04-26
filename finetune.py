@@ -26,6 +26,7 @@ parser.add_argument("--num_workers",   type=int, default=8,       help="读取�
 parser.add_argument("--learning_rate", type=float,  default=1e-3, help="学习率大小")
 parser.add_argument("--use_8bit",      type=bool,   default=True, help="是否将模型量化为8位")
 parser.add_argument("--num_train_epochs", type=int, default=3,    help="训练的轮数")
+parser.add_argument("--language",      type=int, default="Chinese", help="设置语言")
 parser.add_argument("--task",     type=str, default="transcribe", choices=['transcribe', 'translate'], help="模型的任务")
 parser.add_argument("--resume_from_checkpoint",      type=str, default=None, help="恢复训练的检查点路径")
 parser.add_argument("--per_device_train_batch_size", type=int, default=8,    help="训练的batch size")
@@ -39,8 +40,8 @@ print_arguments(args)
 assert 'openai' == os.path.dirname(args.base_model), f"模型文件{args.base_model}不存在，请检查是否为huggingface存在模型"
 # 获取Whisper的特征提取器、编码器和解码器
 feature_extractor = WhisperFeatureExtractor.from_pretrained(args.base_model)
-tokenizer = WhisperTokenizer.from_pretrained(args.base_model, task=args.task)
-processor = WhisperProcessor.from_pretrained(args.base_model, task=args.task)
+tokenizer = WhisperTokenizer.from_pretrained(args.model_path, language=args.language, task=args.task)
+processor = WhisperProcessor.from_pretrained(args.model_path, language=args.language, task=args.task)
 
 
 # 数据预处理

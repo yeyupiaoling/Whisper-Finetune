@@ -36,15 +36,6 @@ for f in files:
 model = model.merge_and_unload()
 model.train(False)
 
-lora_model_sd = model.state_dict()
-deloreanized_sd = {
-    k.replace("base_model.model.", ""): v
-    for k, v in lora_model_sd.items()
-    if "lora" not in k
-}
-
 # 保存模型到指定目录中
-WhisperForConditionalGeneration.save_pretrained(base_model,
-                                                save_directory=save_directory,
-                                                state_dict=deloreanized_sd)
+model.save_pretrained(save_directory)
 print(f'合并模型保持在：{save_directory}')
