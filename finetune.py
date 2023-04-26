@@ -41,8 +41,8 @@ print_arguments(args)
 assert 'openai' == os.path.dirname(args.base_model), f"模型文件{args.base_model}不存在，请检查是否为huggingface存在模型"
 # 获取Whisper的特征提取器、编码器和解码器
 feature_extractor = WhisperFeatureExtractor.from_pretrained(args.base_model)
-tokenizer = WhisperTokenizer.from_pretrained(args.model_path, language=args.language, task=args.task)
-processor = WhisperProcessor.from_pretrained(args.model_path, language=args.language, task=args.task)
+tokenizer = WhisperTokenizer.from_pretrained(args.base_model, language=args.language, task=args.task)
+processor = WhisperProcessor.from_pretrained(args.base_model, language=args.language, task=args.task)
 
 
 # 数据预处理
