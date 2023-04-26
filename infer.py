@@ -7,8 +7,8 @@ from utils.utils import print_arguments
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--audio_path", type=str, default="dataset/test.wav",              help="预测的音频路径")
-parser.add_argument("--language",   type=int, default="Chinese",                       help="设置语言")
-parser.add_argument("--model_path", type=str, default="models/whisper-large-v2-finetune",  help="合并模型的路径，或者是huggingface上模型的名称")
+parser.add_argument("--language",   type=str, default="Chinese",                       help="设置语言")
+parser.add_argument("--model_path", type=str, default="models/whisper-tiny-finetune",  help="合并模型的路径，或者是huggingface上模型的名称")
 parser.add_argument("--task",       type=str, default="transcribe", choices=['transcribe', 'translate'], help="模型的任务")
 args = parser.parse_args()
 print_arguments(args)
