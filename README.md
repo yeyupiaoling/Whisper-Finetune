@@ -74,9 +74,33 @@ python -m pip install -r requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/s
 
 准备好数据之后，就可以开始微调模型了。训练最重要的两个参数分别是，`--base_model`指定微调的Whisper模型，这个参数值需要在[HuggingFace](https://huggingface.co/openai)存在的，这个不需要提前下载，启动训练时可以自动下载。第二个`--output_path`是是训练时保存的Lora检查点路径，因为我们使用Lora来微调模型。其他更多的参数请查看这个程序。
 
+### 单卡训练
+
 ```shell
-python finetune.py --base_model=openai/whisper-large-v2 --output_path=models/whisper-large-v2-lora
+CUDA_VISIBLE_DEVICES=0 python finetune.py --base_model=openai/whisper-large-v2 --output_path=models/whisper-large-v2-lora
 ```
+
+### 多卡训练
+
+1. 使用torchrun启动多卡训练
+```shell
+torchrun --nproc_per_node=2 finetune.py --base_model=openai/whisper-large-v2 --output_path=models/whisper-large-v2-lora
+```
+
+2. 使用accelerate启动多卡训练
+```shell
+accelerate config
+```
+
+```shell
+accelerate env
+```
+
+
+```shell
+accelerate launch finetune_vicuna.py --base_model=openai/whisper-large-v2 --output_path=models/whisper-large-v2-lora
+```
+
 
 输出日志如下：
 ```shell
