@@ -135,4 +135,4 @@ trainer.train(resume_from_checkpoint=args.resume_from_checkpoint)
 # 保存最后的模型
 trainer.save_state()
 if training_args.local_rank == 0 or training_args.local_rank == -1:
-    model.save_pretrained(training_args.output_dir)
+    model.save_pretrained(os.path.join(args.output_path, "checkpoint-final"))
