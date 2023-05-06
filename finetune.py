@@ -88,10 +88,6 @@ model = get_peft_model(model, config)
 if args.resume_from_checkpoint:
     adapters_dict = torch.load(f'{args.resume_from_checkpoint}/pytorch_model.bin')
     set_peft_model_state_dict(model=model, peft_model_state_dict=adapters_dict)
-# 打印训练参数
-print("="*70)
-model.print_trainable_parameters()
-print("="*70)
 
 # 定义训练参数
 training_args = Seq2SeqTrainingArguments(output_dir="output",
@@ -115,6 +111,13 @@ training_args = Seq2SeqTrainingArguments(output_dir="output",
                                          remove_unused_columns=False,
                                          label_names=["labels"])
 
+# 打印信息
+if training_args.local_rank == 0 or training_args.local_rank == -1:
+    print(f"训练数据：{audio_data['train'].num_rows}，测试数据：{audio_data['test'].num_rows}")
+    print('=' * 90)
+    model.print_trainable_parameters()
+    print('=' * 90)
+
 # 定义训练器
 trainer = Seq2SeqTrainer(args=training_args,
                          model=model,
@@ -130,5 +133,6 @@ print("如果加载恢复训练参数，出现miss keys警告，请忽略它。"
 trainer.train(resume_from_checkpoint=args.resume_from_checkpoint)
 
 # 保存最后的模型
-if training_args.local_rank == 0:
-    model.save_pretrained(training_args.output_dir)
+trainer.save_state()
+if training_args.local_rank == 0 or training_args.local_rank == -1:
+    model.save_pretrained(os.path.join(args.output_path, "checkpoint-final"))

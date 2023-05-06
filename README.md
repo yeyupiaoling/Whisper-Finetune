@@ -74,9 +74,56 @@ python -m pip install -r requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/s
 
 准备好数据之后，就可以开始微调模型了。训练最重要的两个参数分别是，`--base_model`指定微调的Whisper模型，这个参数值需要在[HuggingFace](https://huggingface.co/openai)存在的，这个不需要提前下载，启动训练时可以自动下载。第二个`--output_path`是是训练时保存的Lora检查点路径，因为我们使用Lora来微调模型。其他更多的参数请查看这个程序。
 
+### 单卡训练
+
+单卡训练命令如下，Windows系统可以不添加`CUDA_VISIBLE_DEVICES`参数。
 ```shell
-python finetune.py --base_model=openai/whisper-large-v2 --output_path=models/whisper-large-v2-lora
+CUDA_VISIBLE_DEVICES=0 python finetune.py --base_model=openai/whisper-large-v2 --output_path=models/whisper-large-v2-lora
 ```
+
+### 多卡训练
+
+多卡训练有两种方法，分别是torchrun和accelerate，开发者可以根据自己的习惯使用对应的方式。
+
+1. 使用torchrun启动多卡训练，命令如下，通过`--nproc_per_node`指定使用的显卡数量。
+```shell
+torchrun --nproc_per_node=2 finetune.py --base_model=openai/whisper-large-v2 --output_path=models/whisper-large-v2-lora
+```
+
+2. 使用accelerate启动多卡训练，如果是第一次使用accelerate，要配置训练参数，方式如下。
+
+首先配置训练参数，过程是让开发者回答几个问题，基本都是默认就可以，但有几个参数需要看实际情况设置。
+```shell
+accelerate config
+```
+
+大概过程就是这样：
+```
+----------------------------------In which compute environment are you running?
+This machine
+----------------------------------Which type of machine are you using? 
+multi-GPU
+How many different machines will you use (use more than 1 for multi-node training)? [1]:
+Do you wish to optimize your script with torch dynamo?[yes/NO]:
+Do you want to use DeepSpeed? [yes/NO]:
+Do you want to use FullyShardedDataParallel? [yes/NO]:
+Do you want to use Megatron-LM ? [yes/NO]: 
+How many GPU(s) should be used for distributed training? [1]:2
+What GPU(s) (by id) should be used for training on this machine as a comma-seperated list? [all]:
+----------------------------------Do you wish to use FP16 or BF16 (mixed precision)?
+fp16 
+```
+
+配置完成之后，可以使用以下命令查看配置。
+```shell
+accelerate env
+```
+
+开始训练命令如下。
+```shell
+accelerate launch finetune_vicuna.py --base_model=openai/whisper-large-v2 --output_path=models/whisper-large-v2-lora
+```
+
 
 输出日志如下：
 ```shell
