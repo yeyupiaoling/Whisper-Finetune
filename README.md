@@ -36,6 +36,43 @@ OpenAI在开源了号称其英文语音辨识能力已达到人类水准的Whisp
 5. `infer.py`：使用微调后的模型或者Whisper原模型预测。
 6. `infer_ct2.py`：使用转换的模型预测。
 
+## 模型测试表
+
+1. 原始模型字错率测试表
+
+|       使用模型       | 语言  | aishell_test(CER) | test_net(CER) | test_meeting(CER) | 下载地址 |
+|:----------------:|:---:|:-----------------:|:-------------:|:-----------------:|:----:|
+|   whisper-tiny   | 普通话 |                   |               |                   |      |
+|   whisper-base   | 普通话 |                   |               |                   |      |
+|  whisper-small   | 普通话 |                   |               |                   |      |
+|  whisper-medium  | 普通话 |                   |               |                   |      |
+| whisper-large-v2 | 普通话 |                   |               |                   |      |
+
+
+2. 微调[WenetSpeech](https://github.com/yeyupiaoling/PPASR/blob/develop/docs/wenetspeech.md)数据集后字错率测试表
+
+|       使用模型       | 语言  |                                         微调数据集                                         | aishell_test(CER) | test_net(CER) | test_meeting(CER) | 下载地址 |
+|:----------------:|:---:|:-------------------------------------------------------------------------------------:|:-----------------:|:-------------:|:-----------------:|:----:|
+|   whisper-tiny   | 普通话 | [WenetSpeech](https://github.com/yeyupiaoling/PPASR/blob/develop/docs/wenetspeech.md) |                   |               |                   |      |
+|   whisper-base   | 普通话 | [WenetSpeech](https://github.com/yeyupiaoling/PPASR/blob/develop/docs/wenetspeech.md) |                   |               |                   |      |
+|  whisper-small   | 普通话 | [WenetSpeech](https://github.com/yeyupiaoling/PPASR/blob/develop/docs/wenetspeech.md) |                   |               |                   |      |
+|  whisper-medium  | 普通话 | [WenetSpeech](https://github.com/yeyupiaoling/PPASR/blob/develop/docs/wenetspeech.md) |                   |               |                   |      |
+| whisper-large-v2 | 普通话 | [WenetSpeech](https://github.com/yeyupiaoling/PPASR/blob/develop/docs/wenetspeech.md) |                   |               |                   |      |
+
+3. 未加速和加速后的推理速度测试表
+
+|       使用模型       | 原生模型实时率 | 转换CTranslate2加速后实时率 |
+|:----------------:|:-------:|:-------------------:|
+|   whisper-tiny   |         |                     |
+|   whisper-base   |         |                     |    
+|  whisper-small   |         |                     | 
+|  whisper-medium  |         |                     |  
+| whisper-large-v2 |         |                     |
+
+**重要说明：**
+1. 在评估的时候移除模型输出的标点符号，并把繁体中文转成简体中文。
+2. RTF= 所有音频总时间(单位秒) / ASR识别所有音频处理时间(单位秒)
+
 ## 安装环境
 
 - 首先安装的是Pytorch的GPU版本，如果已经安装过了，请跳过。
@@ -78,7 +115,7 @@ python -m pip install -r requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/s
 
 单卡训练命令如下，Windows系统可以不添加`CUDA_VISIBLE_DEVICES`参数。
 ```shell
-CUDA_VISIBLE_DEVICES=0 python finetune.py --base_model=openai/whisper-large-v2 --output_path=models/whisper-large-v2-lora
+CUDA_VISIBLE_DEVICES=0 python finetune.py --base_model=openai/whisper-large-v2 --output_dir=models/whisper-large-v2-lora
 ```
 
 ### 多卡训练
@@ -87,7 +124,7 @@ CUDA_VISIBLE_DEVICES=0 python finetune.py --base_model=openai/whisper-large-v2 -
 
 1. 使用torchrun启动多卡训练，命令如下，通过`--nproc_per_node`指定使用的显卡数量。
 ```shell
-torchrun --nproc_per_node=2 finetune.py --base_model=openai/whisper-large-v2 --output_path=models/whisper-large-v2-lora
+torchrun --nproc_per_node=2 finetune.py --base_model=openai/whisper-large-v2 --output_dir=models/whisper-large-v2-lora
 ```
 
 2. 使用accelerate启动多卡训练，如果是第一次使用accelerate，要配置训练参数，方式如下。
@@ -121,7 +158,7 @@ accelerate env
 
 开始训练命令如下。
 ```shell
-accelerate launch finetune_vicuna.py --base_model=openai/whisper-large-v2 --output_path=models/whisper-large-v2-lora
+accelerate launch finetune_vicuna.py --base_model=openai/whisper-large-v2 --output_dir=models/whisper-large-v2-lora
 ```
 
 

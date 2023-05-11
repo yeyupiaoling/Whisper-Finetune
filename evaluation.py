@@ -11,7 +11,7 @@ from tqdm import tqdm
 from transformers import WhisperForConditionalGeneration, WhisperTokenizer, WhisperProcessor, WhisperFeatureExtractor
 
 from utils.data_utils import DataCollatorSpeechSeq2SeqWithPadding
-from utils.utils import print_arguments
+from utils.utils import print_arguments, remove_punctuation, to_simple
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--test_data",   type=str, default="dataset/test.json",            help="测试集的路径")
@@ -19,6 +19,9 @@ parser.add_argument("--model_path",  type=str, default="models/whisper-tiny-fine
 parser.add_argument("--batch_size",  type=int, default=16,        help="评估的batch size")
 parser.add_argument("--num_workers", type=int, default=8,         help="读取数据的线程数量")
 parser.add_argument("--language",    type=str, default="Chinese", help="设置语言")
+parser.add_argument("--remove_pun",  type=bool, default=True,     help="是否移除标点符号")
+parser.add_argument("--to_simple",   type=bool, default=True,     help="是否转为简体中文")
+parser.add_argument("--local_files_only",   type=bool, default=True,     help="是否只在本地加载模型，不尝试下载")
 parser.add_argument("--task",       type=str, default="transcribe", choices=['transcribe', 'translate'], help="模型的任务")
 parser.add_argument("--metric",     type=str, default="cer",        choices=['cer', 'wer'],              help="评估方式")
 args = parser.parse_args()
@@ -28,9 +31,20 @@ print_arguments(args)
 assert 'openai' == os.path.dirname(args.model_path) or os.path.exists(args.model_path), \
     f"模型文件{args.model_path}不存在，请检查是否已经成功合并模型，或者是否为huggingface存在模型"
 # 获取Whisper的特征提取器、编码器和解码器
-feature_extractor = WhisperFeatureExtractor.from_pretrained(args.model_path)
-tokenizer = WhisperTokenizer.from_pretrained(args.model_path, language=args.language, task=args.task)
-processor = WhisperProcessor.from_pretrained(args.model_path, language=args.language, task=args.task)
+feature_extractor = WhisperFeatureExtractor.from_pretrained(args.model_path, local_files_only=args.local_files_only)
+tokenizer = WhisperTokenizer.from_pretrained(args.model_path,
+                                             language=args.language,
+                                             task=args.task,
+                                             local_files_only=args.local_files_only)
+processor = WhisperProcessor.from_pretrained(args.model_path,
+                                             language=args.language,
+                                             task=args.task,
+                                             local_files_only=args.local_files_only)
+# 获取模型
+model = WhisperForConditionalGeneration.from_pretrained(args.model_path,
+                                                        device_map="auto",
+                                                        local_files_only=args.local_files_only)
+model.eval()
 
 
 # 数据预处理
@@ -57,10 +71,6 @@ eval_dataloader = DataLoader(audio_data['test'], batch_size=args.batch_size,
 # 获取评估方法
 metric = evaluate.load(args.metric)
 
-# 获取模型
-model = WhisperForConditionalGeneration.from_pretrained(args.model_path, device_map="auto")
-model.eval()
-
 # 开始评估
 for step, batch in enumerate(tqdm(eval_dataloader)):
     with torch.cuda.amp.autocast():
@@ -75,6 +85,14 @@ for step, batch in enumerate(tqdm(eval_dataloader)):
             # 将预测和实际的token转换为文本
             decoded_preds = tokenizer.batch_decode(generated_tokens, skip_special_tokens=True)
             decoded_labels = tokenizer.batch_decode(labels, skip_special_tokens=True)
+            # 删除标点符号
+            if args.remove_pun:
+                decoded_preds = remove_punctuation(decoded_preds)
+                decoded_labels = remove_punctuation(decoded_labels)
+            # 将繁体中文总成简体中文
+            if args.to_simple:
+                decoded_preds = to_simple(decoded_preds)
+                decoded_labels = to_simple(decoded_labels)
             metric.add_batch(predictions=decoded_preds, references=decoded_labels)
     # 删除计算的记录
     del generated_tokens, labels, batch

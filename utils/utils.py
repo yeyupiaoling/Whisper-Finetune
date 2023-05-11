@@ -1,18 +1,21 @@
 import distutils.util
 import hashlib
 import os
+import re
 import shutil
 import tarfile
 import urllib.request
+from typing import List
 
 from tqdm import tqdm
 from transformers import TrainerCallback, TrainingArguments, TrainerState, TrainerControl
 from transformers.trainer_utils import PREFIX_CHECKPOINT_DIR
+from zhconv import convert
 
 
 def print_arguments(args):
     print("-----------  Configuration Arguments -----------")
-    for arg, value in sorted(vars(args).items()):
+    for arg, value in vars(args).items():
         print("%s: %s" % (arg, value))
     print("------------------------------------------------")
 
@@ -67,6 +70,37 @@ def unpack(filepath, target_dir, rm_tar=False):
     tar.close()
     if rm_tar:
         os.remove(filepath)
+
+
+# 删除标点符号
+def remove_punctuation(text: str or List[str]):
+    punctuation = '!,.;:?、！，。；：？'
+    if isinstance(text, str):
+        text = re.sub(r'[{}]+'.format(punctuation), ' ', text).strip()
+        return text
+    elif isinstance(text, list):
+        result_text = []
+        for t in text:
+            t = re.sub(r'[{}]+'.format(punctuation), ' ', t).strip()
+            result_text.append(t)
+        return result_text
+    else:
+        raise Exception(f'不支持该类型{type(text)}')
+
+
+# 将繁体中文总成简体中文
+def to_simple(text: str or List[str]):
+    if isinstance(text, str):
+        text = convert(text, 'zh-cn')
+        return text
+    elif isinstance(text, list):
+        result_text = []
+        for t in text:
+            t = convert(t, 'zh-cn')
+            result_text.append(t)
+        return result_text
+    else:
+        raise Exception(f'不支持该类型{type(text)}')
 
 
 # 保存模型时的回调函数

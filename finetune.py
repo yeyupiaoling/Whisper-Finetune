@@ -19,14 +19,16 @@ parser = argparse.ArgumentParser()
 parser.add_argument("--train_data",    type=str, default="dataset/train.json",       help="训练数据集的路径")
 parser.add_argument("--test_data",     type=str, default="dataset/test.json",        help="测试数据集的路径")
 parser.add_argument("--base_model",    type=str, default="openai/whisper-tiny",      help="Whisper的基础模型")
-parser.add_argument("--output_path",   type=str, default="models/whisper-tiny-lora", help="训练保存模型的路径")
+parser.add_argument("--output_dir",    type=str, default="output",                   help="训练保存模型的路径")
 parser.add_argument("--warmup_steps",  type=int, default=50,      help="训练预热步数")
 parser.add_argument("--logging_steps", type=int, default=100,     help="打印日志步数")
 parser.add_argument("--eval_steps",    type=int, default=10000,   help="多少步数评估一次")
 parser.add_argument("--save_steps",    type=int, default=10000,   help="多少步数保存模型一次")
 parser.add_argument("--num_workers",   type=int, default=8,       help="读取数据的线程数量")
 parser.add_argument("--learning_rate", type=float,  default=1e-3, help="学习率大小")
+parser.add_argument("--fp16",          type=bool,   default=True, help="是否使用fp16训练模型")
 parser.add_argument("--use_8bit",      type=bool,   default=False, help="是否将模型量化为8位")
+parser.add_argument("--local_files_only", type=bool, default=False, help="是否只在本地加载模型，不尝试下载")
 parser.add_argument("--num_train_epochs", type=int, default=3,    help="训练的轮数")
 parser.add_argument("--language",      type=str, default="Chinese", help="设置语言")
 parser.add_argument("--task",     type=str, default="transcribe", choices=['transcribe', 'translate'], help="模型的任务")
@@ -41,9 +43,15 @@ print_arguments(args)
 # 判断模型路径是否合法
 assert 'openai' == os.path.dirname(args.base_model), f"模型文件{args.base_model}不存在，请检查是否为huggingface存在模型"
 # 获取Whisper的特征提取器、编码器和解码器
-feature_extractor = WhisperFeatureExtractor.from_pretrained(args.base_model)
-tokenizer = WhisperTokenizer.from_pretrained(args.base_model, language=args.language, task=args.task)
-processor = WhisperProcessor.from_pretrained(args.base_model, language=args.language, task=args.task)
+feature_extractor = WhisperFeatureExtractor.from_pretrained(args.base_model, local_files_only=args.local_files_only)
+tokenizer = WhisperTokenizer.from_pretrained(args.base_model,
+                                             language=args.language,
+                                             task=args.task,
+                                             local_files_only=args.local_files_only)
+processor = WhisperProcessor.from_pretrained(args.base_model,
+                                             language=args.language,
+                                             task=args.task,
+                                             local_files_only=args.local_files_only)
 
 
 # 数据预处理
@@ -73,13 +81,18 @@ if ddp:
     args.per_device_train_batch_size = args.per_device_train_batch_size * world_size
 
 if args.use_8bit:
-    model = WhisperForConditionalGeneration.from_pretrained(args.base_model, load_in_8bit=True, device_map=device_map)
+    model = WhisperForConditionalGeneration.from_pretrained(args.base_model,
+                                                            load_in_8bit=True,
+                                                            device_map=device_map,
+                                                            local_files_only=args.local_files_only)
     model.config.forced_decoder_ids = None
     model.config.suppress_tokens = []
     # 转化为Lora模型
-    model = prepare_model_for_int8_training(model, output_embedding_layer_name="proj_out")
+    model = prepare_model_for_int8_training(model)
 else:
-    model = WhisperForConditionalGeneration.from_pretrained(args.base_model, device_map=device_map).half()
+    model = WhisperForConditionalGeneration.from_pretrained(args.base_model,
+                                                            device_map=device_map,
+                                                            local_files_only=args.local_files_only)
     model.config.forced_decoder_ids = None
     model.config.suppress_tokens = []
 config = LoraConfig(r=32, lora_alpha=64, target_modules=["q_proj", "v_proj"], lora_dropout=0.05, bias="none")
@@ -90,7 +103,7 @@ if args.resume_from_checkpoint:
     set_peft_model_state_dict(model=model, peft_model_state_dict=adapters_dict)
 
 # 定义训练参数
-training_args = Seq2SeqTrainingArguments(output_dir="output",
+training_args = Seq2SeqTrainingArguments(output_dir=args.output_dir,
                                          per_device_train_batch_size=args.per_device_train_batch_size,
                                          gradient_accumulation_steps=args.gradient_accumulation_steps,
                                          learning_rate=args.learning_rate,
@@ -98,7 +111,7 @@ training_args = Seq2SeqTrainingArguments(output_dir="output",
                                          num_train_epochs=args.num_train_epochs,
                                          save_strategy="steps",
                                          evaluation_strategy="steps",
-                                         fp16=True,
+                                         fp16=args.fp16,
                                          report_to=["tensorboard"],
                                          save_steps=args.save_steps,
                                          eval_steps=args.eval_steps,
@@ -111,7 +124,7 @@ training_args = Seq2SeqTrainingArguments(output_dir="output",
                                          remove_unused_columns=False,
                                          label_names=["labels"])
 
-# 打印信息
+# 
 if training_args.local_rank == 0 or training_args.local_rank == -1:
     print(f"训练数据：{audio_data['train'].num_rows}，测试数据：{audio_data['test'].num_rows}")
     print('=' * 90)
@@ -135,4 +148,4 @@ trainer.train(resume_from_checkpoint=args.resume_from_checkpoint)
 # 保存最后的模型
 trainer.save_state()
 if training_args.local_rank == 0 or training_args.local_rank == -1:
-    model.save_pretrained(os.path.join(args.output_path, "checkpoint-final"))
+    model.save_pretrained(os.path.join(args.output_dir, "checkpoint-final"))

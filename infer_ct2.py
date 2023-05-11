@@ -14,6 +14,7 @@ parser.add_argument("--use_gpu",     type=bool, default=True,   help="是否使�
 parser.add_argument("--use_int8",    type=bool, default=False,  help="是否使用int8进行预测")
 parser.add_argument("--beam_size",   type=int,  default=10,     help="解码搜索大小")
 parser.add_argument("--num_workers", type=int,  default=1,      help="预测器的并发数量")
+parser.add_argument("--vad_filter",  type=bool, default=False, help="是否使用VAD过滤掉部分没有讲话的音频")
 args = parser.parse_args()
 print_arguments(args)
 
@@ -33,7 +34,8 @@ _, _ = model.transcribe("dataset/test.wav", beam_size=5)
 
 # 语音识别
 def run_recognize(path):
-    segments, info = model.transcribe(path, beam_size=args.beam_size, language=args.language)
+    segments, info = model.transcribe(path, beam_size=args.beam_size, language=args.language,
+                                      vad_filter=args.vad_filter)
     results = []
     result_text = ''
     for segment in segments:

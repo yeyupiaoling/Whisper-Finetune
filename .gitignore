@@ -1,2 +1,6 @@
 .idea/
 __pycache__/
+models/
+output/
+dataset/*
+!dataset/test.wav
