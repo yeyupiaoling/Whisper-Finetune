@@ -2,9 +2,8 @@ import argparse
 import os
 import shutil
 
-from huggingface_hub import snapshot_download
-from transformers import WhisperForConditionalGeneration, WhisperFeatureExtractor, WhisperTokenizer, WhisperProcessor
-
+from transformers import WhisperForConditionalGeneration, WhisperFeatureExtractor, WhisperTokenizerFast,\
+    WhisperProcessor
 from peft import PeftModel, PeftConfig
 from utils.utils import print_arguments
 
@@ -20,7 +19,7 @@ print_arguments(args)
 # 检查模型文件是否存在
 assert os.path.exists(args.lora_model), f"模型文件{args.lora_model}不存在"
 # 获取Lora配置参数
-peft_config = PeftConfig.from_pretrained(args.lora_model, local_files_only=args.local_files_only)
+peft_config = PeftConfig.from_pretrained(args.lora_model)
 # 获取Whisper的基本模型
 base_model = WhisperForConditionalGeneration.from_pretrained(peft_config.base_model_name_or_path, device_map="auto",
                                                              local_files_only=args.local_files_only)
@@ -28,8 +27,8 @@ base_model = WhisperForConditionalGeneration.from_pretrained(peft_config.base_mo
 model = PeftModel.from_pretrained(base_model, args.lora_model, local_files_only=args.local_files_only)
 feature_extractor = WhisperFeatureExtractor.from_pretrained(peft_config.base_model_name_or_path,
                                                             local_files_only=args.local_files_only)
-tokenizer = WhisperTokenizer.from_pretrained(peft_config.base_model_name_or_path, language=args.language,
-                                             task=args.task, local_files_only=args.local_files_only)
+tokenizer = WhisperTokenizerFast.from_pretrained(peft_config.base_model_name_or_path, language=args.language,
+                                                 task=args.task, local_files_only=args.local_files_only)
 processor = WhisperProcessor.from_pretrained(peft_config.base_model_name_or_path, language=args.language,
                                              task=args.task, local_files_only=args.local_files_only)
 
