@@ -8,8 +8,8 @@ from utils.utils import print_arguments
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--audio_path",  type=str,  default="dataset/test.wav",        help="预测的音频路径")
-parser.add_argument("--language",    type=str, default="Chinese",                  help="设置语言")
 parser.add_argument("--model_path",  type=str,  default="models/whisper-tiny-ct2", help="转换后的模型路径，转换方式看文档")
+parser.add_argument("--language",    type=str, default="zh",    help="设置语言")
 parser.add_argument("--use_gpu",     type=bool, default=True,   help="是否使用gpu进行预测")
 parser.add_argument("--use_int8",    type=bool, default=False,  help="是否使用int8进行预测")
 parser.add_argument("--beam_size",   type=int,  default=10,     help="解码搜索大小")
