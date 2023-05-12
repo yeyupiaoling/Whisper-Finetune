@@ -96,12 +96,14 @@ python -m pip install -r requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/s
         "audio": {
             "path": "dataset/audio/data_aishell/wav/test/S0764/BAC009S0764W0489.wav"
         },
+        "duration": 3.97,
         "sentence": "不是她的戏或是她的八卦"
     },
     {
         "audio": {
             "path": "dataset/audio/data_aishell/wav/test/S0764/BAC009S0764W0202.wav"
         },
+        "duration": 5.63,
         "sentence": "第二批三网融合试点工作业已启动"
     }
 ]
@@ -115,7 +117,7 @@ python -m pip install -r requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/s
 
 单卡训练命令如下，Windows系统可以不添加`CUDA_VISIBLE_DEVICES`参数。
 ```shell
-CUDA_VISIBLE_DEVICES=0 python finetune.py --base_model=openai/whisper-large-v2 --output_dir=models/whisper-large-v2-lora
+CUDA_VISIBLE_DEVICES=0 python finetune.py --base_model=openai/whisper-tiny --output_dir=models/whisper-tiny-lora
 ```
 
 ### 多卡训练
@@ -124,7 +126,7 @@ CUDA_VISIBLE_DEVICES=0 python finetune.py --base_model=openai/whisper-large-v2 -
 
 1. 使用torchrun启动多卡训练，命令如下，通过`--nproc_per_node`指定使用的显卡数量。
 ```shell
-torchrun --nproc_per_node=2 finetune.py --base_model=openai/whisper-large-v2 --output_dir=models/whisper-large-v2-lora
+torchrun --nproc_per_node=2 finetune.py --base_model=openai/whisper-tiny --output_dir=models/whisper-tiny-lora
 ```
 
 2. 使用accelerate启动多卡训练，如果是第一次使用accelerate，要配置训练参数，方式如下。
@@ -158,7 +160,7 @@ accelerate env
 
 开始训练命令如下。
 ```shell
-accelerate launch finetune_vicuna.py --base_model=openai/whisper-large-v2 --output_dir=models/whisper-large-v2-lora
+accelerate launch finetune.py --base_model=openai/whisper-tiny --output_dir=models/whisper-tiny-lora
 ```
 
 
@@ -182,7 +184,7 @@ python merge_lora.py --lora_model=output/checkpoint-final --output_dir=models/
 
 执行以下程序进行评估模型，最重要的两个参数分别是。第一个`--model_path`指定的是合并后的模型路径，同时也支持直接使用Whisper原模型，例如直接指定`openai/whisper-large-v2`，第二个是`--metric`指定的是评估方法，例如有字错率`cer`和词错率`wer`。**提示：** 没有微调的模型，可能输出带有标点符号，影响准确率。其他更多的参数请查看这个程序。
 ```shell
-python evaluation.py --model_path=models/whisper-large-v2-finetune --metric=cer
+python evaluation.py --model_path=models/whisper-tiny-finetune --metric=cer
 ```
 
 以下是使用AIShell的微调前和微调后的字错率对比，使用whisper-tiny最为明显，它准确率比较低，但是微调之后有大幅度提升。
@@ -196,19 +198,19 @@ python evaluation.py --model_path=models/whisper-large-v2-finetune --metric=cer
 
 执行以下程序进行语音识别，第一个`--audio_path`参数指定的是要预测的音频路径。第二个`--model_path`指定的是合并后的模型路径，同时也支持直接使用Whisper原模型，例如直接指定`openai/whisper-large-v2`。其他更多的参数请查看这个程序。
 ```shell
-python infer.py --audio_path=dataset/test.wav --model_path=models/whisper-large-v2-finetune
+python infer.py --audio_path=dataset/test.wav --model_path=models/whisper-tiny-finetune
 ```
 
 # 加速预测
 
 众所周知，直接使用Whisper模型推理是比较慢的，所以这里提供了一个加速的方式，主要是使用了CTranslate2进行加速，首先要转换模型，把合并后的模型转换为CTranslate2模型。如下命令，`--model`参数指定的是合并后的模型路径，同时也支持直接使用Whisper原模型，例如直接指定`openai/whisper-large-v2`。`--output_dir`参数指定的是转换后的CTranslate2模型路径，`--quantization`参数指定的是量化模型大小，不希望量化模型的可以直接去掉这个参数。
 ```shell
-ct2-transformers-converter --model models/whisper-large-v2-finetune --output_dir models/whisper-large-v2-ct2 --copy_files tokenizer.json --quantization float16
+ct2-transformers-converter --model models/whisper-tiny-finetune --output_dir models/whisper-tiny-ct2 --copy_files tokenizer.json --quantization float16
 ```
 
 执行以下程序进行加速语音识别，`--audio_path`参数指定的是要预测的音频路径。`--model_path`指定的是转换后的CTranslate2模型。其他更多的参数请查看这个程序。
 ```shell
-python infer_ct2.py --audio_path=dataset/test.wav --model_path=models/whisper-large-v2-ct2
+python infer_ct2.py --audio_path=dataset/test.wav --model_path=models/whisper-tiny-ct2
 ```
 
 输出结果如下：

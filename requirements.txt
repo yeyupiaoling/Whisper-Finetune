@@ -1,3 +1,4 @@
+numpy>=1.23.1
 dataclasses>=0.6
 transformers>=4.28.0.dev0
 bitsandbytes>=0.38.1
@@ -8,3 +9,4 @@ faster-whisper>=0.5.1
 jiwer>=2.5.1
 peft>=0.3.0
 zhconv>=1.4.2
+tqdm>=4.62.1

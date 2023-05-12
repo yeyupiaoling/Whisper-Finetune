@@ -1,16 +1,12 @@
-import distutils.util
 import hashlib
 import os
-import re
 import shutil
 import tarfile
 import urllib.request
-from typing import List
 
 from tqdm import tqdm
 from transformers import TrainerCallback, TrainingArguments, TrainerState, TrainerControl
 from transformers.trainer_utils import PREFIX_CHECKPOINT_DIR
-from zhconv import convert
 
 
 def print_arguments(args):
@@ -20,8 +16,18 @@ def print_arguments(args):
     print("------------------------------------------------")
 
 
+def strtobool(val):
+    val = val.lower()
+    if val in ('y', 'yes', 't', 'true', 'on', '1'):
+        return True
+    elif val in ('n', 'no', 'f', 'false', 'off', '0'):
+        return False
+    else:
+        raise ValueError("invalid truth value %r" % (val,))
+
+
 def add_arguments(argname, type, default, help, argparser, **kwargs):
-    type = distutils.util.strtobool if type == bool else type
+    type = strtobool if type == bool else type
     argparser.add_argument("--" + argname,
                            default=default,
                            type=type,
@@ -72,35 +78,8 @@ def unpack(filepath, target_dir, rm_tar=False):
         os.remove(filepath)
 
 
-# 删除标点符号
-def remove_punctuation(text: str or List[str]):
-    punctuation = '!,.;:?、！，。；：？'
-    if isinstance(text, str):
-        text = re.sub(r'[{}]+'.format(punctuation), ' ', text).strip()
-        return text
-    elif isinstance(text, list):
-        result_text = []
-        for t in text:
-            t = re.sub(r'[{}]+'.format(punctuation), ' ', t).strip()
-            result_text.append(t)
-        return result_text
-    else:
-        raise Exception(f'不支持该类型{type(text)}')
-
-
-# 将繁体中文总成简体中文
-def to_simple(text: str or List[str]):
-    if isinstance(text, str):
-        text = convert(text, 'zh-cn')
-        return text
-    elif isinstance(text, list):
-        result_text = []
-        for t in text:
-            t = convert(t, 'zh-cn')
-            result_text.append(t)
-        return result_text
-    else:
-        raise Exception(f'不支持该类型{type(text)}')
+def make_inputs_require_grad(module, input, output):
+    output.requires_grad_(True)
 
 
 # 保存模型时的回调函数

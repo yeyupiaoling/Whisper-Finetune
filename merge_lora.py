@@ -1,18 +1,19 @@
 import argparse
+import functools
 import os
-import shutil
 
 from transformers import WhisperForConditionalGeneration, WhisperFeatureExtractor, WhisperTokenizerFast,\
     WhisperProcessor
 from peft import PeftModel, PeftConfig
-from utils.utils import print_arguments
+from utils.utils import print_arguments, add_arguments
 
-parser = argparse.ArgumentParser()
-parser.add_argument("--lora_model", type=str, default="output/checkpoint-final", help="微调保存的模型路径")
-parser.add_argument('--output_dir', type=str, default='models/', help="合并模型的保存目录")
-parser.add_argument("--language", type=str, default="Chinese", help="设置语言")
-parser.add_argument("--task", type=str, default="transcribe", choices=['transcribe', 'translate'], help="模型的任务")
-parser.add_argument("--local_files_only", type=bool, default=False, help="是否只在本地加载模型，不尝试下载")
+parser = argparse.ArgumentParser(description=__doc__)
+add_arg = functools.partial(add_arguments, argparser=parser)
+add_arg("lora_model", type=str, default="output/checkpoint-final", help="微调保存的模型路径")
+add_arg('output_dir', type=str, default='models/', help="合并模型的保存目录")
+add_arg("language",   type=str, default="Chinese", help="设置语言")
+add_arg("task", type=str, default="transcribe", choices=['transcribe', 'translate'], help="模型的任务")
+add_arg("local_files_only", type=bool, default=False, help="是否只在本地加载模型，不尝试下载")
 args = parser.parse_args()
 print_arguments(args)
 
@@ -21,7 +22,7 @@ assert os.path.exists(args.lora_model), f"模型文件{args.lora_model}不存在
 # 获取Lora配置参数
 peft_config = PeftConfig.from_pretrained(args.lora_model)
 # 获取Whisper的基本模型
-base_model = WhisperForConditionalGeneration.from_pretrained(peft_config.base_model_name_or_path, device_map="auto",
+base_model = WhisperForConditionalGeneration.from_pretrained(peft_config.base_model_name_or_path, device_map={"": "cpu"},
                                                              local_files_only=args.local_files_only)
 # 与Lora模型合并
 model = PeftModel.from_pretrained(base_model, args.lora_model, local_files_only=args.local_files_only)

@@ -1,4 +1,5 @@
 import argparse
+import functools
 import gc
 import os
 
@@ -10,20 +11,24 @@ from torch.utils.data import DataLoader
 from tqdm import tqdm
 from transformers import WhisperForConditionalGeneration, WhisperTokenizer, WhisperProcessor, WhisperFeatureExtractor
 
-from utils.data_utils import DataCollatorSpeechSeq2SeqWithPadding
-from utils.utils import print_arguments, remove_punctuation, to_simple
+from utils.data_utils import DataCollatorSpeechSeq2SeqWithPadding, get_audio_length_processor, remove_punctuation, \
+    to_simple
+from utils.utils import print_arguments, add_arguments
 
-parser = argparse.ArgumentParser()
-parser.add_argument("--test_data",   type=str, default="dataset/test.json",            help="测试集的路径")
-parser.add_argument("--model_path",  type=str, default="models/whisper-tiny-finetune", help="合并模型的路径，或者是huggingface上模型的名称")
-parser.add_argument("--batch_size",  type=int, default=16,        help="评估的batch size")
-parser.add_argument("--num_workers", type=int, default=8,         help="读取数据的线程数量")
-parser.add_argument("--language",    type=str, default="Chinese", help="设置语言")
-parser.add_argument("--remove_pun",  type=bool, default=True,     help="是否移除标点符号")
-parser.add_argument("--to_simple",   type=bool, default=True,     help="是否转为简体中文")
-parser.add_argument("--local_files_only",   type=bool, default=True,     help="是否只在本地加载模型，不尝试下载")
-parser.add_argument("--task",       type=str, default="transcribe", choices=['transcribe', 'translate'], help="模型的任务")
-parser.add_argument("--metric",     type=str, default="cer",        choices=['cer', 'wer'],              help="评估方式")
+parser = argparse.ArgumentParser(description=__doc__)
+add_arg = functools.partial(add_arguments, argparser=parser)
+add_arg("test_data",   type=str, default="dataset/test.json",            help="测试集的路径")
+add_arg("model_path",  type=str, default="models/whisper-tiny-finetune", help="合并模型的路径，或者是huggingface上模型的名称")
+add_arg("batch_size",  type=int, default=16,        help="评估的batch size")
+add_arg("num_workers", type=int, default=8,         help="读取数据的线程数量")
+add_arg("language",    type=str, default="Chinese", help="设置语言")
+add_arg("remove_pun",  type=bool, default=True,     help="是否移除标点符号")
+add_arg("to_simple",   type=bool, default=True,     help="是否转为简体中文")
+add_arg("min_audio_len",     type=float, default=0.5,  help="最小的音频长度，单位秒")
+add_arg("max_audio_len",     type=float, default=30,   help="最大的音频长度，单位秒")
+add_arg("local_files_only",  type=bool,  default=True, help="是否只在本地加载模型，不尝试下载")
+add_arg("task",       type=str, default="transcribe", choices=['transcribe', 'translate'], help="模型的任务")
+add_arg("metric",     type=str, default="cer",        choices=['cer', 'wer'],              help="评估方式")
 args = parser.parse_args()
 print_arguments(args)
 
@@ -62,10 +67,16 @@ def prepare_dataset(batch):
 data_collator = DataCollatorSpeechSeq2SeqWithPadding(processor=processor)
 
 # 加载评估数据
-audio_data = load_dataset('json', data_files={'test': args.test_data})
-audio_data = audio_data.cast_column("audio", Audio(sampling_rate=16000))
-audio_data = audio_data.with_transform(prepare_dataset)
-eval_dataloader = DataLoader(audio_data['test'], batch_size=args.batch_size,
+audio_dataset = load_dataset('json', data_files={'test': args.test_data})
+audio_dataset = audio_dataset.cast_column("audio", Audio(sampling_rate=16000))
+print(f"过滤前测试数据：{audio_dataset['test'].num_rows}")
+# 过滤时长不在指定区域的音频
+if 'duration' in audio_dataset['test'].features.keys():
+    is_audio_in_length = get_audio_length_processor(args.min_audio_len, args.max_audio_len)
+    audio_dataset["test"] = audio_dataset["test"].filter(is_audio_in_length, input_columns=["duration"])
+    print(f"过滤后测试数据：{audio_dataset['test'].num_rows}")
+audio_dataset = audio_dataset.with_transform(prepare_dataset)
+eval_dataloader = DataLoader(audio_dataset['test'], batch_size=args.batch_size,
                              num_workers=args.num_workers, collate_fn=data_collator)
 
 # 获取评估方法

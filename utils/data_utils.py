@@ -1,7 +1,48 @@
+import re
 from dataclasses import dataclass
 from typing import Any, List, Dict, Union
 
 import torch
+from zhconv import convert
+
+
+# 过滤时长函数
+def get_audio_length_processor(min_audio_length, max_audio_length):
+    def is_audio_in_length_range(duration):
+        return min_audio_length < duration < max_audio_length
+
+    return is_audio_in_length_range
+
+
+# 删除标点符号
+def remove_punctuation(text: str or List[str]):
+    punctuation = '!,.;:?、！，。；：？'
+    if isinstance(text, str):
+        text = re.sub(r'[{}]+'.format(punctuation), '', text).strip()
+        return text
+    elif isinstance(text, list):
+        result_text = []
+        for t in text:
+            t = re.sub(r'[{}]+'.format(punctuation), '', t).strip()
+            result_text.append(t)
+        return result_text
+    else:
+        raise Exception(f'不支持该类型{type(text)}')
+
+
+# 将繁体中文总成简体中文
+def to_simple(text: str or List[str]):
+    if isinstance(text, str):
+        text = convert(text, 'zh-cn')
+        return text
+    elif isinstance(text, list):
+        result_text = []
+        for t in text:
+            t = convert(t, 'zh-cn')
+            result_text.append(t)
+        return result_text
+    else:
+        raise Exception(f'不支持该类型{type(text)}')
 
 
 @dataclass

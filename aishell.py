@@ -2,6 +2,10 @@ import argparse
 import json
 import os
 import functools
+
+import soundfile
+from tqdm import tqdm
+
 from utils.utils import download, unpack
 from utils.utils import add_arguments, print_arguments
 
@@ -10,18 +14,9 @@ MD5_DATA = '2f494334227864a8a8fec932999db9d8'
 
 parser = argparse.ArgumentParser(description=__doc__)
 add_arg = functools.partial(add_arguments, argparser=parser)
-parser.add_argument("--filepath",
-                    default=None,
-                    type=str,
-                    help="压缩包data_aishell.tgz文件路径，不指定会自动下载 (默认: %(default)s)")
-parser.add_argument("--target_dir",
-                    default="dataset/audio/",
-                    type=str,
-                    help="存放音频文件的目录 (默认: %(default)s)")
-parser.add_argument("--annotation_text",
-                    default="dataset/",
-                    type=str,
-                    help="存放音频标注文件的目录 (默认: %(default)s)")
+add_arg("filepath", default=None, type=str, help="压缩包data_aishell.tgz文件路径，不指定会自动下载")
+add_arg("target_dir", default="dataset/audio/", type=str, help="存放音频文件的目录")
+add_arg("annotation_text", default="dataset/", type=str, help="存放音频标注文件的目录")
 args = parser.parse_args()
 
 
@@ -40,6 +35,7 @@ def create_annotation_text(data_dir, annotation_path):
         # remove space
         text = ''.join(text.split())
         transcript_dict[audio_id] = text
+    # 训练集
     data_types = ['train', 'dev']
     lines = []
     for type in data_types:
@@ -54,7 +50,14 @@ def create_annotation_text(data_dir, annotation_path):
                 text = transcript_dict[audio_id]
                 line = {"audio": {"path": audio_path}, "sentence": text}
                 lines.append(line)
+    # 添加音频时长
+    for i in tqdm(range(len(lines))):
+        audio_path = lines[i]['audio']['path']
+        sample, sr = soundfile.read(audio_path)
+        duration = round(sample.shape[-1] / float(sr), 2)
+        lines[i]["duration"] = duration
     f_train.write(json.dumps(lines, ensure_ascii=False, indent=4))
+    # 测试集
     audio_dir = os.path.join(data_dir, 'wav', 'test')
     lines = []
     for subfolder, _, filelist in sorted(os.walk(audio_dir)):
@@ -65,8 +68,14 @@ def create_annotation_text(data_dir, annotation_path):
             if audio_id not in transcript_dict:
                 continue
             text = transcript_dict[audio_id]
-            line = {"audio":{"path": audio_path},"sentence":text}
+            line = {"audio": {"path": audio_path}, "sentence": text}
             lines.append(line)
+    # 添加音频时长
+    for i in tqdm(range(len(lines))):
+        audio_path = lines[i]['audio']['path']
+        sample, sr = soundfile.read(audio_path)
+        duration = round(sample.shape[-1] / float(sr), 2)
+        lines[i]["duration"] = duration
     f_test.write(json.dumps(lines,  ensure_ascii=False,  indent=4))
     f_test.close()
     f_train.close()
