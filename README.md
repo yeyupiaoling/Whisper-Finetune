@@ -38,7 +38,7 @@ OpenAI在开源了号称其英文语音辨识能力已达到人类水准的Whisp
 
 ## 模型测试表
 
-1. 原始模型字错率测试表
+1. 原始模型字错率测试表。
 
 |       使用模型       | 语言  | aishell_test(CER) | test_net(CER) | test_meeting(CER) | 下载地址 |
 |:----------------:|:---:|:-----------------:|:-------------:|:-----------------:|:----:|
@@ -49,29 +49,30 @@ OpenAI在开源了号称其英文语音辨识能力已达到人类水准的Whisp
 | whisper-large-v2 | 普通话 |                   |               |                   |      |
 
 
-2. 微调[WenetSpeech](https://github.com/yeyupiaoling/PPASR/blob/develop/docs/wenetspeech.md)数据集后字错率测试表
+2. 微调[AIShell](https://openslr.magicdatatech.com/resources/33/)数据集后字错率测试表。
 
-|       使用模型       | 语言  |                                         微调数据集                                         | aishell_test(CER) | test_net(CER) | test_meeting(CER) | 下载地址 |
-|:----------------:|:---:|:-------------------------------------------------------------------------------------:|:-----------------:|:-------------:|:-----------------:|:----:|
-|   whisper-tiny   | 普通话 | [WenetSpeech](https://github.com/yeyupiaoling/PPASR/blob/develop/docs/wenetspeech.md) |                   |               |                   |      |
-|   whisper-base   | 普通话 | [WenetSpeech](https://github.com/yeyupiaoling/PPASR/blob/develop/docs/wenetspeech.md) |                   |               |                   |      |
-|  whisper-small   | 普通话 | [WenetSpeech](https://github.com/yeyupiaoling/PPASR/blob/develop/docs/wenetspeech.md) |                   |               |                   |      |
-|  whisper-medium  | 普通话 | [WenetSpeech](https://github.com/yeyupiaoling/PPASR/blob/develop/docs/wenetspeech.md) |                   |               |                   |      |
-| whisper-large-v2 | 普通话 | [WenetSpeech](https://github.com/yeyupiaoling/PPASR/blob/develop/docs/wenetspeech.md) |                   |               |                   |      |
+|       使用模型       | 语言  |                           微调数据集                            | aishell_test(CER) | test_net(CER) | test_meeting(CER) | 下载地址 |
+|:----------------:|:---:|:----------------------------------------------------------:|:-----------------:|:-------------:|:-----------------:|:----:|
+|   whisper-tiny   | 普通话 | [AIShell](https://openslr.magicdatatech.com/resources/33/) |                   |               |                   |      |
+|   whisper-base   | 普通话 | [AIShell](https://openslr.magicdatatech.com/resources/33/) |                   |               |                   |      |
+|  whisper-small   | 普通话 | [AIShell](https://openslr.magicdatatech.com/resources/33/) |                   |               |                   |      |
+|  whisper-medium  | 普通话 | [AIShell](https://openslr.magicdatatech.com/resources/33/) |                   |               |                   |      |
+| whisper-large-v2 | 普通话 | [AIShell](https://openslr.magicdatatech.com/resources/33/) |                   |               |                   |      |
 
-3. 未加速和加速后的推理速度测试表
+3. 未加速和加速后的推理速度测试表，使用GPU为GTX3090（24G）。
 
-|       使用模型       | 原生模型实时率 | 转换CTranslate2加速后实时率 |
-|:----------------:|:-------:|:-------------------:|
-|   whisper-tiny   |         |                     |
-|   whisper-base   |         |                     |    
-|  whisper-small   |         |                     | 
-|  whisper-medium  |         |                     |  
-| whisper-large-v2 |         |                     |
+|       使用模型       | 原生模型实时率(float16) | 转换CTranslate2加速后实时率(float16) | 转换CTranslate2加速后实时率(int8_float16) |
+|:----------------:|:----------------:|:----------------------------:|:---------------------------------:|
+|   whisper-tiny   |                  |                              |                                   |
+|   whisper-base   |                  |                              |                                   |    
+|  whisper-small   |                  |                              |                                   | 
+|  whisper-medium  |                  |                              |                                   |  
+| whisper-large-v2 |                  |                              |                                   |
 
 **重要说明：**
 1. 在评估的时候移除模型输出的标点符号，并把繁体中文转成简体中文。
-2. RTF= 所有音频总时间(单位秒) / ASR识别所有音频处理时间(单位秒)
+2. RTF= 所有音频总时间(单位秒) / ASR识别所有音频处理时间(单位秒)。
+3. 测试速度的音频为`dataset/test.wav`，时长为8秒。
 
 ## 安装环境
 
@@ -111,7 +112,7 @@ python -m pip install -r requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/s
 
 ## 微调模型
 
-准备好数据之后，就可以开始微调模型了。训练最重要的两个参数分别是，`--base_model`指定微调的Whisper模型，这个参数值需要在[HuggingFace](https://huggingface.co/openai)存在的，这个不需要提前下载，启动训练时可以自动下载。第二个`--output_path`是是训练时保存的Lora检查点路径，因为我们使用Lora来微调模型。其他更多的参数请查看这个程序。
+准备好数据之后，就可以开始微调模型了。训练最重要的两个参数分别是，`--base_model`指定微调的Whisper模型，这个参数值需要在[HuggingFace](https://huggingface.co/openai)存在的，这个不需要提前下载，启动训练时可以自动下载。第二个`--output_path`是是训练时保存的Lora检查点路径，因为我们使用Lora来微调模型。如果想存足够的话，最好将`--use_8bit`设置为False，这样训练速度快很多。其他更多的参数请查看这个程序。
 
 ### 单卡训练
 

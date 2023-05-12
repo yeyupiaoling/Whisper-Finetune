@@ -45,8 +45,7 @@ add_arg("generation_max_length",       type=int, default=128,  help="训练数�
 args = parser.parse_args()
 print_arguments(args)
 
-# 判断模型路径是否合法
-assert 'openai' == os.path.dirname(args.base_model), f"模型文件{args.base_model}不存在，请检查是否为huggingface存在模型"
+
 # 获取Whisper的特征提取器、编码器和解码器
 feature_extractor = WhisperFeatureExtractor.from_pretrained(args.base_model, local_files_only=args.local_files_only)
 tokenizer = WhisperTokenizer.from_pretrained(args.base_model,
