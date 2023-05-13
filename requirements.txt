@@ -8,5 +8,6 @@ evaluate>=0.4.0
 faster-whisper>=0.5.1
 jiwer>=2.5.1
 peft>=0.3.0
+accelerate>=0.17.1
 zhconv>=1.4.2
 tqdm>=4.62.1

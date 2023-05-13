@@ -40,46 +40,47 @@ OpenAI在开源了号称其英文语音辨识能力已达到人类水准的Whisp
 
 1. 原始模型字错率测试表。
 
-|       使用模型       | 语言  | aishell_test(CER) | test_net(CER) | test_meeting(CER) | 下载地址 |
-|:----------------:|:---:|:-----------------:|:-------------:|:-----------------:|:----:|
-|   whisper-tiny   | 普通话 |                   |               |                   |      |
-|   whisper-base   | 普通话 |                   |               |                   |      |
-|  whisper-small   | 普通话 |                   |               |                   |      |
-|  whisper-medium  | 普通话 |                   |               |                   |      |
-| whisper-large-v2 | 普通话 |                   |               |                   |      |
+|       使用模型       | 语言  | aishell_test |  test_net   |  test_meeting   | 下载地址 |
+|:----------------:|:---:|:------------:|:-----------:|:---------------:|:----:|
+|   whisper-tiny   | 普通话 |   0.31994    |             |                 |      |
+|   whisper-base   | 普通话 |   0.22197    |             |                 |      |
+|  whisper-small   | 普通话 |   0.13897    |             |                 |      |
+|  whisper-medium  | 普通话 |   0.09538    |             |                 |      |
+| whisper-large-v2 | 普通话 |   0.08826    |             |                 |      |
 
 
 2. 微调[AIShell](https://openslr.magicdatatech.com/resources/33/)数据集后字错率测试表。
 
-|       使用模型       | 语言  |                           微调数据集                            | aishell_test(CER) | test_net(CER) | test_meeting(CER) | 下载地址 |
-|:----------------:|:---:|:----------------------------------------------------------:|:-----------------:|:-------------:|:-----------------:|:----:|
-|   whisper-tiny   | 普通话 | [AIShell](https://openslr.magicdatatech.com/resources/33/) |                   |               |                   |      |
-|   whisper-base   | 普通话 | [AIShell](https://openslr.magicdatatech.com/resources/33/) |                   |               |                   |      |
-|  whisper-small   | 普通话 | [AIShell](https://openslr.magicdatatech.com/resources/33/) |                   |               |                   |      |
-|  whisper-medium  | 普通话 | [AIShell](https://openslr.magicdatatech.com/resources/33/) |                   |               |                   |      |
-| whisper-large-v2 | 普通话 | [AIShell](https://openslr.magicdatatech.com/resources/33/) |                   |               |                   |      |
+|       使用模型       | 语言  |                            数据集                             | aishell_test | test_net | test_meeting | 下载地址 |
+|:----------------:|:---:|:----------------------------------------------------------:|:------------:|:--------:|:------------:|:----:|
+|   whisper-tiny   | 普通话 | [AIShell](https://openslr.magicdatatech.com/resources/33/) |              |          |              |      |
+|   whisper-base   | 普通话 | [AIShell](https://openslr.magicdatatech.com/resources/33/) |              |          |              |      |
+|  whisper-small   | 普通话 | [AIShell](https://openslr.magicdatatech.com/resources/33/) |              |          |              |      |
+|  whisper-medium  | 普通话 | [AIShell](https://openslr.magicdatatech.com/resources/33/) |              |          |              |      |
+| whisper-large-v2 | 普通话 | [AIShell](https://openslr.magicdatatech.com/resources/33/) |              |          |              |      |
 
 3. 未加速和加速后的推理速度测试表，使用GPU为GTX3090（24G）。
 
 |       使用模型       | 原生模型实时率(float16) | 转换CTranslate2加速后实时率(float16) | 转换CTranslate2加速后实时率(int8_float16) |
 |:----------------:|:----------------:|:----------------------------:|:---------------------------------:|
-|   whisper-tiny   |                  |                              |                                   |
-|   whisper-base   |                  |                              |                                   |    
-|  whisper-small   |                  |                              |                                   | 
-|  whisper-medium  |                  |                              |                                   |  
-| whisper-large-v2 |                  |                              |                                   |
+|   whisper-tiny   |       0.03       |             0.06             |               0.06                |
+|   whisper-base   |       0.04       |             0.06             |               0.06                |    
+|  whisper-small   |       0.08       |             0.08             |               0.08                | 
+|  whisper-medium  |       0.13       |             0.10             |               0.10                |  
+| whisper-large-v2 |       0.19       |             0.12             |               0.12                |
 
 **重要说明：**
 1. 在评估的时候移除模型输出的标点符号，并把繁体中文转成简体中文。
-2. RTF= 所有音频总时间(单位秒) / ASR识别所有音频处理时间(单位秒)。
-3. 测试速度的音频为`dataset/test.wav`，时长为8秒。
+2. aishell_test为AIShell的测试集，test_net和test_meeting为WenetSpeech的测试集。
+3. RTF= 所有音频总时间(单位秒) / ASR识别所有音频处理时间(单位秒)。
+4. 测试速度的音频为`dataset/test.wav`，时长为8秒。
 
 ## 安装环境
 
 - 首先安装的是Pytorch的GPU版本，如果已经安装过了，请跳过。
 
 ```shell
-conda install pytorch==1.12.1 torchvision==0.13.1 torchaudio==0.12.1 cudatoolkit=11.3 -c pytorch
+conda install pytorch==1.13.1 torchvision==0.14.1 torchaudio==0.13.1 pytorch-cuda=11.6 -c pytorch -c nvidia
 ```
 
 - 安装所需的依赖库。
@@ -187,12 +188,6 @@ python merge_lora.py --lora_model=output/checkpoint-final --output_dir=models/
 ```shell
 python evaluation.py --model_path=models/whisper-tiny-finetune --metric=cer
 ```
-
-以下是使用AIShell的微调前和微调后的字错率对比，使用whisper-tiny最为明显，它准确率比较低，但是微调之后有大幅度提升。
-
-|      模型      |   微调前   |   微调后   |
-|:------------:|:-------:|:-------:|
-| whisper-tiny | 0.48265 | 0.17926 |
 
 
 ## 预测
