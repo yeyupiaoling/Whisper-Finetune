@@ -40,24 +40,24 @@ OpenAI在开源了号称其英文语音辨识能力已达到人类水准的Whisp
 
 1. 原始模型字错率测试表。
 
-|       使用模型       | 语言  | aishell_test |  test_net   |  test_meeting   | 下载地址 |
-|:----------------:|:---:|:------------:|:-----------:|:---------------:|:----:|
-|   whisper-tiny   | 普通话 |   0.31994    |             |                 |      |
-|   whisper-base   | 普通话 |   0.22197    |             |                 |      |
-|  whisper-small   | 普通话 |   0.13897    |             |                 |      |
-|  whisper-medium  | 普通话 |   0.09538    |             |                 |      |
-| whisper-large-v2 | 普通话 |   0.08826    |             |                 |      |
+|       使用模型       | 语言  | aishell_test | test_net | test_meeting |                               下载地址                               |
+|:----------------:|:---:|:------------:|:--------:|:------------:|:----------------------------------------------------------------:|
+|   whisper-tiny   | 普通话 |   0.31994    |          |              | [点击下载](https://pan.baidu.com/s/1q8xHr71XPe1dnRHv2IzldQ?pwd=wjrf) |
+|   whisper-base   | 普通话 |   0.22197    |          |              | [点击下载](https://pan.baidu.com/s/1q8xHr71XPe1dnRHv2IzldQ?pwd=wjrf) |
+|  whisper-small   | 普通话 |   0.13897    |          |              | [点击下载](https://pan.baidu.com/s/1q8xHr71XPe1dnRHv2IzldQ?pwd=wjrf) |
+|  whisper-medium  | 普通话 |   0.09538    |          |              | [点击下载](https://pan.baidu.com/s/1q8xHr71XPe1dnRHv2IzldQ?pwd=wjrf) |
+| whisper-large-v2 | 普通话 |   0.08826    |          |              | [点击下载](https://pan.baidu.com/s/1q8xHr71XPe1dnRHv2IzldQ?pwd=wjrf) |
 
 
 2. 微调[AIShell](https://openslr.magicdatatech.com/resources/33/)数据集后字错率测试表。
 
-|       使用模型       | 语言  |                            数据集                             | aishell_test | test_net | test_meeting | 下载地址 |
-|:----------------:|:---:|:----------------------------------------------------------:|:------------:|:--------:|:------------:|:----:|
-|   whisper-tiny   | 普通话 | [AIShell](https://openslr.magicdatatech.com/resources/33/) |              |          |              |      |
-|   whisper-base   | 普通话 | [AIShell](https://openslr.magicdatatech.com/resources/33/) |              |          |              |      |
-|  whisper-small   | 普通话 | [AIShell](https://openslr.magicdatatech.com/resources/33/) |              |          |              |      |
-|  whisper-medium  | 普通话 | [AIShell](https://openslr.magicdatatech.com/resources/33/) |              |          |              |      |
-| whisper-large-v2 | 普通话 | [AIShell](https://openslr.magicdatatech.com/resources/33/) |              |          |              |      |
+|       使用模型       | 语言  |                            数据集                             | aishell_test | test_net | test_meeting |                               下载地址                               |
+|:----------------:|:---:|:----------------------------------------------------------:|:------------:|:--------:|:------------:|:----------------------------------------------------------------:|
+|   whisper-tiny   | 普通话 | [AIShell](https://openslr.magicdatatech.com/resources/33/) |              |          |              | [点击下载](https://pan.baidu.com/s/1hIximy9ddN3cMHN4_VdhnQ?pwd=nfc2) |
+|   whisper-base   | 普通话 | [AIShell](https://openslr.magicdatatech.com/resources/33/) |              |          |              | [点击下载](https://pan.baidu.com/s/1hIximy9ddN3cMHN4_VdhnQ?pwd=nfc2) |
+|  whisper-small   | 普通话 | [AIShell](https://openslr.magicdatatech.com/resources/33/) |              |          |              | [点击下载](https://pan.baidu.com/s/1hIximy9ddN3cMHN4_VdhnQ?pwd=nfc2) |
+|  whisper-medium  | 普通话 | [AIShell](https://openslr.magicdatatech.com/resources/33/) |              |          |              | [点击下载](https://pan.baidu.com/s/1hIximy9ddN3cMHN4_VdhnQ?pwd=nfc2) |
+| whisper-large-v2 | 普通话 | [AIShell](https://openslr.magicdatatech.com/resources/33/) |              |          |              | [点击下载](https://pan.baidu.com/s/1hIximy9ddN3cMHN4_VdhnQ?pwd=nfc2) |
 
 3. 未加速和加速后的推理速度测试表，使用GPU为GTX3090（24G）。
 
@@ -71,7 +71,7 @@ OpenAI在开源了号称其英文语音辨识能力已达到人类水准的Whisp
 
 **重要说明：**
 1. 在评估的时候移除模型输出的标点符号，并把繁体中文转成简体中文。
-2. aishell_test为AIShell的测试集，test_net和test_meeting为WenetSpeech的测试集。
+2. `aishell_tes`t为AIShell的测试集，`test_net`和`test_meeting`为WenetSpeech的测试集。
 3. RTF= 所有音频总时间(单位秒) / ASR识别所有音频处理时间(单位秒)。
 4. 测试速度的音频为`dataset/test.wav`，时长为8秒。
 
