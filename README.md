@@ -22,7 +22,7 @@ OpenAI在开源了号称其英文语音辨识能力已达到人类水准的Whisp
 
 - Anaconda 3
 - Python 3.8
-- Pytorch 1.12.1
+- Pytorch 1.13.1
 - Ubuntu 18.04
 - GPU A100-PCIE-40GB*1
 
@@ -113,13 +113,13 @@ python -m pip install -r requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/s
 
 ## 微调模型
 
-准备好数据之后，就可以开始微调模型了。训练最重要的两个参数分别是，`--base_model`指定微调的Whisper模型，这个参数值需要在[HuggingFace](https://huggingface.co/openai)存在的，这个不需要提前下载，启动训练时可以自动下载。第二个`--output_path`是是训练时保存的Lora检查点路径，因为我们使用Lora来微调模型。如果想存足够的话，最好将`--use_8bit`设置为False，这样训练速度快很多。其他更多的参数请查看这个程序。
+准备好数据之后，就可以开始微调模型了。训练最重要的两个参数分别是，`--base_model`指定微调的Whisper模型，这个参数值需要在[HuggingFace](https://huggingface.co/openai)存在的，这个不需要提前下载，启动训练时可以自动下载，当然也可以提前下载，那么`--base_model`指定就是路径，同时`--local_files_only`设置为True。第二个`--output_path`是是训练时保存的Lora检查点路径，因为我们使用Lora来微调模型。如果想存足够的话，最好将`--use_8bit`设置为False，这样训练速度快很多。其他更多的参数请查看这个程序。
 
 ### 单卡训练
 
 单卡训练命令如下，Windows系统可以不添加`CUDA_VISIBLE_DEVICES`参数。
 ```shell
-CUDA_VISIBLE_DEVICES=0 python finetune.py --base_model=openai/whisper-tiny --output_dir=models/whisper-tiny-lora
+CUDA_VISIBLE_DEVICES=0 python finetune.py --base_model=openai/whisper-tiny --output_dir=output/
 ```
 
 ### 多卡训练
@@ -128,7 +128,7 @@ CUDA_VISIBLE_DEVICES=0 python finetune.py --base_model=openai/whisper-tiny --out
 
 1. 使用torchrun启动多卡训练，命令如下，通过`--nproc_per_node`指定使用的显卡数量。
 ```shell
-torchrun --nproc_per_node=2 finetune.py --base_model=openai/whisper-tiny --output_dir=models/whisper-tiny-lora
+torchrun --nproc_per_node=2 finetune.py --base_model=openai/whisper-tiny --output_dir=output/
 ```
 
 2. 使用accelerate启动多卡训练，如果是第一次使用accelerate，要配置训练参数，方式如下。
@@ -162,7 +162,7 @@ accelerate env
 
 开始训练命令如下。
 ```shell
-accelerate launch finetune.py --base_model=openai/whisper-tiny --output_dir=models/whisper-tiny-lora
+accelerate launch finetune.py --base_model=openai/whisper-tiny --output_dir=output/
 ```
 
 
@@ -177,7 +177,7 @@ accelerate launch finetune.py --base_model=openai/whisper-tiny --output_dir=mode
 
 ## 合并模型
 
-微调完成之后会有两个模型，第一个是Whisper基础模型，第二个是Lora模型，需要把这两个模型合并之后才能之后的操作。这个程序只需要传递两个参数，`--lora_model`指定的是训练时保存的检查点路径，注意后面还有`adapter_model`，第二个`--output_dir`是合并后模型的保存目录。
+微调完成之后会有两个模型，第一个是Whisper基础模型，第二个是Lora模型，需要把这两个模型合并之后才能之后的操作。这个程序只需要传递两个参数，`--lora_model`指定的是训练结束后保存的Lora模型路径，注意如何不是最后的`checkpoint-final`后面还有`adapter_model`文件夹，第二个`--output_dir`是合并后模型的保存目录。
 ```shell
 python merge_lora.py --lora_model=output/checkpoint-final --output_dir=models/
 ```
@@ -225,4 +225,7 @@ python infer_ct2.py --audio_path=dataset/test.wav --model_path=models/whisper-ti
 }
 ```
 
+## 参考资料
 
+1. https://github.com/huggingface/peft
+2. https://github.com/guillaumekln/faster-whisper
