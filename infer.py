@@ -17,11 +17,11 @@ args = parser.parse_args()
 print_arguments(args)
 
 # 获取Whisper的特征提取器、编码器和解码器
-feature_extractor = WhisperFeatureExtractor.from_pretrained(args.model_path, local_files_only=args.local_files_only)
 processor = WhisperProcessor.from_pretrained(args.model_path,
                                              language=args.language,
                                              task=args.task,
                                              local_files_only=args.local_files_only)
+forced_decoder_ids = processor.get_decoder_prompt_ids(language=args.language, task=args.task)
 
 # 获取模型
 model = WhisperForConditionalGeneration.from_pretrained(args.model_path,
@@ -34,7 +34,7 @@ sample, sr = soundfile.read(args.audio_path)
 # 预处理音频
 input_features = processor(sample, sampling_rate=sr, return_tensors="pt").input_features.cuda().half()
 # 开始识别
-predicted_ids = model.generate(input_features)
+predicted_ids = model.generate(input_features, forced_decoder_ids=forced_decoder_ids)
 # 解码结果
 transcription = processor.batch_decode(predicted_ids, skip_special_tokens=True)[0]
 print(f"识别结果：{transcription}")

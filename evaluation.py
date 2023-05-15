@@ -37,14 +37,11 @@ assert 'openai' == os.path.dirname(args.model_path) or os.path.exists(args.model
     f"模型文件{args.model_path}不存在，请检查是否已经成功合并模型，或者是否为huggingface存在模型"
 # 获取Whisper的特征提取器、编码器和解码器
 feature_extractor = WhisperFeatureExtractor.from_pretrained(args.model_path, local_files_only=args.local_files_only)
-tokenizer = WhisperTokenizer.from_pretrained(args.model_path,
-                                             language=args.language,
-                                             task=args.task,
-                                             local_files_only=args.local_files_only)
 processor = WhisperProcessor.from_pretrained(args.model_path,
                                              language=args.language,
                                              task=args.task,
                                              local_files_only=args.local_files_only)
+forced_decoder_ids = processor.get_decoder_prompt_ids(language=args.language, task=args.task)
 # 获取模型
 model = WhisperForConditionalGeneration.from_pretrained(args.model_path,
                                                         device_map="auto",
@@ -59,7 +56,7 @@ def prepare_dataset(batch):
     new_batch["input_features"] = [feature_extractor(a["array"], sampling_rate=a["sampling_rate"]).input_features[0]
                                    for a in batch["audio"]]
     # 将目标文本编码为标签ID
-    new_batch["labels"] = [tokenizer(s).input_ids for s in batch["sentence"]]
+    new_batch["labels"] = [processor.tokenizer(s).input_ids for s in batch["sentence"]]
     return new_batch
 
 
@@ -90,12 +87,13 @@ for step, batch in enumerate(tqdm(eval_dataloader)):
                 model.generate(
                     input_features=batch["input_features"].cuda(),
                     decoder_input_ids=batch["labels"][:, :4].cuda(),
+                    forced_decoder_ids=forced_decoder_ids,
                     max_new_tokens=255).cpu().numpy())
             labels = batch["labels"].cpu().numpy()
-            labels = np.where(labels != -100, labels, tokenizer.pad_token_id)
+            labels = np.where(labels != -100, labels, processor.tokenizer.pad_token_id)
             # 将预测和实际的token转换为文本
-            decoded_preds = tokenizer.batch_decode(generated_tokens, skip_special_tokens=True)
-            decoded_labels = tokenizer.batch_decode(labels, skip_special_tokens=True)
+            decoded_preds = processor.tokenizer.batch_decode(generated_tokens, skip_special_tokens=True)
+            decoded_labels = processor.tokenizer.batch_decode(labels, skip_special_tokens=True)
             # 删除标点符号
             if args.remove_pun:
                 decoded_preds = remove_punctuation(decoded_preds)

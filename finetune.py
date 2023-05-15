@@ -47,10 +47,6 @@ print_arguments(args)
 
 # 获取Whisper的特征提取器、编码器和解码器
 feature_extractor = WhisperFeatureExtractor.from_pretrained(args.base_model, local_files_only=args.local_files_only)
-tokenizer = WhisperTokenizer.from_pretrained(args.base_model,
-                                             language=args.language,
-                                             task=args.task,
-                                             local_files_only=args.local_files_only)
 processor = WhisperProcessor.from_pretrained(args.base_model,
                                              language=args.language,
                                              task=args.task,
@@ -64,7 +60,7 @@ def prepare_dataset(batch):
     new_batch["input_features"] = [feature_extractor(a["array"], sampling_rate=a["sampling_rate"]).input_features[0]
                                    for a in batch["audio"]]
     # 将目标文本编码为标签ID
-    new_batch["labels"] = [tokenizer(s).input_ids for s in batch["sentence"]]
+    new_batch["labels"] = [processor.tokenizer(s).input_ids for s in batch["sentence"]]
     return new_batch
 
 
