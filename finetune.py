@@ -41,7 +41,6 @@ add_arg("resume_from_checkpoint",      type=str, default=None, help="恢复训�
 add_arg("per_device_train_batch_size", type=int, default=8,    help="训练的batch size")
 add_arg("per_device_eval_batch_size",  type=int, default=8,    help="评估的batch size")
 add_arg("gradient_accumulation_steps", type=int, default=1,    help="梯度累积步数")
-add_arg("generation_max_length",       type=int, default=128,  help="训练数据的最大长度")
 args = parser.parse_args()
 print_arguments(args)
 
@@ -139,7 +138,6 @@ training_args = Seq2SeqTrainingArguments(output_dir=args.output_dir,
                                          ddp_find_unused_parameters=False if ddp else None,
                                          dataloader_num_workers=args.num_workers,
                                          per_device_eval_batch_size=args.per_device_eval_batch_size,
-                                         generation_max_length=args.generation_max_length,
                                          logging_steps=args.logging_steps,
                                          remove_unused_columns=False,
                                          label_names=["labels"])
