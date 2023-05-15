@@ -42,22 +42,22 @@ OpenAI在开源了号称其英文语音辨识能力已达到人类水准的Whisp
 
 |       使用模型       | 语言  | aishell_test | test_net | test_meeting |                               下载地址                               |
 |:----------------:|:---:|:------------:|:--------:|:------------:|:----------------------------------------------------------------:|
-|   whisper-tiny   | 普通话 |   0.31898    |          |              | [点击下载](https://pan.baidu.com/s/1q8xHr71XPe1dnRHv2IzldQ?pwd=wjrf) |
+|   whisper-tiny   | 普通话 |   0.31898    |  1.07363 |              | [点击下载](https://pan.baidu.com/s/1q8xHr71XPe1dnRHv2IzldQ?pwd=wjrf) |
 |   whisper-base   | 普通话 |   0.22196    |          |              | [点击下载](https://pan.baidu.com/s/1q8xHr71XPe1dnRHv2IzldQ?pwd=wjrf) |
-|  whisper-small   | 普通话 |   0.13897    |          |              | [点击下载](https://pan.baidu.com/s/1q8xHr71XPe1dnRHv2IzldQ?pwd=wjrf) |
-|  whisper-medium  | 普通话 |   0.09538    |          |              | [点击下载](https://pan.baidu.com/s/1q8xHr71XPe1dnRHv2IzldQ?pwd=wjrf) |
+|  whisper-small   | 普通话 |   0.13897    |  0.95126 |              | [点击下载](https://pan.baidu.com/s/1q8xHr71XPe1dnRHv2IzldQ?pwd=wjrf) |
+|  whisper-medium  | 普通话 |   0.09538    |  0.94367 |              | [点击下载](https://pan.baidu.com/s/1q8xHr71XPe1dnRHv2IzldQ?pwd=wjrf) |
 |  whisper-large   | 普通话 |   0.08969    |          |              | [点击下载](https://pan.baidu.com/s/1q8xHr71XPe1dnRHv2IzldQ?pwd=wjrf) |
-| whisper-large-v2 | 普通话 |   0.08826    |          |              | [点击下载](https://pan.baidu.com/s/1q8xHr71XPe1dnRHv2IzldQ?pwd=wjrf) |
+| whisper-large-v2 | 普通话 |   0.08817    |          |              | [点击下载](https://pan.baidu.com/s/1q8xHr71XPe1dnRHv2IzldQ?pwd=wjrf) |
 
 
 2. 微调[AIShell](https://openslr.magicdatatech.com/resources/33/)数据集后字错率测试表。
 
 |       使用模型       | 语言  |                            数据集                             | aishell_test | test_net | test_meeting |                               下载地址                               |
 |:----------------:|:---:|:----------------------------------------------------------:|:------------:|:--------:|:------------:|:----------------------------------------------------------------:|
-|   whisper-tiny   | 普通话 | [AIShell](https://openslr.magicdatatech.com/resources/33/) |   0.12796    |          |              | [点击下载](https://pan.baidu.com/s/1hIximy9ddN3cMHN4_VdhnQ?pwd=nfc2) |
-|   whisper-base   | 普通话 | [AIShell](https://openslr.magicdatatech.com/resources/33/) |   0.08599    |          |              | [点击下载](https://pan.baidu.com/s/1hIximy9ddN3cMHN4_VdhnQ?pwd=nfc2) |
-|  whisper-small   | 普通话 | [AIShell](https://openslr.magicdatatech.com/resources/33/) |              |          |              | [点击下载](https://pan.baidu.com/s/1hIximy9ddN3cMHN4_VdhnQ?pwd=nfc2) |
-|  whisper-medium  | 普通话 | [AIShell](https://openslr.magicdatatech.com/resources/33/) |              |          |              | [点击下载](https://pan.baidu.com/s/1hIximy9ddN3cMHN4_VdhnQ?pwd=nfc2) |
+|   whisper-tiny   | 普通话 | [AIShell](https://openslr.magicdatatech.com/resources/33/) |   0.12796    | 1.05538  |    0.55164   | [点击下载](https://pan.baidu.com/s/1hIximy9ddN3cMHN4_VdhnQ?pwd=nfc2) |
+|   whisper-base   | 普通话 | [AIShell](https://openslr.magicdatatech.com/resources/33/) |   0.08599    | 1.0188   |    0.39721   | [点击下载](https://pan.baidu.com/s/1hIximy9ddN3cMHN4_VdhnQ?pwd=nfc2) |
+|  whisper-small   | 普通话 | [AIShell](https://openslr.magicdatatech.com/resources/33/) |   0.05177    | 0.96311  |    0.23783   | [点击下载](https://pan.baidu.com/s/1hIximy9ddN3cMHN4_VdhnQ?pwd=nfc2) |
+|  whisper-medium  | 普通话 | [AIShell](https://openslr.magicdatatech.com/resources/33/) |   0.03529    | 0.94132  |    0.17101   | [点击下载](https://pan.baidu.com/s/1hIximy9ddN3cMHN4_VdhnQ?pwd=nfc2) |
 | whisper-large-v2 | 普通话 | [AIShell](https://openslr.magicdatatech.com/resources/33/) |              |          |              | [点击下载](https://pan.baidu.com/s/1hIximy9ddN3cMHN4_VdhnQ?pwd=nfc2) |
 
 3. 未加速和加速后的推理速度测试表，使用GPU为GTX3090（24G）。
