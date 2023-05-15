@@ -2,7 +2,7 @@ import argparse
 import functools
 
 import soundfile
-from transformers import WhisperForConditionalGeneration, WhisperProcessor, WhisperFeatureExtractor
+from transformers import WhisperForConditionalGeneration, WhisperProcessor
 
 from utils.utils import print_arguments, add_arguments
 

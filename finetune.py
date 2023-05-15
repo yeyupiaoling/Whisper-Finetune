@@ -6,12 +6,8 @@ import torch
 from datasets import load_dataset, Audio
 from peft import LoraConfig, get_peft_model, set_peft_model_state_dict, AdaLoraConfig
 from peft import prepare_model_for_int8_training
-from transformers import Seq2SeqTrainer
-from transformers import Seq2SeqTrainingArguments
-from transformers import WhisperFeatureExtractor
-from transformers import WhisperForConditionalGeneration
-from transformers import WhisperProcessor
-from transformers import WhisperTokenizer
+from transformers import Seq2SeqTrainer, Seq2SeqTrainingArguments, WhisperFeatureExtractor, \
+    WhisperForConditionalGeneration, WhisperProcessor
 
 from utils.data_utils import DataCollatorSpeechSeq2SeqWithPadding, get_audio_length_processor
 from utils.utils import print_arguments, SavePeftModelCallback, make_inputs_require_grad, add_arguments

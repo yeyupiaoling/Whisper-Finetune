@@ -9,7 +9,7 @@ import torch
 from datasets import load_dataset, Audio
 from torch.utils.data import DataLoader
 from tqdm import tqdm
-from transformers import WhisperForConditionalGeneration, WhisperTokenizer, WhisperProcessor, WhisperFeatureExtractor
+from transformers import WhisperForConditionalGeneration, WhisperProcessor, WhisperFeatureExtractor
 
 from utils.data_utils import DataCollatorSpeechSeq2SeqWithPadding, get_audio_length_processor, remove_punctuation, \
     to_simple
