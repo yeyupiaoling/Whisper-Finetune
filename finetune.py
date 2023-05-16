@@ -82,21 +82,17 @@ if ddp:
     device_map = {"": int(os.environ.get("LOCAL_RANK") or 0)}
     args.per_device_train_batch_size = args.per_device_train_batch_size * world_size
 
+# 获取模型
+model = WhisperForConditionalGeneration.from_pretrained(args.base_model,
+                                                        load_in_8bit=args.use_8bit,
+                                                        device_map=device_map,
+                                                        local_files_only=args.local_files_only)
+model.config.forced_decoder_ids = None
+model.config.suppress_tokens = []
+# 量化8bit模型
 if args.use_8bit:
-    model = WhisperForConditionalGeneration.from_pretrained(args.base_model,
-                                                            load_in_8bit=True,
-                                                            device_map=device_map,
-                                                            local_files_only=args.local_files_only)
-    model.config.forced_decoder_ids = None
-    model.config.suppress_tokens = []
-    # 转化为Lora模型
     model = prepare_model_for_int8_training(model)
-else:
-    model = WhisperForConditionalGeneration.from_pretrained(args.base_model,
-                                                            device_map=device_map,
-                                                            local_files_only=args.local_files_only)
-    model.config.forced_decoder_ids = None
-    model.config.suppress_tokens = []
+# 注册forward，否则多卡训练会失败
 model.model.encoder.conv1.register_forward_hook(make_inputs_require_grad)
 # 设置Lora参数
 if args.use_adalora:
