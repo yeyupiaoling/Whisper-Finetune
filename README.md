@@ -44,7 +44,7 @@ OpenAI在开源了号称其英文语音辨识能力已达到人类水准的Whisp
 |:----------------:|:---:|:------------:|:--------:|:------------:|:----------------------------------------------------------------:|
 |   whisper-tiny   | 普通话 |   0.31898    |  1.07363 |   0.75332    | [点击下载](https://pan.baidu.com/s/1q8xHr71XPe1dnRHv2IzldQ?pwd=wjrf) |
 |   whisper-base   | 普通话 |   0.22196    |          |   0.50378    | [点击下载](https://pan.baidu.com/s/1q8xHr71XPe1dnRHv2IzldQ?pwd=wjrf) |
-|  whisper-small   | 普通话 |   0.13897    |  0.95126 |              | [点击下载](https://pan.baidu.com/s/1q8xHr71XPe1dnRHv2IzldQ?pwd=wjrf) |
+|  whisper-small   | 普通话 |   0.13897    |  0.95126 |   0.31154    | [点击下载](https://pan.baidu.com/s/1q8xHr71XPe1dnRHv2IzldQ?pwd=wjrf) |
 |  whisper-medium  | 普通话 |   0.09538    |  0.94367 |              | [点击下载](https://pan.baidu.com/s/1q8xHr71XPe1dnRHv2IzldQ?pwd=wjrf) |
 |  whisper-large   | 普通话 |   0.08969    |          |              | [点击下载](https://pan.baidu.com/s/1q8xHr71XPe1dnRHv2IzldQ?pwd=wjrf) |
 | whisper-large-v2 | 普通话 |   0.08817    |          |              | [点击下载](https://pan.baidu.com/s/1q8xHr71XPe1dnRHv2IzldQ?pwd=wjrf) |
