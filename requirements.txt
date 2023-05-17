@@ -13,3 +13,4 @@ peft>=0.3.0
 accelerate>=0.19.0
 zhconv>=1.4.2
 tqdm>=4.62.1
+soundcard>=0.4.2

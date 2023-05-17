@@ -33,8 +33,10 @@ OpenAI在开源了号称其英文语音辨识能力已达到人类水准的Whisp
 2. `finetune.py`：微调模型。
 3. `merge_lora.py`：合并Whisper和Lora的模型。
 4. `evaluation.py`：评估使用微调后的模型或者Whisper原模型。
-5. `infer.py`：使用微调后的模型或者Whisper原模型预测。
-6. `infer_ct2.py`：使用转换的模型预测。
+5. `infer_tfs.py`：使用transformers直接调用微调后的模型或者Whisper原模型预测，只适合推理短音频。
+6. `infer_ct2.py`：使用转换为CTranslate2的模型预测，主要参考这个程序用法。
+7. `infer_gui.py`：有GUI界面操作，使用转换为CTranslate2的模型预测。
+8. `infer_server.py`：使用转换为CTranslate2的模型部署到服务器端，提供给客户端调用。
 
 ## 模型测试表
 
@@ -193,9 +195,9 @@ python evaluation.py --model_path=models/whisper-tiny-finetune --metric=cer
 
 ## 预测
 
-执行以下程序进行语音识别，第一个`--audio_path`参数指定的是要预测的音频路径。第二个`--model_path`指定的是合并后的模型路径，同时也支持直接使用Whisper原模型，例如直接指定`openai/whisper-large-v2`。其他更多的参数请查看这个程序。
+执行以下程序进行语音识别，这个使用transformers直接调用微调后的模型或者Whisper原模型预测，只适合推理短音频，长语音还是参考`infer_ct2.py`的使用方式。第一个`--audio_path`参数指定的是要预测的音频路径。第二个`--model_path`指定的是合并后的模型路径，同时也支持直接使用Whisper原模型，例如直接指定`openai/whisper-large-v2`。其他更多的参数请查看这个程序。
 ```shell
-python infer.py --audio_path=dataset/test.wav --model_path=models/whisper-tiny-finetune
+python infer_tfs.py --audio_path=dataset/test.wav --model_path=models/whisper-tiny-finetune
 ```
 
 # 加速预测
