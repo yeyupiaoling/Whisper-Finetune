@@ -31,10 +31,12 @@ model.eval()
 
 # 读取音频
 sample, sr = soundfile.read(args.audio_path)
+duration = sample.shape[-1]/sr
+assert duration < 30, f"本程序只适合推理小于30秒的音频，当前音频{duration}秒，请使用其他推理程序!"
 # 预处理音频
-input_features = processor(sample, sampling_rate=sr, return_tensors="pt").input_features.cuda().half()
+input_features = processor(sample, sampling_rate=sr, return_tensors="pt", do_normalize=True).input_features.cuda().half()
 # 开始识别
-predicted_ids = model.generate(input_features, forced_decoder_ids=forced_decoder_ids)
+predicted_ids = model.generate(input_features, forced_decoder_ids=forced_decoder_ids, max_new_tokens=256)
 # 解码结果
 transcription = processor.batch_decode(predicted_ids, skip_special_tokens=True)[0]
 print(f"识别结果：{transcription}")
