@@ -46,8 +46,8 @@ OpenAI在开源了号称其英文语音辨识能力已达到人类水准的Whisp
 |   whisper-base   | 普通话 |   0.22196    |  0.30404 |   0.50378    | [点击下载](https://pan.baidu.com/s/1q8xHr71XPe1dnRHv2IzldQ?pwd=wjrf) |
 |  whisper-small   | 普通话 |   0.13897    |  0.18417 |   0.31154    | [点击下载](https://pan.baidu.com/s/1q8xHr71XPe1dnRHv2IzldQ?pwd=wjrf) |
 |  whisper-medium  | 普通话 |   0.09538    |  0.13591 |   0.26669    | [点击下载](https://pan.baidu.com/s/1q8xHr71XPe1dnRHv2IzldQ?pwd=wjrf) |
-|  whisper-large   | 普通话 |   0.08969    |          |   0.23439    | [点击下载](https://pan.baidu.com/s/1q8xHr71XPe1dnRHv2IzldQ?pwd=wjrf) |
-| whisper-large-v2 | 普通话 |   0.08817    |          |   0.26547    | [点击下载](https://pan.baidu.com/s/1q8xHr71XPe1dnRHv2IzldQ?pwd=wjrf) |
+|  whisper-large   | 普通话 |   0.08969    |  0.12933 |   0.23439    | [点击下载](https://pan.baidu.com/s/1q8xHr71XPe1dnRHv2IzldQ?pwd=wjrf) |
+| whisper-large-v2 | 普通话 |   0.08817    |  0.12332 |   0.26547    | [点击下载](https://pan.baidu.com/s/1q8xHr71XPe1dnRHv2IzldQ?pwd=wjrf) |
 
 
 2. 微调[AIShell](https://openslr.magicdatatech.com/resources/33/)数据集后字错率测试表。
