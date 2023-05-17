@@ -18,7 +18,6 @@ os.environ['KMP_DUPLICATE_LIB_OK'] = 'True'
 
 parser = argparse.ArgumentParser(description=__doc__)
 add_arg = functools.partial(add_arguments, argparser=parser)
-add_arg("audio_path",  type=str,  default="dataset/test.wav",        help="预测的音频路径")
 add_arg("model_path",  type=str,  default="models/whisper-tiny-ct2", help="转换后的模型路径，转换方式看文档")
 add_arg("language",    type=str, default="zh",    help="设置语言")
 add_arg("use_gpu",     type=bool, default=True,   help="是否使用gpu进行预测")
@@ -122,9 +121,9 @@ class SpeechRecognitionApp:
                 result_text += text
                 if self.is_joint_text:
                     self.result_text.delete('1.0', 'end')
-                    self.result_text.insert(END, result_text)
+                    self.result_text.insert(END, f"{result_text}\n")
                 else:
-                    self.result_text.insert(END, f"[{round(segment.start, 2)} - {round(segment.end, 2)}]：{text}")
+                    self.result_text.insert(END, f"[{round(segment.start, 2)} - {round(segment.end, 2)}]：{text}\n")
         except Exception as e:
             print(e)
         self.predicting = False

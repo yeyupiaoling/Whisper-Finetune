@@ -228,6 +228,31 @@ python infer_ct2.py --audio_path=dataset/test.wav --model_path=models/whisper-ti
 }
 ```
 
+# GUI界面预测
+
+这里同样是使用了CTranslate2进行加速，转换模型方式看上面文档。`--model_path`指定的是转换后的CTranslate2模型。其他更多的参数请查看这个程序。
+
+```shell
+python infer_gui.py --model_path=models/whisper-tiny-ct2
+```
+
+启动后界面如下：
+
+<img src="./docs/images/gui.jpg" alt="GUI界面" width="600"/>
+
+
+# Web部署
+
+Web部署同样是使用了CTranslate2进行加速，转换模型方式看上面文档。`--host`指定服务启动的地址，这里设置为`0.0.0.0`，即任何地址都可以访问。`--port`指定使用的端口号。`--model_path`指定的是转换后的CTranslate2模型。`--num_workers`指定是使用多少个线程并发推理，这在Web部署上很重要，当有多个并发访问是可以同时推理。其他更多的参数请查看这个程序。
+
+```shell
+python infer_server.py --host=0.0.0.0 --port=5000 --model_path=models/whisper-tiny-ct2 --num_workers=2
+```
+
+提供的测试页面如下：
+
+<img src="./docs/images/web.jpg" alt="GUI界面" width="600"/>
+
 ## 参考资料
 
 1. https://github.com/huggingface/peft
