@@ -1,6 +1,6 @@
 numpy>=1.23.1
 dataclasses>=0.6
-transformers>=4.28.0.dev0
+transformers>=4.28.1
 bitsandbytes>=0.38.1
 soundfile>=0.12.1
 datasets>=2.11.0
@@ -8,6 +8,6 @@ evaluate>=0.4.0
 faster-whisper>=0.5.1
 jiwer>=2.5.1
 peft>=0.3.0
-accelerate>=0.17.1
+accelerate>=0.19.0
 zhconv>=1.4.2
 tqdm>=4.62.1
