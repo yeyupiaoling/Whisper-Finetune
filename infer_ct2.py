@@ -1,12 +1,12 @@
 import argparse
 import functools
-import json
 import os
 
 from faster_whisper import WhisperModel
 
 from utils.utils import print_arguments, add_arguments
 
+os.environ['KMP_DUPLICATE_LIB_OK'] = 'True'
 parser = argparse.ArgumentParser(description=__doc__)
 add_arg = functools.partial(add_arguments, argparser=parser)
 add_arg("audio_path",  type=str,  default="dataset/test.wav",        help="预测的音频路径")
@@ -39,21 +39,8 @@ _, _ = model.transcribe("dataset/test.wav", beam_size=5)
 
 
 # 语音识别
-def run_recognize(path):
-    segments, info = model.transcribe(path, beam_size=args.beam_size, language=args.language,
-                                      vad_filter=args.vad_filter)
-    results = []
-    result_text = ''
-    for segment in segments:
-        text = segment.text
-        result_text += text
-        results.append(dict(start=round(segment.start, 2), end=round(segment.end, 2), text=text))
-    result = dict(language=info.language, duration=info.duration, results=results, text=result_text)
-    return result
-
-
-if __name__ == '__main__':
-    recognize_result = run_recognize(args.audio_path)
-    print("识别结果：")
-    # 打印结果
-    print(json.dumps(recognize_result, ensure_ascii=False, indent=4))
+segments, info = model.transcribe(args.audio_path, beam_size=args.beam_size, language=args.language,
+                                  vad_filter=args.vad_filter)
+for segment in segments:
+    text = segment.text
+    print(f"[{round(segment.start, 2)} - {round(segment.end, 2)}]：{text}\n")

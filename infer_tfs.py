@@ -1,7 +1,7 @@
 import argparse
 import functools
 
-import soundfile
+import librosa
 from transformers import WhisperForConditionalGeneration, WhisperProcessor
 
 from utils.utils import print_arguments, add_arguments
@@ -30,7 +30,7 @@ model = WhisperForConditionalGeneration.from_pretrained(args.model_path,
 model.eval()
 
 # 读取音频
-sample, sr = soundfile.read(args.audio_path)
+sample, sr = librosa.load(args.audio_path, sr=16000)
 duration = sample.shape[-1]/sr
 assert duration < 30, f"本程序只适合推理小于30秒的音频，当前音频{duration}秒，请使用其他推理程序!"
 # 预处理音频

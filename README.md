@@ -214,18 +214,18 @@ python infer_ct2.py --audio_path=dataset/test.wav --model_path=models/whisper-ti
 
 输出结果如下：
 ```shell
-{
-    "language": "zh",
-    "duration": 8.39,
-    "results": [
-        {
-            "start": 0.0,
-            "end": 8.39,
-            "text": "近几年不但我用书给女儿压岁也劝说亲朋友不要给女儿压岁钱而改送压岁书"
-        }
-    ],
-    "text": "近几年不但我用书给女儿压岁也劝说亲朋友不要给女儿压岁钱而改送压岁书"
-}
+-----------  Configuration Arguments -----------
+audio_path: dataset/test.wav
+model_path: models/whisper-tiny-ct2
+language: zh
+use_gpu: True
+use_int8: False
+beam_size: 10
+num_workers: 1
+vad_filter: False
+local_files_only: True
+------------------------------------------------
+[0.0 - 8.0]：近几年,不但我用书给女儿压碎,也全说亲朋不要给女儿压碎钱,而改送压碎书。
 ```
 
 # GUI界面预测
@@ -249,9 +249,79 @@ Web部署同样是使用了CTranslate2进行加速，转换模型方式看上面
 python infer_server.py --host=0.0.0.0 --port=5000 --model_path=models/whisper-tiny-ct2 --num_workers=2
 ```
 
+## 接口文档
+
+目前提供两个接口，普通的识别接口`/recognition`和流式返回结果`/recognition_stream`，注意这个流式是指流式返回识别结果，同样是上传完整的音频，然后流式返回识别结果，这种方式针对长语音识别体验非常好。他们的文档接口是完全一致的，接口参数如下。
+
+|     字段     | 是否必须 |   类型   |    默认值     |              说明               |
+|:----------:|:----:|:------:|:----------:|:-----------------------------:|
+|   audio    |  是   |  File  |            |           要识别的音频文件            |
+| to_simple  |  否   |  int   |     1      |            是否繁体转简体            |
+| remove_pun |  否   |  int   |     0      |           是否移除标点符号            |
+|    task    |  否   | String | transcribe | 识别任务类型，支持transcribe和translate |
+
+
+返回结果：
+
+|   字段    |  类型  |      说明       |
+|:-------:|:----:|:-------------:|
+| results | List |    分割的识别结果    |
+| +result | str  |   每片分隔的文本结果   |
+| +start  | int  | 每片分隔的开始时间，单位秒 |
+|  +end   | int  | 每片分隔的结束时间，单位秒 |
+|  code   | int  |  错误码，0即为成功识别  |
+
+示例如下：
+```json
+{
+  "results": [
+    {
+      "result": "近几年,不但我用书给女儿压碎,也全说亲朋不要给女儿压碎钱,而改送压碎书。",
+      "start": 0,
+      "end": 8
+    }
+  ],
+  "code": 0
+}
+```
+
+为了方便理解，这里提供了调用Web接口的Python代码，下面的是`/recognition`的调用方式。
+```python
+import requests
+
+response = requests.post(url="http://127.0.0.1:5000/recognition", 
+                         files=[("audio", ("test.wav", open("dataset/test.wav", 'rb'), 'audio/wav'))],
+                         json={"to_simple": 1, "remove_pun": 0, "task": "transcribe"}, timeout=20)
+print(response.text)
+```
+
+下面的是`/recognition_stream`的调用方式。
+```python
+import json
+import requests
+
+response = requests.post(url="http://127.0.0.1:5000/recognition_stream",
+                         files=[("audio", ("test.wav", open("dataset/test_long.wav", 'rb'), 'audio/wav'))],
+                         json={"to_simple": 1, "remove_pun": 0, "task": "transcribe"}, stream=True, timeout=20)
+for chunk in response.iter_lines(decode_unicode=False, delimiter=b"\0"):
+    if chunk:
+        result = json.loads(chunk.decode())
+        text = result["result"]
+        start = result["start"]
+        end = result["end"]
+        print(f"[{start} - {end}]：{text}")
+```
+
+
 提供的测试页面如下：
 
-<img src="./docs/images/web.jpg" alt="GUI界面" width="600"/>
+首页`http://127.0.0.1:5000/` 的页面如下：
+
+<img src="./docs/images/web.jpg" alt="首页" width="600"/>
+
+文档页面`http://127.0.0.1:5000/docs` 的页面如下：
+
+<img src="./docs/images/api.jpg" alt="文档页面" width="600"/>
 
 ## 参考资料
 

@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <title>语音识别-夜雨飘零</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <script type="text/javascript" src="record.js"></script>
-    <link href="index.css" rel="stylesheet" type="text/css"/>
+    <script type="text/javascript" src="/static/record.js"></script>
+    <link href="/static/index.css" rel="stylesheet" type="text/css"/>
 </head>
 <body>
 <div id="header">
@@ -60,7 +60,7 @@
         input.click();
         input.onchange = function () {
             var file = input.files[0];
-            upload_file(host + "/transcribe", file, function (state, e) {
+            upload_file(host + "/recognition", file, function (state, e) {
                 switch (state) {
                     case 'uploading':
                         var percentComplete = Math.round(e.loaded * 100 / e.total) + '%';

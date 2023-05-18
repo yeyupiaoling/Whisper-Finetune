@@ -11,6 +11,7 @@ import numpy as np
 import soundcard
 import soundfile
 from faster_whisper import WhisperModel
+from zhconv import convert
 
 from utils.utils import print_arguments, add_arguments
 
@@ -23,7 +24,7 @@ add_arg("language",    type=str, default="zh",    help="设置语言")
 add_arg("use_gpu",     type=bool, default=True,   help="是否使用gpu进行预测")
 add_arg("use_int8",    type=bool, default=False,  help="是否使用int8进行预测")
 add_arg("beam_size",   type=int,  default=10,     help="解码搜索大小")
-add_arg("vad_filter",  type=bool, default=False,  help="是否使用VAD过滤掉部分没有讲话的音频")
+add_arg("vad_filter",  type=bool, default=True,  help="是否使用VAD过滤掉部分没有讲话的音频")
 add_arg("local_files_only", type=bool, default=True, help="是否只在本地加载模型，不尝试下载")
 args = parser.parse_args()
 print_arguments(args)
@@ -36,7 +37,6 @@ class SpeechRecognitionApp:
         self.predicting = False
         self.playing = False
         self.recording = False
-        self.is_joint_text = True
         # 录音参数
         self.frames = []
         self.sample_rate = 16000
@@ -67,13 +67,19 @@ class SpeechRecognitionApp:
         self.result_text.place(x=10, y=100)
         # 转阿拉伯数字控件
         self.check_frame = Frame(self.window)
-        self.check_var = BooleanVar()
-        self.joint_text_check = Checkbutton(self.check_frame, text='拼接文本', variable=self.check_var,
-                                            command=self.to_joint_text)
-        self.joint_text_check.grid(row=0)
-        self.joint_text_check.select()
+        self.joint_text_check_var = BooleanVar()
+        self.joint_text_check = Checkbutton(self.check_frame, text='拼接文本', variable=self.joint_text_check_var)
+        self.joint_text_check.grid(column=0, row=0)
+        self.to_simple_check_var = BooleanVar()
+        self.to_simple_check = Checkbutton(self.check_frame, text='繁体转简体', variable=self.to_simple_check_var)
+        self.to_simple_check.grid(column=1, row=0)
+        self.to_simple_check.select()
+        self.task_check_var = BooleanVar()
+        self.task_check = Checkbutton(self.check_frame, text='音频转录', variable=self.task_check_var)
+        self.task_check.grid(column=2, row=0)
+        self.task_check.select()
         self.check_frame.grid(row=1)
-        self.check_frame.place(x=700, y=10)
+        self.check_frame.place(x=600, y=10)
 
         # 检查模型文件是否存在
         assert os.path.exists(args.model_path), f"模型文件{args.model_path}不存在"
@@ -90,10 +96,6 @@ class SpeechRecognitionApp:
                                       local_files_only=args.local_files_only)
         # 预热
         _, _ = self.model.transcribe("dataset/test.wav", beam_size=5)
-
-    # 是否拼接文本
-    def to_joint_text(self):
-        self.is_joint_text = self.check_var.get()
 
     # 预测短语音线程
     def predict_audio_thread(self):
@@ -113,13 +115,18 @@ class SpeechRecognitionApp:
         self.predicting = True
         self.result_text.delete('1.0', 'end')
         try:
+            task = "transcribe" if self.task_check_var.get() else "translate"
             segments, info = self.model.transcribe(wav_path, beam_size=args.beam_size, language=args.language,
-                                                   vad_filter=args.vad_filter)
+                                                   vad_filter=args.vad_filter, task=task)
             result_text = ''
             for segment in segments:
                 text = segment.text
-                result_text += text
-                if self.is_joint_text:
+                # 繁体转简体
+                if self.to_simple_check_var.get():
+                    text = convert(text, 'zh-cn')
+                # 判断是否要分段输出
+                if self.joint_text_check_var.get():
+                    result_text += text
                     self.result_text.delete('1.0', 'end')
                     self.result_text.insert(END, f"{result_text}\n")
                 else:
