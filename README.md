@@ -26,6 +26,23 @@ OpenAI在开源了号称其英文语音辨识能力已达到人类水准的Whisp
 - Ubuntu 18.04
 - GPU A100-PCIE-40GB*1
 
+## 目录
+ - [项目主要程序介绍](#项目主要程序介绍)
+ - [模型测试表](#模型测试表)
+ - [安装环境](#安装环境)
+ - [准备数据](#准备数据)
+ - [微调模型](#微调模型)
+   - [单卡训练](#单卡训练)
+   - [多卡训练](#多卡训练)
+ - [合并模型](#合并模型)
+ - [评估模型](#评估模型)
+ - [预测](#预测)
+ - [加速预测](#加速预测)
+ - [GUI界面预测](#GUI界面预测)
+ - [Web部署](#Web部署)
+   - [接口文档](#接口文档)
+
+<a name='项目主要程序介绍'></a>
 
 ## 项目主要程序介绍
 
@@ -37,6 +54,9 @@ OpenAI在开源了号称其英文语音辨识能力已达到人类水准的Whisp
 6. `infer_ct2.py`：使用转换为CTranslate2的模型预测，主要参考这个程序用法。
 7. `infer_gui.py`：有GUI界面操作，使用转换为CTranslate2的模型预测。
 8. `infer_server.py`：使用转换为CTranslate2的模型部署到服务器端，提供给客户端调用。
+
+
+<a name='模型测试表'></a>
 
 ## 模型测试表
 
@@ -78,6 +98,8 @@ OpenAI在开源了号称其英文语音辨识能力已达到人类水准的Whisp
 3. RTF= 所有音频总时间(单位秒) / ASR识别所有音频处理时间(单位秒)。
 4. 测试速度的音频为`dataset/test.wav`，时长为8秒。
 
+<a name='安装环境'></a>
+
 ## 安装环境
 
 - 首先安装的是Pytorch的GPU版本，如果已经安装过了，请跳过。
@@ -91,6 +113,8 @@ conda install pytorch==1.13.1 torchvision==0.14.1 torchaudio==0.13.1 pytorch-cud
 ```shell
 python -m pip install -r requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/simple
 ```
+
+<a name='准备数据'></a>
 
 ## 准备数据
 
@@ -114,9 +138,13 @@ python -m pip install -r requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/s
 ]
 ```
 
+<a name='微调模型'></a>
+
 ## 微调模型
 
 准备好数据之后，就可以开始微调模型了。训练最重要的两个参数分别是，`--base_model`指定微调的Whisper模型，这个参数值需要在[HuggingFace](https://huggingface.co/openai)存在的，这个不需要提前下载，启动训练时可以自动下载，当然也可以提前下载，那么`--base_model`指定就是路径，同时`--local_files_only`设置为True。第二个`--output_path`是是训练时保存的Lora检查点路径，因为我们使用Lora来微调模型。如果想存足够的话，最好将`--use_8bit`设置为False，这样训练速度快很多。其他更多的参数请查看这个程序。
+
+<a name='单卡训练'></a>
 
 ### 单卡训练
 
@@ -124,6 +152,8 @@ python -m pip install -r requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/s
 ```shell
 CUDA_VISIBLE_DEVICES=0 python finetune.py --base_model=openai/whisper-tiny --output_dir=output/
 ```
+
+<a name='多卡训练'></a>
 
 ### 多卡训练
 
@@ -178,12 +208,16 @@ accelerate launch finetune.py --base_model=openai/whisper-tiny --output_dir=outp
 {'loss': 0.5959, 'learning_rate': 0.0009911038741833634, 'epoch': 0.03}
 ```
 
+<a name='合并模型'></a>
+
 ## 合并模型
 
 微调完成之后会有两个模型，第一个是Whisper基础模型，第二个是Lora模型，需要把这两个模型合并之后才能之后的操作。这个程序只需要传递两个参数，`--lora_model`指定的是训练结束后保存的Lora模型路径，注意如何不是最后的`checkpoint-final`后面还有`adapter_model`文件夹，第二个`--output_dir`是合并后模型的保存目录。
 ```shell
 python merge_lora.py --lora_model=output/checkpoint-final --output_dir=models/
 ```
+
+<a name='评估模型'></a>
 
 ## 评估模型
 
@@ -192,6 +226,7 @@ python merge_lora.py --lora_model=output/checkpoint-final --output_dir=models/
 python evaluation.py --model_path=models/whisper-tiny-finetune --metric=cer
 ```
 
+<a name='预测'></a>
 
 ## 预测
 
@@ -200,7 +235,9 @@ python evaluation.py --model_path=models/whisper-tiny-finetune --metric=cer
 python infer_tfs.py --audio_path=dataset/test.wav --model_path=models/whisper-tiny-finetune
 ```
 
-# 加速预测
+<a name='加速预测'></a>
+
+## 加速预测
 
 众所周知，直接使用Whisper模型推理是比较慢的，所以这里提供了一个加速的方式，主要是使用了CTranslate2进行加速，首先要转换模型，把合并后的模型转换为CTranslate2模型。如下命令，`--model`参数指定的是合并后的模型路径，同时也支持直接使用Whisper原模型，例如直接指定`openai/whisper-large-v2`。`--output_dir`参数指定的是转换后的CTranslate2模型路径，`--quantization`参数指定的是量化模型大小，不希望量化模型的可以直接去掉这个参数。
 ```shell
@@ -228,7 +265,9 @@ local_files_only: True
 [0.0 - 8.0]：近几年,不但我用书给女儿压碎,也全说亲朋不要给女儿压碎钱,而改送压碎书。
 ```
 
-# GUI界面预测
+<a name='GUI界面预测'></a>
+
+## GUI界面预测
 
 这里同样是使用了CTranslate2进行加速，转换模型方式看上面文档。`--model_path`指定的是转换后的CTranslate2模型。其他更多的参数请查看这个程序。
 
@@ -240,8 +279,9 @@ python infer_gui.py --model_path=models/whisper-tiny-ct2
 
 <img src="./docs/images/gui.jpg" alt="GUI界面" width="600"/>
 
+<a name='Web部署'></a>
 
-# Web部署
+## Web部署
 
 Web部署同样是使用了CTranslate2进行加速，转换模型方式看上面文档。`--host`指定服务启动的地址，这里设置为`0.0.0.0`，即任何地址都可以访问。`--port`指定使用的端口号。`--model_path`指定的是转换后的CTranslate2模型。`--num_workers`指定是使用多少个线程并发推理，这在Web部署上很重要，当有多个并发访问是可以同时推理。其他更多的参数请查看这个程序。
 
@@ -249,7 +289,7 @@ Web部署同样是使用了CTranslate2进行加速，转换模型方式看上面
 python infer_server.py --host=0.0.0.0 --port=5000 --model_path=models/whisper-tiny-ct2 --num_workers=2
 ```
 
-## 接口文档
+### 接口文档
 
 目前提供两个接口，普通的识别接口`/recognition`和流式返回结果`/recognition_stream`，注意这个流式是指流式返回识别结果，同样是上传完整的音频，然后流式返回识别结果，这种方式针对长语音识别体验非常好。他们的文档接口是完全一致的，接口参数如下。
 
@@ -265,7 +305,7 @@ python infer_server.py --host=0.0.0.0 --port=5000 --model_path=models/whisper-ti
 
 |   字段    |  类型  |      说明       |
 |:-------:|:----:|:-------------:|
-| results | List |    分割的识别结果    |
+| results | list |    分割的识别结果    |
 | +result | str  |   每片分隔的文本结果   |
 | +start  | int  | 每片分隔的开始时间，单位秒 |
 |  +end   | int  | 每片分隔的结束时间，单位秒 |
