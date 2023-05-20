@@ -80,7 +80,7 @@ OpenAI在开源了号称其英文语音辨识能力已达到人类水准的Whisp
 |   whisper-base   | 普通话 | [AIShell](https://openslr.magicdatatech.com/resources/33/) |   0.08599    | 0.30654  |    0.39721   | [点击下载](https://pan.baidu.com/s/1hIximy9ddN3cMHN4_VdhnQ?pwd=nfc2) |
 |  whisper-small   | 普通话 | [AIShell](https://openslr.magicdatatech.com/resources/33/) |   0.05177    | 0.19302  |    0.23783   | [点击下载](https://pan.baidu.com/s/1hIximy9ddN3cMHN4_VdhnQ?pwd=nfc2) |
 |  whisper-medium  | 普通话 | [AIShell](https://openslr.magicdatatech.com/resources/33/) |   0.03529    | 0.13554  |    0.17101   | [点击下载](https://pan.baidu.com/s/1hIximy9ddN3cMHN4_VdhnQ?pwd=nfc2) |
-| whisper-large-v2 | 普通话 | [AIShell](https://openslr.magicdatatech.com/resources/33/) |              |          |              | [点击下载](https://pan.baidu.com/s/1hIximy9ddN3cMHN4_VdhnQ?pwd=nfc2) |
+| whisper-large-v2 | 普通话 | [AIShell](https://openslr.magicdatatech.com/resources/33/) |   0.03078    |          |              | [点击下载](https://pan.baidu.com/s/1hIximy9ddN3cMHN4_VdhnQ?pwd=nfc2) |
 
 3. 未加速和加速后的推理速度测试表，使用GPU为GTX3090（24G）。
 
