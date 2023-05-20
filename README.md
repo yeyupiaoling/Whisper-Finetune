@@ -62,25 +62,25 @@ OpenAI在开源了号称其英文语音辨识能力已达到人类水准的Whisp
 
 1. 原始模型字错率测试表。
 
-|       使用模型       | 语言  | aishell_test | test_net | test_meeting |                               下载地址                               |
-|:----------------:|:---:|:------------:|:--------:|:------------:|:----------------------------------------------------------------:|
-|   whisper-tiny   | 普通话 |   0.31898    | 0.40482  |   0.75332    | [点击下载](https://pan.baidu.com/s/1q8xHr71XPe1dnRHv2IzldQ?pwd=wjrf) |
-|   whisper-base   | 普通话 |   0.22196    | 0.30404  |   0.50378    | [点击下载](https://pan.baidu.com/s/1q8xHr71XPe1dnRHv2IzldQ?pwd=wjrf) |
-|  whisper-small   | 普通话 |   0.13897    | 0.18417  |   0.31154    | [点击下载](https://pan.baidu.com/s/1q8xHr71XPe1dnRHv2IzldQ?pwd=wjrf) |
-|  whisper-medium  | 普通话 |   0.09538    | 0.13591  |   0.26669    | [点击下载](https://pan.baidu.com/s/1q8xHr71XPe1dnRHv2IzldQ?pwd=wjrf) |
-|  whisper-large   | 普通话 |   0.08969    | 0.12933  |   0.23439    | [点击下载](https://pan.baidu.com/s/1q8xHr71XPe1dnRHv2IzldQ?pwd=wjrf) |
-| whisper-large-v2 | 普通话 |   0.08817    | 0.12332  |   0.26547    | [点击下载](https://pan.baidu.com/s/1q8xHr71XPe1dnRHv2IzldQ?pwd=wjrf) |
+|       使用模型       |  指定语言   | aishell_test | test_net | test_meeting |                               下载地址                               |                        CTranslate2模型下载地址                         |
+|:----------------:|:-------:|:------------:|:--------:|:------------:|:----------------------------------------------------------------:|:----------------------------------------------------------------:|
+|   whisper-tiny   | Chinese |   0.31898    | 0.40482  |   0.75332    | [点击下载](https://pan.baidu.com/s/1q8xHr71XPe1dnRHv2IzldQ?pwd=wjrf) | [点击下载](https://pan.baidu.com/s/1Rg8KM1gDKLw8kObZEJQG1A?pwd=hnhe) |
+|   whisper-base   | Chinese |   0.22196    | 0.30404  |   0.50378    | [点击下载](https://pan.baidu.com/s/1q8xHr71XPe1dnRHv2IzldQ?pwd=wjrf) | [点击下载](https://pan.baidu.com/s/1Rg8KM1gDKLw8kObZEJQG1A?pwd=hnhe) |
+|  whisper-small   | Chinese |   0.13897    | 0.18417  |   0.31154    | [点击下载](https://pan.baidu.com/s/1q8xHr71XPe1dnRHv2IzldQ?pwd=wjrf) | [点击下载](https://pan.baidu.com/s/1Rg8KM1gDKLw8kObZEJQG1A?pwd=hnhe) |
+|  whisper-medium  | Chinese |   0.09538    | 0.13591  |   0.26669    | [点击下载](https://pan.baidu.com/s/1q8xHr71XPe1dnRHv2IzldQ?pwd=wjrf) | [点击下载](https://pan.baidu.com/s/1Rg8KM1gDKLw8kObZEJQG1A?pwd=hnhe) |
+|  whisper-large   | Chinese |   0.08969    | 0.12933  |   0.23439    | [点击下载](https://pan.baidu.com/s/1q8xHr71XPe1dnRHv2IzldQ?pwd=wjrf) | [点击下载](https://pan.baidu.com/s/1Rg8KM1gDKLw8kObZEJQG1A?pwd=hnhe) |
+| whisper-large-v2 | Chinese |   0.08817    | 0.12332  |   0.26547    | [点击下载](https://pan.baidu.com/s/1q8xHr71XPe1dnRHv2IzldQ?pwd=wjrf) | [点击下载](https://pan.baidu.com/s/1Rg8KM1gDKLw8kObZEJQG1A?pwd=hnhe) |
 
 
 2. 微调[AIShell](https://openslr.magicdatatech.com/resources/33/)数据集后字错率测试表。
 
-|       使用模型       | 语言  |                            数据集                             | aishell_test | test_net | test_meeting |                               下载地址                               |
-|:----------------:|:---:|:----------------------------------------------------------:|:------------:|:--------:|:------------:|:----------------------------------------------------------------:|
-|   whisper-tiny   | 普通话 | [AIShell](https://openslr.magicdatatech.com/resources/33/) |   0.12796    | 0.41646  |    0.55164   | [点击下载](https://pan.baidu.com/s/1hIximy9ddN3cMHN4_VdhnQ?pwd=nfc2) |
-|   whisper-base   | 普通话 | [AIShell](https://openslr.magicdatatech.com/resources/33/) |   0.08599    | 0.30654  |    0.39721   | [点击下载](https://pan.baidu.com/s/1hIximy9ddN3cMHN4_VdhnQ?pwd=nfc2) |
-|  whisper-small   | 普通话 | [AIShell](https://openslr.magicdatatech.com/resources/33/) |   0.05177    | 0.19302  |    0.23783   | [点击下载](https://pan.baidu.com/s/1hIximy9ddN3cMHN4_VdhnQ?pwd=nfc2) |
-|  whisper-medium  | 普通话 | [AIShell](https://openslr.magicdatatech.com/resources/33/) |   0.03529    | 0.13554  |    0.17101   | [点击下载](https://pan.baidu.com/s/1hIximy9ddN3cMHN4_VdhnQ?pwd=nfc2) |
-| whisper-large-v2 | 普通话 | [AIShell](https://openslr.magicdatatech.com/resources/33/) |   0.03078    |          |              | [点击下载](https://pan.baidu.com/s/1hIximy9ddN3cMHN4_VdhnQ?pwd=nfc2) |
+|       使用模型       |  指定语言   |                            数据集                             | aishell_test | test_net | test_meeting |                               下载地址                               |                        CTranslate2模型下载地址                         |
+|:----------------:|:-------:|:----------------------------------------------------------:|:------------:|:--------:|:------------:|:----------------------------------------------------------------:|:----------------------------------------------------------------:|
+|   whisper-tiny   | Chinese | [AIShell](https://openslr.magicdatatech.com/resources/33/) |   0.12796    | 0.41646  |   0.55164    | [点击下载](https://pan.baidu.com/s/1hIximy9ddN3cMHN4_VdhnQ?pwd=nfc2) | [点击下载](https://pan.baidu.com/s/1H-OBD9L0hYV-M_WoPEbiJA?pwd=8hbb) |
+|   whisper-base   | Chinese | [AIShell](https://openslr.magicdatatech.com/resources/33/) |   0.08599    | 0.30654  |   0.39721    | [点击下载](https://pan.baidu.com/s/1hIximy9ddN3cMHN4_VdhnQ?pwd=nfc2) | [点击下载](https://pan.baidu.com/s/1H-OBD9L0hYV-M_WoPEbiJA?pwd=8hbb) |
+|  whisper-small   | Chinese | [AIShell](https://openslr.magicdatatech.com/resources/33/) |   0.05177    | 0.19302  |   0.23783    | [点击下载](https://pan.baidu.com/s/1hIximy9ddN3cMHN4_VdhnQ?pwd=nfc2) | [点击下载](https://pan.baidu.com/s/1H-OBD9L0hYV-M_WoPEbiJA?pwd=8hbb) |
+|  whisper-medium  | Chinese | [AIShell](https://openslr.magicdatatech.com/resources/33/) |   0.03529    | 0.13554  |   0.17101    | [点击下载](https://pan.baidu.com/s/1hIximy9ddN3cMHN4_VdhnQ?pwd=nfc2) | [点击下载](https://pan.baidu.com/s/1H-OBD9L0hYV-M_WoPEbiJA?pwd=8hbb) |
+| whisper-large-v2 | Chinese | [AIShell](https://openslr.magicdatatech.com/resources/33/) |   0.03078    | 0.11359  |   0.14079    | [点击下载](https://pan.baidu.com/s/1hIximy9ddN3cMHN4_VdhnQ?pwd=nfc2) | [点击下载](https://pan.baidu.com/s/1H-OBD9L0hYV-M_WoPEbiJA?pwd=8hbb) |
 
 3. 未加速和加速后的推理速度测试表，使用GPU为GTX3090（24G）。
 
@@ -94,7 +94,7 @@ OpenAI在开源了号称其英文语音辨识能力已达到人类水准的Whisp
 
 **重要说明：**
 1. 在评估的时候移除模型输出的标点符号，并把繁体中文转成简体中文。
-2. `aishell_tes`t为AIShell的测试集，`test_net`和`test_meeting`为WenetSpeech的测试集。
+2. `aishell_test`为AIShell的测试集，`test_net`和`test_meeting`为WenetSpeech的测试集。
 3. RTF= 所有音频总时间(单位秒) / ASR识别所有音频处理时间(单位秒)。
 4. 测试速度的音频为`dataset/test.wav`，时长为8秒。
 

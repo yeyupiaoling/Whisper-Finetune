@@ -19,7 +19,7 @@ os.environ['KMP_DUPLICATE_LIB_OK'] = 'True'
 
 parser = argparse.ArgumentParser(description=__doc__)
 add_arg = functools.partial(add_arguments, argparser=parser)
-add_arg("model_path",  type=str,  default="models/whisper-tiny-ct2", help="转换后的模型路径，转换方式看文档")
+add_arg("model_path",  type=str,  default="models/whisper-tiny-finetune-ct2", help="转换后的模型路径，转换方式看文档")
 add_arg("language",    type=str, default="zh",    help="设置语言，必须简写，如果为None则自动检测语言")
 add_arg("use_gpu",     type=bool, default=True,   help="是否使用gpu进行预测")
 add_arg("use_int8",    type=bool, default=False,  help="是否使用int8进行预测")
