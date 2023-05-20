@@ -3,13 +3,13 @@ import functools
 import os
 
 import torch
-from datasets import load_dataset, Audio
 from peft import LoraConfig, get_peft_model, set_peft_model_state_dict, AdaLoraConfig
 from peft import prepare_model_for_int8_training
 from transformers import Seq2SeqTrainer, Seq2SeqTrainingArguments, WhisperFeatureExtractor, \
     WhisperForConditionalGeneration, WhisperProcessor
 
-from utils.data_utils import DataCollatorSpeechSeq2SeqWithPadding, get_audio_length_processor
+from utils.reader import CustomDataset
+from utils.data_utils import DataCollatorSpeechSeq2SeqWithPadding
 from utils.utils import print_arguments, SavePeftModelCallback, make_inputs_require_grad, add_arguments
 
 parser = argparse.ArgumentParser(description=__doc__)
@@ -48,29 +48,18 @@ processor = WhisperProcessor.from_pretrained(args.base_model,
                                              task=args.task,
                                              local_files_only=args.local_files_only)
 
-
-# 数据预处理
-def prepare_dataset(batch):
-    new_batch = {}
-    # 从输入音频数组中计算log-Mel输入特征
-    new_batch["input_features"] = [feature_extractor(a["array"], sampling_rate=a["sampling_rate"]).input_features[0]
-                                   for a in batch["audio"]]
-    # 将目标文本编码为标签ID
-    new_batch["labels"] = [processor.tokenizer(s).input_ids for s in batch["sentence"]]
-    return new_batch
-
-
-# 数据加载
-audio_dataset = load_dataset('json', data_files={'train': args.train_data, 'test': args.test_data})
-audio_dataset = audio_dataset.cast_column("audio", Audio(sampling_rate=16000))
-print(f"过滤前训练数据：{audio_dataset['train'].num_rows}，测试数据：{audio_dataset['test'].num_rows}")
-# 过滤时长不在指定区域的音频
-if 'duration' in audio_dataset['train'].features.keys():
-    is_audio_in_length = get_audio_length_processor(args.min_audio_len, args.max_audio_len)
-    audio_dataset["train"] = audio_dataset["train"].filter(is_audio_in_length, input_columns=["duration"])
-    audio_dataset["test"] = audio_dataset["test"].filter(is_audio_in_length, input_columns=["duration"])
-    print(f"过滤后训练数据：{audio_dataset['train'].num_rows}，测试数据：{audio_dataset['test'].num_rows}")
-audio_dataset = audio_dataset.with_transform(prepare_dataset)
+# 读取数据
+train_dataset = CustomDataset(data_list_path=args.train_data,
+                              processor=processor,
+                              feature_extractor=feature_extractor,
+                              min_duration=args.min_audio_len,
+                              max_duration=args.max_audio_len)
+test_dataset = CustomDataset(data_list_path=args.test_data,
+                             processor=processor,
+                             feature_extractor=feature_extractor,
+                             min_duration=args.min_audio_len,
+                             max_duration=args.max_audio_len)
+print(f"训练数据：{len(train_dataset)}，测试数据：{len(test_dataset)}")
 # 数据padding器
 data_collator = DataCollatorSpeechSeq2SeqWithPadding(processor=processor)
 
@@ -138,8 +127,8 @@ if training_args.local_rank == 0 or training_args.local_rank == -1:
 # 定义训练器
 trainer = Seq2SeqTrainer(args=training_args,
                          model=model,
-                         train_dataset=audio_dataset["train"],
-                         eval_dataset=audio_dataset["test"],
+                         train_dataset=train_dataset,
+                         eval_dataset=test_dataset,
                          data_collator=data_collator,
                          tokenizer=processor.feature_extractor,
                          callbacks=[SavePeftModelCallback])

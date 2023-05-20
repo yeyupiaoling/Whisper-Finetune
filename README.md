@@ -64,12 +64,12 @@ OpenAI在开源了号称其英文语音辨识能力已达到人类水准的Whisp
 
 |       使用模型       | 语言  | aishell_test | test_net | test_meeting |                               下载地址                               |
 |:----------------:|:---:|:------------:|:--------:|:------------:|:----------------------------------------------------------------:|
-|   whisper-tiny   | 普通话 |   0.31898    |  0.40482 |   0.75332    | [点击下载](https://pan.baidu.com/s/1q8xHr71XPe1dnRHv2IzldQ?pwd=wjrf) |
-|   whisper-base   | 普通话 |   0.22196    |  0.30404 |   0.50378    | [点击下载](https://pan.baidu.com/s/1q8xHr71XPe1dnRHv2IzldQ?pwd=wjrf) |
-|  whisper-small   | 普通话 |   0.13897    |  0.18417 |   0.31154    | [点击下载](https://pan.baidu.com/s/1q8xHr71XPe1dnRHv2IzldQ?pwd=wjrf) |
-|  whisper-medium  | 普通话 |   0.09538    |  0.13591 |   0.26669    | [点击下载](https://pan.baidu.com/s/1q8xHr71XPe1dnRHv2IzldQ?pwd=wjrf) |
-|  whisper-large   | 普通话 |   0.08969    |  0.12933 |   0.23439    | [点击下载](https://pan.baidu.com/s/1q8xHr71XPe1dnRHv2IzldQ?pwd=wjrf) |
-| whisper-large-v2 | 普通话 |   0.08817    |  0.12332 |   0.26547    | [点击下载](https://pan.baidu.com/s/1q8xHr71XPe1dnRHv2IzldQ?pwd=wjrf) |
+|   whisper-tiny   | 普通话 |   0.31898    | 0.40482  |   0.75332    | [点击下载](https://pan.baidu.com/s/1q8xHr71XPe1dnRHv2IzldQ?pwd=wjrf) |
+|   whisper-base   | 普通话 |   0.22196    | 0.30404  |   0.50378    | [点击下载](https://pan.baidu.com/s/1q8xHr71XPe1dnRHv2IzldQ?pwd=wjrf) |
+|  whisper-small   | 普通话 |   0.13897    | 0.18417  |   0.31154    | [点击下载](https://pan.baidu.com/s/1q8xHr71XPe1dnRHv2IzldQ?pwd=wjrf) |
+|  whisper-medium  | 普通话 |   0.09538    | 0.13591  |   0.26669    | [点击下载](https://pan.baidu.com/s/1q8xHr71XPe1dnRHv2IzldQ?pwd=wjrf) |
+|  whisper-large   | 普通话 |   0.08969    | 0.12933  |   0.23439    | [点击下载](https://pan.baidu.com/s/1q8xHr71XPe1dnRHv2IzldQ?pwd=wjrf) |
+| whisper-large-v2 | 普通话 |   0.08817    | 0.12332  |   0.26547    | [点击下载](https://pan.baidu.com/s/1q8xHr71XPe1dnRHv2IzldQ?pwd=wjrf) |
 
 
 2. 微调[AIShell](https://openslr.magicdatatech.com/resources/33/)数据集后字错率测试表。
@@ -118,24 +118,15 @@ python -m pip install -r requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/s
 
 ## 准备数据
 
-训练的数据集如下，是一个JSON的数据列表。Whisper是支持有标点符号的，所以训练的数据集中可以带有标点符号。本项目提供了一个制作AIShell数据集的程序`aishell.py`，执行这个程序可以自动下载并生成如下列格式的训练集和测试集，**注意：** 这个程序可以通过指定AIShell的压缩文件来跳过下载过程的，如果直接下载会非常慢，可以使用一些如迅雷等下载器下载该数据集，然后通过参数`--filepath`指定下载的压缩文件路径，如`/home/test/data_aishell.tgz`。
+训练的数据集如下，是一个jsonlines的数据列表，也就是每一行都是一个JSON数据，数据格式如下。Whisper是支持有标点符号的，所以训练的数据集中可以带有标点符号。本项目提供了一个制作AIShell数据集的程序`aishell.py`，执行这个程序可以自动下载并生成如下列格式的训练集和测试集，**注意：** 这个程序可以通过指定AIShell的压缩文件来跳过下载过程的，如果直接下载会非常慢，可以使用一些如迅雷等下载器下载该数据集，然后通过参数`--filepath`指定下载的压缩文件路径，如`/home/test/data_aishell.tgz`。
 ```json
-[
-    {
-        "audio": {
-            "path": "dataset/audio/data_aishell/wav/test/S0764/BAC009S0764W0489.wav"
-        },
-        "duration": 3.97,
-        "sentence": "不是她的戏或是她的八卦"
-    },
-    {
-        "audio": {
-            "path": "dataset/audio/data_aishell/wav/test/S0764/BAC009S0764W0202.wav"
-        },
-        "duration": 5.63,
-        "sentence": "第二批三网融合试点工作业已启动"
-    }
-]
+{
+  "audio": {
+      "path": "dataset/audio/data_aishell/wav/test/S0764/BAC009S0764W0489.wav"
+  },
+  "duration": 3.97,
+  "sentence": "不是她的戏或是她的八卦"
+}
 ```
 
 <a name='微调模型'></a>
@@ -241,19 +232,19 @@ python infer_tfs.py --audio_path=dataset/test.wav --model_path=models/whisper-ti
 
 众所周知，直接使用Whisper模型推理是比较慢的，所以这里提供了一个加速的方式，主要是使用了CTranslate2进行加速，首先要转换模型，把合并后的模型转换为CTranslate2模型。如下命令，`--model`参数指定的是合并后的模型路径，同时也支持直接使用Whisper原模型，例如直接指定`openai/whisper-large-v2`。`--output_dir`参数指定的是转换后的CTranslate2模型路径，`--quantization`参数指定的是量化模型大小，不希望量化模型的可以直接去掉这个参数。
 ```shell
-ct2-transformers-converter --model models/whisper-tiny-finetune --output_dir models/whisper-tiny-ct2 --copy_files tokenizer.json --quantization float16
+ct2-transformers-converter --model models/whisper-tiny-finetune --output_dir models/whisper-tiny-finetune-ct2 --copy_files tokenizer.json --quantization float16
 ```
 
 执行以下程序进行加速语音识别，`--audio_path`参数指定的是要预测的音频路径。`--model_path`指定的是转换后的CTranslate2模型。其他更多的参数请查看这个程序。
 ```shell
-python infer_ct2.py --audio_path=dataset/test.wav --model_path=models/whisper-tiny-ct2
+python infer_ct2.py --audio_path=dataset/test.wav --model_path=models/whisper-tiny-finetune-ct2
 ```
 
 输出结果如下：
 ```shell
 -----------  Configuration Arguments -----------
 audio_path: dataset/test.wav
-model_path: models/whisper-tiny-ct2
+model_path: models/whisper-tiny-finetune-ct2
 language: zh
 use_gpu: True
 use_int8: False
@@ -272,7 +263,7 @@ local_files_only: True
 这里同样是使用了CTranslate2进行加速，转换模型方式看上面文档。`--model_path`指定的是转换后的CTranslate2模型。其他更多的参数请查看这个程序。
 
 ```shell
-python infer_gui.py --model_path=models/whisper-tiny-ct2
+python infer_gui.py --model_path=models/whisper-tiny-finetune-ct2
 ```
 
 启动后界面如下：
@@ -286,7 +277,7 @@ python infer_gui.py --model_path=models/whisper-tiny-ct2
 Web部署同样是使用了CTranslate2进行加速，转换模型方式看上面文档。`--host`指定服务启动的地址，这里设置为`0.0.0.0`，即任何地址都可以访问。`--port`指定使用的端口号。`--model_path`指定的是转换后的CTranslate2模型。`--num_workers`指定是使用多少个线程并发推理，这在Web部署上很重要，当有多个并发访问是可以同时推理。其他更多的参数请查看这个程序。
 
 ```shell
-python infer_server.py --host=0.0.0.0 --port=5000 --model_path=models/whisper-tiny-ct2 --num_workers=2
+python infer_server.py --host=0.0.0.0 --port=5000 --model_path=models/whisper-tiny-finetune-ct2 --num_workers=2
 ```
 
 ### 接口文档
