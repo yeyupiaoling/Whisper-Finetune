@@ -6,13 +6,12 @@ import os
 import evaluate
 import numpy as np
 import torch
-from datasets import load_dataset, Audio
 from torch.utils.data import DataLoader
 from tqdm import tqdm
 from transformers import WhisperForConditionalGeneration, WhisperProcessor, WhisperFeatureExtractor
 
-from utils.data_utils import DataCollatorSpeechSeq2SeqWithPadding, get_audio_length_processor, remove_punctuation, \
-    to_simple
+from utils.data_utils import DataCollatorSpeechSeq2SeqWithPadding, remove_punctuation, to_simple
+from utils.reader import CustomDataset
 from utils.utils import print_arguments, add_arguments
 
 parser = argparse.ArgumentParser(description=__doc__)
@@ -21,7 +20,7 @@ add_arg("test_data",   type=str, default="dataset/test.json",            help="�
 add_arg("model_path",  type=str, default="models/whisper-tiny-finetune", help="合并模型的路径，或者是huggingface上模型的名称")
 add_arg("batch_size",  type=int, default=16,        help="评估的batch size")
 add_arg("num_workers", type=int, default=8,         help="读取数据的线程数量")
-add_arg("language",    type=str, default="Chinese", help="设置语言")
+add_arg("language",    type=str, default="Chinese", help="设置语言，可全称也可简写，如果为None则评估的是多语言")
 add_arg("remove_pun",  type=bool, default=True,     help="是否移除标点符号")
 add_arg("to_simple",   type=bool, default=True,     help="是否转为简体中文")
 add_arg("min_audio_len",     type=float, default=0.5,  help="最小的音频长度，单位秒")
@@ -41,39 +40,24 @@ processor = WhisperProcessor.from_pretrained(args.model_path,
                                              language=args.language,
                                              task=args.task,
                                              local_files_only=args.local_files_only)
-forced_decoder_ids = processor.get_decoder_prompt_ids(language=args.language, task=args.task)
+forced_decoder_ids = processor.get_decoder_prompt_ids()
 # 获取模型
 model = WhisperForConditionalGeneration.from_pretrained(args.model_path,
                                                         device_map="auto",
                                                         local_files_only=args.local_files_only)
 model.eval()
 
-
-# 数据预处理
-def prepare_dataset(batch):
-    new_batch = {}
-    # 从输入音频数组中计算log-Mel输入特征
-    new_batch["input_features"] = [feature_extractor(a["array"], sampling_rate=a["sampling_rate"]).input_features[0]
-                                   for a in batch["audio"]]
-    # 将目标文本编码为标签ID
-    new_batch["labels"] = [processor.tokenizer(s).input_ids for s in batch["sentence"]]
-    return new_batch
-
+# 获取测试数据
+test_dataset = CustomDataset(data_list_path=args.test_data,
+                             processor=processor,
+                             feature_extractor=feature_extractor,
+                             min_duration=args.min_audio_len,
+                             max_duration=args.max_audio_len)
+print(f"测试数据：{len(test_dataset)}")
 
 # 数据padding器
 data_collator = DataCollatorSpeechSeq2SeqWithPadding(processor=processor)
-
-# 加载评估数据
-audio_dataset = load_dataset('json', data_files={'test': args.test_data})
-audio_dataset = audio_dataset.cast_column("audio", Audio(sampling_rate=16000))
-print(f"过滤前测试数据：{audio_dataset['test'].num_rows}")
-# 过滤时长不在指定区域的音频
-if 'duration' in audio_dataset['test'].features.keys():
-    is_audio_in_length = get_audio_length_processor(args.min_audio_len, args.max_audio_len)
-    audio_dataset["test"] = audio_dataset["test"].filter(is_audio_in_length, input_columns=["duration"])
-    print(f"过滤后测试数据：{audio_dataset['test'].num_rows}")
-audio_dataset = audio_dataset.with_transform(prepare_dataset)
-eval_dataloader = DataLoader(audio_dataset['test'], batch_size=args.batch_size,
+eval_dataloader = DataLoader(test_dataset, batch_size=args.batch_size,
                              num_workers=args.num_workers, collate_fn=data_collator)
 
 # 获取评估方法

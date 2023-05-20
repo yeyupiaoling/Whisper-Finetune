@@ -290,6 +290,7 @@ python infer_server.py --host=0.0.0.0 --port=5000 --model_path=models/whisper-ti
 | to_simple  |  否   |  int   |     1      |            是否繁体转简体            |
 | remove_pun |  否   |  int   |     0      |           是否移除标点符号            |
 |    task    |  否   | String | transcribe | 识别任务类型，支持transcribe和translate |
+|  language  |  否   | String |    None    |     设置语言，简写，如果不指定则自动检测语言      |
 
 
 返回结果：
@@ -322,7 +323,7 @@ import requests
 
 response = requests.post(url="http://127.0.0.1:5000/recognition", 
                          files=[("audio", ("test.wav", open("dataset/test.wav", 'rb'), 'audio/wav'))],
-                         json={"to_simple": 1, "remove_pun": 0, "task": "transcribe"}, timeout=20)
+                         json={"to_simple": 1, "remove_pun": 0, "language": "zh", "task": "transcribe"}, timeout=20)
 print(response.text)
 ```
 
@@ -333,7 +334,7 @@ import requests
 
 response = requests.post(url="http://127.0.0.1:5000/recognition_stream",
                          files=[("audio", ("test.wav", open("dataset/test_long.wav", 'rb'), 'audio/wav'))],
-                         json={"to_simple": 1, "remove_pun": 0, "task": "transcribe"}, stream=True, timeout=20)
+                         json={"to_simple": 1, "remove_pun": 0, "language": "zh", "task": "transcribe"}, stream=True, timeout=20)
 for chunk in response.iter_lines(decode_unicode=False, delimiter=b"\0"):
     if chunk:
         result = json.loads(chunk.decode())

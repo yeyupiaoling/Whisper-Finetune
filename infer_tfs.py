@@ -9,7 +9,7 @@ from utils.utils import print_arguments, add_arguments
 parser = argparse.ArgumentParser(description=__doc__)
 add_arg = functools.partial(add_arguments, argparser=parser)
 add_arg("audio_path", type=str, default="dataset/test.wav",              help="预测的音频路径")
-add_arg("language",   type=str, default="Chinese",                       help="设置语言")
+add_arg("language",   type=str, default="Chinese",                       help="设置语言，可全称也可简写，如果为None则预测的是多语言")
 add_arg("model_path", type=str, default="models/whisper-tiny-finetune",  help="合并模型的路径，或者是huggingface上模型的名称")
 add_arg("task",       type=str, default="transcribe", choices=['transcribe', 'translate'], help="模型的任务")
 add_arg("local_files_only", type=bool, default=True,  help="是否只在本地加载模型，不尝试下载")

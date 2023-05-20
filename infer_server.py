@@ -22,7 +22,6 @@ add_arg = functools.partial(add_arguments, argparser=parser)
 add_arg("host",        type=str,  default="127.0.0.1", help="监听主机的IP地址")
 add_arg("port",        type=int,  default=5000,        help="服务所使用的端口号")
 add_arg("model_path",  type=str,  default="models/whisper-tiny-ct2", help="转换后的模型路径，转换方式看文档")
-add_arg("language",    type=str,  default="zh",   help="设置语言")
 add_arg("use_gpu",     type=bool, default=True,   help="是否使用gpu进行预测")
 add_arg("use_int8",    type=bool, default=False,  help="是否使用int8进行预测")
 add_arg("beam_size",   type=int,  default=10,     help="解码搜索大小")
@@ -58,8 +57,8 @@ def release_model_semaphore():
     model_semaphore.release()
 
 
-def recognition(file: File, to_simple: int, remove_pun: int, task: str = "transcribe"):
-    segments, info = model.transcribe(file, beam_size=10, task=task)
+def recognition(file: File, to_simple: int, remove_pun: int, language: str = "zh", task: str = "transcribe"):
+    segments, info = model.transcribe(file, beam_size=10, task=task, language=language)
     for segment in segments:
         text = segment.text
         if to_simple == 1:
@@ -74,7 +73,8 @@ def recognition(file: File, to_simple: int, remove_pun: int, task: str = "transc
 @app.post("/recognition_stream")
 async def api_recognition_stream(to_simple: int = Body(1, description="是否繁体转简体", embed=True),
                                  remove_pun: int = Body(0, description="是否删除标点符号", embed=True),
-                                 task: str = Body("transcribe", description="任务类型", embed=True),
+                                 language: str = Body(None, description="设置语言，简写，如果不指定则自动检测语言", embed=True),
+                                 task: str = Body("transcribe", description="识别任务类型，支持transcribe和translate", embed=True),
                                  audio: UploadFile = File(..., description="音频文件")):
     global model_semaphore
     if model_semaphore is None:
@@ -82,7 +82,7 @@ async def api_recognition_stream(to_simple: int = Body(1, description="是否繁
     await model_semaphore.acquire()
     contents = await audio.read()
     data = BytesIO(contents)
-    generator = recognition(file=data, to_simple=to_simple, remove_pun=remove_pun, task=task)
+    generator = recognition(file=data, to_simple=to_simple, remove_pun=remove_pun, language=language, task=task)
     background_tasks = BackgroundTasks()
     background_tasks.add_task(release_model_semaphore)
     return StreamingResponse(generator, background=background_tasks)
@@ -91,11 +91,12 @@ async def api_recognition_stream(to_simple: int = Body(1, description="是否繁
 @app.post("/recognition")
 async def api_recognition(to_simple: int = Body(1, description="是否繁体转简体", embed=True),
                           remove_pun: int = Body(0, description="是否删除标点符号", embed=True),
-                          task: str = Body("transcribe", description="任务类型", embed=True),
+                          language: str = Body(None, description="设置语言，简写，如果不指定则自动检测语言", embed=True),
+                          task: str = Body("transcribe", description="识别任务类型，支持transcribe和translate", embed=True),
                           audio: UploadFile = File(..., description="音频文件")):
     contents = await audio.read()
     data = BytesIO(contents)
-    generator = recognition(file=data, to_simple=to_simple, remove_pun=remove_pun, task=task)
+    generator = recognition(file=data, to_simple=to_simple, remove_pun=remove_pun, language=language, task=task)
     results = []
     for output in generator:
         output = json.loads(output[:-1].decode("utf-8"))

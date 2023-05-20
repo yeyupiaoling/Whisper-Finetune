@@ -10,9 +10,7 @@ from utils.utils import print_arguments, add_arguments
 parser = argparse.ArgumentParser(description=__doc__)
 add_arg = functools.partial(add_arguments, argparser=parser)
 add_arg("lora_model", type=str, default="output/checkpoint-final", help="微调保存的模型路径")
-add_arg('output_dir', type=str, default='models/', help="合并模型的保存目录")
-add_arg("language",   type=str, default="Chinese", help="设置语言")
-add_arg("task", type=str, default="transcribe", choices=['transcribe', 'translate'], help="模型的任务")
+add_arg('output_dir', type=str, default='models/',    help="合并模型的保存目录")
 add_arg("local_files_only", type=bool, default=False, help="是否只在本地加载模型，不尝试下载")
 args = parser.parse_args()
 print_arguments(args)
@@ -28,10 +26,10 @@ base_model = WhisperForConditionalGeneration.from_pretrained(peft_config.base_mo
 model = PeftModel.from_pretrained(base_model, args.lora_model, local_files_only=args.local_files_only)
 feature_extractor = WhisperFeatureExtractor.from_pretrained(peft_config.base_model_name_or_path,
                                                             local_files_only=args.local_files_only)
-tokenizer = WhisperTokenizerFast.from_pretrained(peft_config.base_model_name_or_path, language=args.language,
-                                                 task=args.task, local_files_only=args.local_files_only)
-processor = WhisperProcessor.from_pretrained(peft_config.base_model_name_or_path, language=args.language,
-                                             task=args.task, local_files_only=args.local_files_only)
+tokenizer = WhisperTokenizerFast.from_pretrained(peft_config.base_model_name_or_path,
+                                                 local_files_only=args.local_files_only)
+processor = WhisperProcessor.from_pretrained(peft_config.base_model_name_or_path,
+                                             local_files_only=args.local_files_only)
 
 # 合并参数
 model = model.merge_and_unload()
