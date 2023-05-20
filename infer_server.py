@@ -73,10 +73,11 @@ def recognition(file: File, to_simple: int, remove_pun: int, language: str = "zh
 @app.post("/recognition_stream")
 async def api_recognition_stream(to_simple: int = Body(1, description="是否繁体转简体", embed=True),
                                  remove_pun: int = Body(0, description="是否删除标点符号", embed=True),
-                                 language: str = Body(None, description="设置语言，简写，如果不指定则自动检测语言", embed=True),
+                                 language: str = Body("zh", description="设置语言，简写，如果不指定则自动检测语言", embed=True),
                                  task: str = Body("transcribe", description="识别任务类型，支持transcribe和translate", embed=True),
                                  audio: UploadFile = File(..., description="音频文件")):
     global model_semaphore
+    if language == "None": language = None
     if model_semaphore is None:
         model_semaphore = asyncio.Semaphore(5)
     await model_semaphore.acquire()
@@ -91,9 +92,10 @@ async def api_recognition_stream(to_simple: int = Body(1, description="是否繁
 @app.post("/recognition")
 async def api_recognition(to_simple: int = Body(1, description="是否繁体转简体", embed=True),
                           remove_pun: int = Body(0, description="是否删除标点符号", embed=True),
-                          language: str = Body(None, description="设置语言，简写，如果不指定则自动检测语言", embed=True),
+                          language: str = Body("zh", description="设置语言，简写，如果不指定则自动检测语言", embed=True),
                           task: str = Body("transcribe", description="识别任务类型，支持transcribe和translate", embed=True),
                           audio: UploadFile = File(..., description="音频文件")):
+    if language == "None":language=None
     contents = await audio.read()
     data = BytesIO(contents)
     generator = recognition(file=data, to_simple=to_simple, remove_pun=remove_pun, language=language, task=task)

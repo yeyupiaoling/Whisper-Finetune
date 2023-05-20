@@ -290,7 +290,7 @@ python infer_server.py --host=0.0.0.0 --port=5000 --model_path=models/whisper-ti
 | to_simple  |  否   |  int   |     1      |            是否繁体转简体            |
 | remove_pun |  否   |  int   |     0      |           是否移除标点符号            |
 |    task    |  否   | String | transcribe | 识别任务类型，支持transcribe和translate |
-|  language  |  否   | String |    None    |     设置语言，简写，如果不指定则自动检测语言      |
+|  language  |  否   | String |     zh     |    设置语言，简写，如果为None则自动检测语言     |
 
 
 返回结果：

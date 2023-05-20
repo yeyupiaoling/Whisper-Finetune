@@ -18,16 +18,16 @@
         <img id="record_btn" onclick="record()" src="/static/record.png" alt="录音"/>
     </div>
     <div id="result">
-        <textarea id="result_p"></textarea>
+        <label for="result_p"></label><textarea id="result_p"></textarea>
     </div>
 </div>
 <script>
-    var is_recording = false;
-    var is_playing = false;
-    var host = location.origin;
-    var recorder;
-    var audio = document.querySelector('audio');
-    var textarea = document.getElementById('result_p')
+    let is_recording = false;
+    let is_playing = false;
+    let host = location.origin;
+    let recorder;
+    let audio = document.querySelector('audio');
+    let textarea = document.getElementById('result_p')
 
 
     function record() {
@@ -84,7 +84,7 @@
         recorder.upload(location.origin + "/recognition", function (state, e) {
             switch (state) {
                 case 'uploading':
-                    var percentComplete = Math.round(e.loaded * 100 / e.total) + '%';
+                    const percentComplete = Math.round(e.loaded * 100 / e.total) + '%';
                     console.log(percentComplete);
                     break;
                 case 'ok':
@@ -103,16 +103,19 @@
 
     // 上传音频文件
     function uploadAudioFile() {
-        var input = document.createElement("input");
+        const input = document.createElement("input");
         input.type = "file";
         input.accept = "audio/*";
         input.click();
         input.onchange = function () {
-            var file = input.files[0];
+            const file = input.files[0];
+            console.log(file)
+            audio.src = window.URL.createObjectURL(file);
+            stopPlay();
             upload_file(host + "/recognition", file, function (state, e) {
                 switch (state) {
                     case 'uploading':
-                        var percentComplete = Math.round(e.loaded * 100 / e.total) + '%';
+                        const percentComplete = Math.round(e.loaded * 100 / e.total) + '%';
                         console.log(percentComplete);
                         break;
                     case 'ok':
@@ -132,10 +135,10 @@
 
     // 上传音频文件
     upload_file = function (url, file, callback) {
-        var fd = new FormData();
+        const fd = new FormData();
         // 上传的文件名和数据
         fd.append("audio", file);
-        var xhr = new XMLHttpRequest();
+        const xhr = new XMLHttpRequest();
         xhr.timeout = 60000
         if (callback) {
             xhr.upload.addEventListener("progress", function (e) {
