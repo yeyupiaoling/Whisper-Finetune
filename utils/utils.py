@@ -26,8 +26,16 @@ def strtobool(val):
         raise ValueError("invalid truth value %r" % (val,))
 
 
+def str_none(val):
+    if val == 'None':
+        return None
+    else:
+        return val
+
+
 def add_arguments(argname, type, default, help, argparser, **kwargs):
     type = strtobool if type == bool else type
+    type = str_none if type == str else type
     argparser.add_argument("--" + argname,
                            default=default,
                            type=type,
