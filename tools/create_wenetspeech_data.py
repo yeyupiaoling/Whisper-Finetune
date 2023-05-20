@@ -8,9 +8,9 @@ from pydub import AudioSegment
 from tqdm import tqdm
 
 parser = argparse.ArgumentParser(description=__doc__)
-parser.add_argument('--wenetspeech_json', type=str, default='F:\音频数据\WenetSpeech数据集/WenetSpeech.json',
+parser.add_argument('--wenetspeech_json', type=str, default='/media/WenetSpeech数据集/WenetSpeech.json',
                     help="WenetSpeech的标注json文件路径")
-parser.add_argument('--annotation_dir', type=str, default='../dataset/', help="存放数据列表的文件夹路径")
+parser.add_argument('--annotation_dir', type=str, default='dataset/', help="存放数据列表的文件夹路径")
 args = parser.parse_args()
 
 if not os.path.exists(args.annotation_dir):
