@@ -1,9 +1,12 @@
 import json
+import os
 from json import JSONDecodeError
 
 import librosa
 import soundfile
 from torch.utils.data import Dataset
+
+from utils.binary import DatasetReader
 
 
 class CustomDataset(Dataset):
@@ -17,32 +20,37 @@ class CustomDataset(Dataset):
                  max_duration=30):
         super(CustomDataset, self).__init__()
         self.processor = processor
+        self.data_list_path = data_list_path
         self.feature_extractor = feature_extractor
         self.sample_rate = sample_rate
         self.mono = mono
-        # 获取数据列表
-        try:
-            # 普通的json格式
-            with open(data_list_path, 'r', encoding='utf-8') as f:
-                lines = json.load(f)
-        except JSONDecodeError:
-            # jsonlines数据格式
+        if self.data_list_path.endswith(".header"):
+            # 获取二进制的数据列表
+            self.dataset_reader = DatasetReader(data_header_path=data_list_path,
+                                                min_duration=min_duration,
+                                                max_duration=max_duration)
+            self.data_list = self.dataset_reader.get_keys()
+        else:
+            # 获取数据列表
             with open(data_list_path, 'r', encoding='utf-8') as f:
                 lines = f.readlines()
-        self.data_list = []
-        for line in lines:
-            if isinstance(line, str):
-                line = json.loads(line)
-            if not isinstance(line, dict): continue
-            # 跳过超出长度限制的音频
-            if line["duration"] < min_duration:
-                continue
-            if max_duration != -1 and line["duration"] > max_duration:
-                continue
-            self.data_list.append(dict(line))
+            self.data_list = []
+            for line in lines:
+                if isinstance(line, str):
+                    line = json.loads(line)
+                if not isinstance(line, dict): continue
+                # 跳过超出长度限制的音频
+                if line["duration"] < min_duration:
+                    continue
+                if max_duration != -1 and line["duration"] > max_duration:
+                    continue
+                self.data_list.append(dict(line))
 
     def __getitem__(self, idx):
-        data_list = self.data_list[idx]
+        if self.data_list_path.endswith(".header"):
+            data_list = self.dataset_reader.get_data(self.data_list[idx])
+        else:
+            data_list = self.data_list[idx]
         # 分割音频路径和标签
         audio_file, transcript = data_list["audio"]['path'], data_list["sentence"]
         if 'start_time' not in data_list["audio"].keys():

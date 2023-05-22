@@ -1,11 +1,11 @@
 import argparse
 import os
-import shutil
-import threading
 
 import ijson
-from pydub import AudioSegment
 from tqdm import tqdm
+
+from utils.binary import DatasetWriter
+
 
 parser = argparse.ArgumentParser(description=__doc__)
 parser.add_argument('--wenetspeech_json', type=str, default='/media/WenetSpeech数据集/WenetSpeech.json',
@@ -16,7 +16,8 @@ args = parser.parse_args()
 if not os.path.exists(args.annotation_dir):
     os.makedirs(args.annotation_dir)
 # 训练数据列表
-f_train = open(os.path.join(args.annotation_dir, 'train.json'), 'w', encoding='utf-8')
+train_list_path = os.path.join(args.annotation_dir, 'train.json')
+f_train = open(train_list_path, 'w', encoding='utf-8')
 # 测试数据列表
 f_test_net = open(os.path.join(args.annotation_dir, 'test_net.json'), 'w', encoding='utf-8')
 f_test_meeting = open(os.path.join(args.annotation_dir, 'test_meeting.json'), 'w', encoding='utf-8')
@@ -84,3 +85,10 @@ def main():
 
 if __name__ == '__main__':
     main()
+    dataset_writer = DatasetWriter(f"{args.annotation_dir}/train")
+    with open(train_list_path, 'r', encoding='utf-8') as f:
+        lines = f.readlines()
+    for line in tqdm(lines):
+        line = line.replace('\n', '')
+        dataset_writer.add_data(line)
+    dataset_writer.close()
