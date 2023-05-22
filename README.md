@@ -164,9 +164,9 @@ accelerate config
 
 大概过程就是这样：
 ```
-----------------------------------In which compute environment are you running?
+--------------------------------------------------------------------In which compute environment are you running?
 This machine
-----------------------------------Which type of machine are you using? 
+--------------------------------------------------------------------Which type of machine are you using?
 multi-GPU
 How many different machines will you use (use more than 1 for multi-node training)? [1]:
 Do you wish to optimize your script with torch dynamo?[yes/NO]:
@@ -175,8 +175,9 @@ Do you want to use FullyShardedDataParallel? [yes/NO]:
 Do you want to use Megatron-LM ? [yes/NO]: 
 How many GPU(s) should be used for distributed training? [1]:2
 What GPU(s) (by id) should be used for training on this machine as a comma-seperated list? [all]:
-----------------------------------Do you wish to use FP16 or BF16 (mixed precision)?
-fp16 
+--------------------------------------------------------------------Do you wish to use FP16 or BF16 (mixed precision)?
+fp16
+accelerate configuration saved at /home/test/.cache/huggingface/accelerate/default_config.yaml
 ```
 
 配置完成之后，可以使用以下命令查看配置。
