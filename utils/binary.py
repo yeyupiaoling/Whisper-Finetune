@@ -37,7 +37,7 @@ class DatasetReader(object):
     def __init__(self, data_header_path, min_duration=0, max_duration=30):
         self.keys = []
         self.offset_dict = {}
-        self.fp = open(data_header_path.repalce('.header', '.data'), 'rb')
+        self.fp = open(data_header_path.replace('.header', '.data'), 'rb')
         self.m = mmap.mmap(self.fp.fileno(), 0, access=mmap.ACCESS_READ)
         for line in open(data_header_path, 'rb'):
             key, val_pos, val_len = line.split('\t'.encode('ascii'))

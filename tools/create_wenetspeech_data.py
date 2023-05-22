@@ -3,7 +3,9 @@ import os
 
 import ijson
 from tqdm import tqdm
+import sys
 
+sys.path.insert(0, sys.path[0] + "/../")
 from utils.binary import DatasetWriter
 
 
@@ -85,6 +87,7 @@ def main():
 
 if __name__ == '__main__':
     main()
+    print('正在把数据列表转成二进制文件...')
     dataset_writer = DatasetWriter(f"{args.annotation_dir}/train")
     with open(train_list_path, 'r', encoding='utf-8') as f:
         lines = f.readlines()
