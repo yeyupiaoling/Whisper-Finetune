@@ -97,13 +97,14 @@ class SavePeftModelCallback(TrainerCallback):
                 state: TrainerState,
                 control: TrainerControl,
                 **kwargs, ):
-        checkpoint_folder = os.path.join(args.output_dir, f"{PREFIX_CHECKPOINT_DIR}-{state.global_step}")
-        peft_model_dir = os.path.join(checkpoint_folder, "adapter_model")
-        kwargs["model"].save_pretrained(peft_model_dir)
-        # 更换恢复训练时的模型参数
-        peft_model_path = os.path.join(checkpoint_folder, "adapter_model/adapter_model.bin")
-        pytorch_model_path = os.path.join(checkpoint_folder, "pytorch_model.bin")
-        if os.path.exists(pytorch_model_path):
-            os.remove(pytorch_model_path)
-        shutil.copy(peft_model_path, pytorch_model_path)
+        if args.local_rank == 0 or args.local_rank == -1:
+            checkpoint_folder = os.path.join(args.output_dir, f"{PREFIX_CHECKPOINT_DIR}-{state.global_step}")
+            peft_model_dir = os.path.join(checkpoint_folder, "adapter_model")
+            kwargs["model"].save_pretrained(peft_model_dir)
+            # 更换恢复训练时的模型参数
+            peft_model_path = os.path.join(checkpoint_folder, "adapter_model/adapter_model.bin")
+            pytorch_model_path = os.path.join(checkpoint_folder, "pytorch_model.bin")
+            if os.path.exists(pytorch_model_path):
+                os.remove(pytorch_model_path)
+            shutil.copy(peft_model_path, pytorch_model_path)
         return control
