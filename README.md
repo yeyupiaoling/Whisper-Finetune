@@ -41,6 +41,7 @@ OpenAI在开源了号称其英文语音辨识能力已达到人类水准的Whisp
  - [GUI界面预测](#GUI界面预测)
  - [Web部署](#Web部署)
    - [接口文档](#接口文档)
+ - [打赏作者](#打赏作者)
 
 <a name='项目主要程序介绍'></a>
 
@@ -81,6 +82,8 @@ OpenAI在开源了号称其英文语音辨识能力已达到人类水准的Whisp
 |  whisper-small   | Chinese | [AIShell](https://openslr.magicdatatech.com/resources/33/) |   0.05177    | 0.19302  |   0.23783    | [点击下载](https://pan.baidu.com/s/1hIximy9ddN3cMHN4_VdhnQ?pwd=nfc2) | [点击下载](https://pan.baidu.com/s/1H-OBD9L0hYV-M_WoPEbiJA?pwd=8hbb) |
 |  whisper-medium  | Chinese | [AIShell](https://openslr.magicdatatech.com/resources/33/) |   0.03529    | 0.13554  |   0.17101    | [点击下载](https://pan.baidu.com/s/1hIximy9ddN3cMHN4_VdhnQ?pwd=nfc2) | [点击下载](https://pan.baidu.com/s/1H-OBD9L0hYV-M_WoPEbiJA?pwd=8hbb) |
 | whisper-large-v2 | Chinese | [AIShell](https://openslr.magicdatatech.com/resources/33/) |   0.03078    | 0.11359  |   0.14079    | [点击下载](https://pan.baidu.com/s/1hIximy9ddN3cMHN4_VdhnQ?pwd=nfc2) | [点击下载](https://pan.baidu.com/s/1H-OBD9L0hYV-M_WoPEbiJA?pwd=8hbb) |
+|   whisper-tiny   | Chinese |     [WenetSpeech](./tools/create_wenetspeech_data.py)      |   0.21727    | 0.28316  |   0.42416    |                                                                  |                                                                  |
+| whisper-large-v2 | Chinese |     [WenetSpeech](./tools/create_wenetspeech_data.py)      |   0.05545    | 0.10280  |   0.20719    |                                                                  |                                                                  |
 
 3. 未加速和加速后的推理速度测试表，使用GPU为GTX3090（24G）。
 
@@ -269,7 +272,9 @@ python infer_gui.py --model_path=models/whisper-tiny-finetune-ct2
 
 启动后界面如下：
 
+<div align="center">
 <img src="./docs/images/gui.jpg" alt="GUI界面" width="600"/>
+</div>
 
 <a name='Web部署'></a>
 
@@ -350,11 +355,23 @@ for chunk in response.iter_lines(decode_unicode=False, delimiter=b"\0"):
 
 首页`http://127.0.0.1:5000/` 的页面如下：
 
+<div align="center">
 <img src="./docs/images/web.jpg" alt="首页" width="600"/>
+</div>
 
 文档页面`http://127.0.0.1:5000/docs` 的页面如下：
 
+<div align="center">
 <img src="./docs/images/api.jpg" alt="文档页面" width="600"/>
+</div>
+
+<a name='打赏作者'></a>
+## 打赏作者
+
+<br/>
+<div align="center">
+<img src="https://yeyupiaoling.cn/reward.png" alt="打赏作者" width="400">
+</div>
 
 ## 参考资料
 
