@@ -15,8 +15,8 @@ from utils.utils import print_arguments, SavePeftModelCallback, make_inputs_requ
 
 parser = argparse.ArgumentParser(description=__doc__)
 add_arg = functools.partial(add_arguments, argparser=parser)
-add_arg("train_data",    type=str, default="dataset/test_meeting.json",       help="训练数据集的路径")
-add_arg("test_data",     type=str, default="dataset/test_meeting.json",        help="测试数据集的路径")
+add_arg("train_data",    type=str, default="dataset/train.json",       help="训练数据集的路径")
+add_arg("test_data",     type=str, default="dataset/test.json",        help="测试数据集的路径")
 add_arg("base_model",    type=str, default="openai/whisper-tiny",      help="Whisper的基础模型")
 add_arg("output_dir",    type=str, default="output/",                  help="训练保存模型的路径")
 add_arg("warmup_steps",  type=int, default=50,      help="训练预热步数")
@@ -34,6 +34,7 @@ add_arg("local_files_only", type=bool, default=False, help="是否只在本地�
 add_arg("num_train_epochs", type=int, default=3,    help="训练的轮数")
 add_arg("language",      type=str, default="Chinese", help="设置语言，可全称也可简写，如果为None则训练的是多语言")
 add_arg("task",     type=str, default="transcribe", choices=['transcribe', 'translate'], help="模型的任务")
+add_arg("metric",   type=str, default="cer",        choices=['cer', 'wer'],              help="评估方式")
 add_arg("resume_from_checkpoint",      type=str, default=None, help="恢复训练的检查点路径")
 add_arg("per_device_train_batch_size", type=int, default=8,    help="训练的batch size")
 add_arg("per_device_eval_batch_size",  type=int, default=8,    help="评估的batch size")
@@ -109,7 +110,7 @@ def compute_metrics(pred):
     # 将预测和实际的token转换为文本
     pred_str = processor.tokenizer.batch_decode(pred_ids, skip_special_tokens=True)
     label_str = processor.tokenizer.batch_decode(label_ids, skip_special_tokens=True)
-    m = 100 * metric.compute(predictions=pred_str, references=label_str)
+    m = metric.compute(predictions=pred_str, references=label_str)
     return {args.metric: m}
 
 
@@ -121,6 +122,8 @@ training_args = Seq2SeqTrainingArguments(output_dir=args.output_dir,
                                          warmup_steps=args.warmup_steps,
                                          num_train_epochs=args.num_train_epochs,
                                          save_strategy="steps",
+                                         predict_with_generate=True,
+                                         generation_max_length=225,
                                          evaluation_strategy="steps",
                                          fp16=args.fp16,
                                          report_to=["tensorboard"],
@@ -129,12 +132,12 @@ training_args = Seq2SeqTrainingArguments(output_dir=args.output_dir,
                                          save_total_limit=5,
                                          optim='adamw_torch',
                                          load_best_model_at_end=True,
+                                         greater_is_better=False,
                                          metric_for_best_model=args.metric if not args.use_8bit else None,
                                          ddp_find_unused_parameters=False if ddp else None,
                                          dataloader_num_workers=args.num_workers,
                                          per_device_eval_batch_size=args.per_device_eval_batch_size,
                                          logging_steps=args.logging_steps,
-                                         greater_is_better=False,
                                          remove_unused_columns=False,
                                          label_names=["labels"])
 
