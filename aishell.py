@@ -9,7 +9,7 @@ from tqdm import tqdm
 from utils.utils import download, unpack
 from utils.utils import add_arguments, print_arguments
 
-DATA_URL = 'https://openslr.magicdatatech.com/resources/33/data_aishell.tgz'
+DATA_URL = 'https://openslr.elda.org/resources/33/data_aishell.tgz'
 MD5_DATA = '2f494334227864a8a8fec932999db9d8'
 
 parser = argparse.ArgumentParser(description=__doc__)
