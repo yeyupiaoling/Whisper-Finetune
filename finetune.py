@@ -2,6 +2,7 @@ import argparse
 import functools
 import os
 
+import evaluate
 import torch
 from peft import LoraConfig, get_peft_model, set_peft_model_state_dict, AdaLoraConfig
 from peft import prepare_model_for_int8_training
@@ -14,8 +15,8 @@ from utils.utils import print_arguments, SavePeftModelCallback, make_inputs_requ
 
 parser = argparse.ArgumentParser(description=__doc__)
 add_arg = functools.partial(add_arguments, argparser=parser)
-add_arg("train_data",    type=str, default="dataset/train.json",       help="训练数据集的路径")
-add_arg("test_data",     type=str, default="dataset/test.json",        help="测试数据集的路径")
+add_arg("train_data",    type=str, default="dataset/test_meeting.json",       help="训练数据集的路径")
+add_arg("test_data",     type=str, default="dataset/test_meeting.json",        help="测试数据集的路径")
 add_arg("base_model",    type=str, default="openai/whisper-tiny",      help="Whisper的基础模型")
 add_arg("output_dir",    type=str, default="output/",                  help="训练保存模型的路径")
 add_arg("warmup_steps",  type=int, default=50,      help="训练预热步数")
@@ -95,6 +96,23 @@ if args.resume_from_checkpoint:
     adapters_dict = torch.load(f'{args.resume_from_checkpoint}/pytorch_model.bin')
     set_peft_model_state_dict(model=model, peft_model_state_dict=adapters_dict)
 
+# 获取评估方法
+metric = evaluate.load(args.metric)
+
+
+# 评估
+def compute_metrics(pred):
+    pred_ids = pred.predictions
+    label_ids = pred.label_ids
+    # 将-100替换为pad_token_id
+    label_ids[label_ids == -100] = processor.tokenizer.pad_token_id
+    # 将预测和实际的token转换为文本
+    pred_str = processor.tokenizer.batch_decode(pred_ids, skip_special_tokens=True)
+    label_str = processor.tokenizer.batch_decode(label_ids, skip_special_tokens=True)
+    m = 100 * metric.compute(predictions=pred_str, references=label_str)
+    return {args.metric: m}
+
+
 # 定义训练参数
 training_args = Seq2SeqTrainingArguments(output_dir=args.output_dir,
                                          per_device_train_batch_size=args.per_device_train_batch_size,
@@ -111,10 +129,12 @@ training_args = Seq2SeqTrainingArguments(output_dir=args.output_dir,
                                          save_total_limit=5,
                                          optim='adamw_torch',
                                          load_best_model_at_end=True,
+                                         metric_for_best_model=args.metric if not args.use_8bit else None,
                                          ddp_find_unused_parameters=False if ddp else None,
                                          dataloader_num_workers=args.num_workers,
                                          per_device_eval_batch_size=args.per_device_eval_batch_size,
                                          logging_steps=args.logging_steps,
+                                         greater_is_better=False,
                                          remove_unused_columns=False,
                                          label_names=["labels"])
 
@@ -129,6 +149,7 @@ trainer = Seq2SeqTrainer(args=training_args,
                          train_dataset=train_dataset,
                          eval_dataset=test_dataset,
                          data_collator=data_collator,
+                         compute_metrics=compute_metrics if not args.use_8bit else None,
                          tokenizer=processor.feature_extractor,
                          callbacks=[SavePeftModelCallback])
 model.config.use_cache = False
