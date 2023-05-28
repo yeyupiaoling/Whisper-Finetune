@@ -4,8 +4,8 @@ import os
 
 import evaluate
 import torch
-from peft import LoraConfig, get_peft_model, set_peft_model_state_dict, AdaLoraConfig
-from peft import prepare_model_for_int8_training
+# from peft import LoraConfig, get_peft_model, set_peft_model_state_dict, AdaLoraConfig
+# from peft import prepare_model_for_int8_training
 from transformers import Seq2SeqTrainer, Seq2SeqTrainingArguments, WhisperFeatureExtractor, \
     WhisperForConditionalGeneration, WhisperProcessor, GenerationConfig
 
@@ -24,14 +24,14 @@ add_arg("logging_steps", type=int, default=100,     help="打印日志步数")
 add_arg("eval_steps",    type=int, default=10000,   help="多少步数评估一次")
 add_arg("save_steps",    type=int, default=10000,   help="多少步数保存模型一次")
 add_arg("num_workers",   type=int, default=8,       help="读取数据的线程数量")
-add_arg("learning_rate", type=float,  default=1e-3, help="学习率大小")
-add_arg("min_audio_len", type=float,  default=0.5,  help="最小的音频长度，单位秒")
-add_arg("max_audio_len", type=float,  default=30,   help="最大的音频长度，单位秒")
-add_arg("use_adalora",   type=bool,   default=True, help="是否使用AdaLora而不是Lora")
-add_arg("fp16",          type=bool,   default=True, help="是否使用fp16训练模型")
-add_arg("use_8bit",      type=bool,   default=True, help="是否将模型量化为8位")
-add_arg("remove_pun",    type=bool, default=True,   help="是否移除标点符号")
-add_arg("to_simple",     type=bool, default=True,   help="是否转为简体中文")
+add_arg("learning_rate", type=float, default=1e-3,  help="学习率大小")
+add_arg("min_audio_len", type=float, default=0.5,   help="最小的音频长度，单位秒")
+add_arg("max_audio_len", type=float, default=30,    help="最大的音频长度，单位秒")
+add_arg("use_adalora",   type=bool,  default=True,  help="是否使用AdaLora而不是Lora")
+add_arg("fp16",          type=bool,  default=True,  help="是否使用fp16训练模型")
+add_arg("use_8bit",      type=bool,  default=False, help="是否将模型量化为8位")
+add_arg("remove_pun",    type=bool,  default=True,  help="是否移除标点符号")
+add_arg("to_simple",     type=bool,  default=True,  help="是否转为简体中文")
 add_arg("generation_max_length", type=int, default=225, help="评估的时候生成的最大长度")
 add_arg("local_files_only", type=bool, default=False, help="是否只在本地加载模型，不尝试下载")
 add_arg("num_train_epochs", type=int, default=3,    help="训练的轮数")
@@ -54,7 +54,8 @@ processor = WhisperProcessor.from_pretrained(args.base_model,
                                              local_files_only=args.local_files_only)
 # 做语言和任务限制，提高评估识别准确率
 forced_decoder_ids = processor.get_decoder_prompt_ids()
-generation_config = GenerationConfig(forced_decoder_ids=forced_decoder_ids)
+generation_config = GenerationConfig.from_pretrained(args.base_model, local_files_only=args.local_files_only)
+generation_config.forced_decoder_ids = forced_decoder_ids
 
 # 读取数据
 train_dataset = CustomDataset(data_list_path=args.train_data,
@@ -149,7 +150,7 @@ training_args = Seq2SeqTrainingArguments(output_dir=args.output_dir,  # 保存�
                                          optim='adamw_torch',  # 指定优化方法
                                          load_best_model_at_end=True,  # 指定是否在结束时加载最优模型
                                          greater_is_better=False,  # 指定评估值越小越好
-                                         metric_for_best_model=args.metric,  # 接近评估字段名称
+                                         metric_for_best_model=args.metric if not args.use_8bit else None,  # 评估字段名称
                                          ddp_find_unused_parameters=False if ddp else None,  # 分布式训练设置
                                          dataloader_num_workers=args.num_workers,  # 设置读取数据的线程数量
                                          logging_steps=args.logging_steps,  # 指定打印log的步数
@@ -167,7 +168,7 @@ trainer = Seq2SeqTrainer(args=training_args,
                          train_dataset=train_dataset,
                          eval_dataset=test_dataset,
                          data_collator=data_collator,
-                         compute_metrics=compute_metrics,
+                         compute_metrics=compute_metrics if not args.use_8bit else None,
                          tokenizer=processor.feature_extractor,
                          callbacks=[SavePeftModelCallback])
 model.config.use_cache = False
