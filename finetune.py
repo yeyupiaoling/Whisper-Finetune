@@ -4,8 +4,8 @@ import os
 
 import evaluate
 import torch
-# from peft import LoraConfig, get_peft_model, set_peft_model_state_dict, AdaLoraConfig
-# from peft import prepare_model_for_int8_training
+from peft import LoraConfig, get_peft_model, set_peft_model_state_dict, AdaLoraConfig
+from peft import prepare_model_for_int8_training
 from transformers import Seq2SeqTrainer, Seq2SeqTrainingArguments, WhisperFeatureExtractor, \
     WhisperForConditionalGeneration, WhisperProcessor, GenerationConfig
 
