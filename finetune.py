@@ -10,7 +10,7 @@ from transformers import Seq2SeqTrainer, Seq2SeqTrainingArguments, WhisperFeatur
     WhisperForConditionalGeneration, WhisperProcessor, GenerationConfig
 
 from utils.reader import CustomDataset
-from utils.data_utils import DataCollatorSpeechSeq2SeqWithPadding
+from utils.data_utils import DataCollatorSpeechSeq2SeqWithPadding, remove_punctuation, to_simple
 from utils.utils import print_arguments, SavePeftModelCallback, make_inputs_require_grad, add_arguments
 
 parser = argparse.ArgumentParser(description=__doc__)
@@ -30,6 +30,9 @@ add_arg("max_audio_len", type=float,  default=30,   help="最大的音频长度�
 add_arg("use_adalora",   type=bool,   default=True, help="是否使用AdaLora而不是Lora")
 add_arg("fp16",          type=bool,   default=True, help="是否使用fp16训练模型")
 add_arg("use_8bit",      type=bool,   default=True, help="是否将模型量化为8位")
+add_arg("remove_pun",    type=bool, default=True,   help="是否移除标点符号")
+add_arg("to_simple",     type=bool, default=True,   help="是否转为简体中文")
+add_arg("generation_max_length", type=int, default=225, help="评估的时候生成的最大长度")
 add_arg("local_files_only", type=bool, default=False, help="是否只在本地加载模型，不尝试下载")
 add_arg("num_train_epochs", type=int, default=3,    help="训练的轮数")
 add_arg("language",      type=str, default="Chinese", help="设置语言，可全称也可简写，如果为None则训练的是多语言")
@@ -49,7 +52,7 @@ processor = WhisperProcessor.from_pretrained(args.base_model,
                                              language=args.language,
                                              task=args.task,
                                              local_files_only=args.local_files_only)
-# 做语言和任务限制，提高识别准确率
+# 做语言和任务限制，提高评估识别准确率
 forced_decoder_ids = processor.get_decoder_prompt_ids()
 generation_config = GenerationConfig(forced_decoder_ids=forced_decoder_ids)
 
@@ -113,6 +116,14 @@ def compute_metrics(pred):
     # 将预测和实际的token转换为文本
     pred_str = processor.tokenizer.batch_decode(pred_ids, skip_special_tokens=True)
     label_str = processor.tokenizer.batch_decode(label_ids, skip_special_tokens=True)
+    # 删除标点符号
+    if args.remove_pun:
+        pred_str = remove_punctuation(pred_str)
+        label_str = remove_punctuation(label_str)
+    # 将繁体中文总成简体中文
+    if args.to_simple:
+        pred_str = to_simple(pred_str)
+        label_str = to_simple(label_str)
     m = metric.compute(predictions=pred_str, references=label_str)
     return {args.metric: m}
 
@@ -128,7 +139,7 @@ training_args = Seq2SeqTrainingArguments(output_dir=args.output_dir,  # 保存�
                                          save_strategy="steps",  # 指定按照步数保存检查点
                                          evaluation_strategy="steps",  # 指定按照步数评估模型
                                          predict_with_generate=True,  # 允许评估的时候生成模式
-                                         generation_max_length=225,  # 评估的时候生成的最大长度
+                                         generation_max_length=args.generation_max_length,  # 评估的时候生成的最大长度
                                          generation_config=generation_config,  # 评估的生成配置参数
                                          fp16=args.fp16,  # 是否使用半精度训练
                                          report_to=["tensorboard"],  # 指定使用tensorboard保存log
