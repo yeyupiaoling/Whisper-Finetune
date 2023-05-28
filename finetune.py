@@ -7,7 +7,7 @@ import torch
 from peft import LoraConfig, get_peft_model, set_peft_model_state_dict, AdaLoraConfig
 from peft import prepare_model_for_int8_training
 from transformers import Seq2SeqTrainer, Seq2SeqTrainingArguments, WhisperFeatureExtractor, \
-    WhisperForConditionalGeneration, WhisperProcessor
+    WhisperForConditionalGeneration, WhisperProcessor, GenerationConfig
 
 from utils.reader import CustomDataset
 from utils.data_utils import DataCollatorSpeechSeq2SeqWithPadding
@@ -49,6 +49,9 @@ processor = WhisperProcessor.from_pretrained(args.base_model,
                                              language=args.language,
                                              task=args.task,
                                              local_files_only=args.local_files_only)
+# 做语言和任务限制，提高识别准确率
+forced_decoder_ids = processor.get_decoder_prompt_ids()
+generation_config = GenerationConfig(forced_decoder_ids=forced_decoder_ids)
 
 # 读取数据
 train_dataset = CustomDataset(data_list_path=args.train_data,
@@ -115,31 +118,32 @@ def compute_metrics(pred):
 
 
 # 定义训练参数
-training_args = Seq2SeqTrainingArguments(output_dir=args.output_dir,
-                                         per_device_train_batch_size=args.per_device_train_batch_size,
-                                         gradient_accumulation_steps=args.gradient_accumulation_steps,
-                                         learning_rate=args.learning_rate,
-                                         warmup_steps=args.warmup_steps,
-                                         num_train_epochs=args.num_train_epochs,
-                                         save_strategy="steps",
-                                         predict_with_generate=True,
-                                         generation_max_length=225,
-                                         evaluation_strategy="steps",
-                                         fp16=args.fp16,
-                                         report_to=["tensorboard"],
-                                         save_steps=args.save_steps,
-                                         eval_steps=args.eval_steps,
-                                         save_total_limit=5,
-                                         optim='adamw_torch',
-                                         load_best_model_at_end=True,
-                                         greater_is_better=False,
-                                         metric_for_best_model=args.metric if not args.use_8bit else None,
-                                         ddp_find_unused_parameters=False if ddp else None,
-                                         dataloader_num_workers=args.num_workers,
-                                         per_device_eval_batch_size=args.per_device_eval_batch_size,
-                                         logging_steps=args.logging_steps,
-                                         remove_unused_columns=False,
-                                         label_names=["labels"])
+training_args = Seq2SeqTrainingArguments(output_dir=args.output_dir,  # 保存检查点和意志的目录
+                                         per_device_train_batch_size=args.per_device_train_batch_size,  # 训练batch_size大小
+                                         per_device_eval_batch_size=args.per_device_eval_batch_size,  # 评估batch_size大小
+                                         gradient_accumulation_steps=args.gradient_accumulation_steps,  # 训练梯度累计步数
+                                         learning_rate=args.learning_rate,  # 学习率大小
+                                         warmup_steps=args.warmup_steps,  # 预热步数
+                                         num_train_epochs=args.num_train_epochs,  # 微调训练轮数
+                                         save_strategy="steps",  # 指定按照步数保存检查点
+                                         evaluation_strategy="steps",  # 指定按照步数评估模型
+                                         predict_with_generate=True,  # 允许评估的时候生成模式
+                                         generation_max_length=225,  # 评估的时候生成的最大长度
+                                         generation_config=generation_config,  # 评估的生成配置参数
+                                         fp16=args.fp16,  # 是否使用半精度训练
+                                         report_to=["tensorboard"],  # 指定使用tensorboard保存log
+                                         save_steps=args.save_steps,  # 指定保存检查点的步数
+                                         eval_steps=args.eval_steps,  # 指定评估模型的步数
+                                         save_total_limit=5,  # 只保存最新检查点的数量
+                                         optim='adamw_torch',  # 指定优化方法
+                                         load_best_model_at_end=True,  # 指定是否在结束时加载最优模型
+                                         greater_is_better=False,  # 指定评估值越小越好
+                                         metric_for_best_model=args.metric,  # 接近评估字段名称
+                                         ddp_find_unused_parameters=False if ddp else None,  # 分布式训练设置
+                                         dataloader_num_workers=args.num_workers,  # 设置读取数据的线程数量
+                                         logging_steps=args.logging_steps,  # 指定打印log的步数
+                                         remove_unused_columns=False,  # 删除模型不需要的数据列
+                                         label_names=["labels"])  # 与标签对应的输入字典中的键列表
 
 if training_args.local_rank == 0 or training_args.local_rank == -1:
     print('=' * 90)
@@ -152,7 +156,7 @@ trainer = Seq2SeqTrainer(args=training_args,
                          train_dataset=train_dataset,
                          eval_dataset=test_dataset,
                          data_collator=data_collator,
-                         compute_metrics=compute_metrics if not args.use_8bit else None,
+                         compute_metrics=compute_metrics,
                          tokenizer=processor.feature_extractor,
                          callbacks=[SavePeftModelCallback])
 model.config.use_cache = False
