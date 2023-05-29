@@ -21,8 +21,8 @@ add_arg("base_model",    type=str, default="openai/whisper-tiny",      help="Whi
 add_arg("output_dir",    type=str, default="output/",                  help="训练保存模型的路径")
 add_arg("warmup_steps",  type=int, default=50,      help="训练预热步数")
 add_arg("logging_steps", type=int, default=100,     help="打印日志步数")
-add_arg("eval_steps",    type=int, default=10000,   help="多少步数评估一次")
-add_arg("save_steps",    type=int, default=10000,   help="多少步数保存模型一次")
+add_arg("eval_steps",    type=int, default=1000,    help="多少步数评估一次")
+add_arg("save_steps",    type=int, default=1000,    help="多少步数保存模型一次")
 add_arg("num_workers",   type=int, default=8,       help="读取数据的线程数量")
 add_arg("learning_rate", type=float, default=1e-3,  help="学习率大小")
 add_arg("min_audio_len", type=float, default=0.5,   help="最小的音频长度，单位秒")
@@ -111,7 +111,6 @@ training_args = \
                              eval_steps=args.eval_steps,  # 指定评估模型的步数
                              save_total_limit=5,  # 只保存最新检查点的数量
                              optim='adamw_torch',  # 指定优化方法
-                             load_best_model_at_end=True,  # 指定是否在结束时加载最优模型
                              ddp_find_unused_parameters=False if ddp else None,  # 分布式训练设置
                              dataloader_num_workers=args.num_workers,  # 设置读取数据的线程数量
                              logging_steps=args.logging_steps,  # 指定打印log的步数
