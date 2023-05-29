@@ -13,7 +13,6 @@ class CustomDataset(Dataset):
     def __init__(self,
                  data_list_path,
                  processor,
-                 feature_extractor,
                  mono=True,
                  sample_rate=16000,
                  min_duration=0.5,
@@ -21,7 +20,7 @@ class CustomDataset(Dataset):
         super(CustomDataset, self).__init__()
         self.processor = processor
         self.data_list_path = data_list_path
-        self.feature_extractor = feature_extractor
+        self.feature_extractor = processor.feature_extractor
         self.sample_rate = sample_rate
         self.mono = mono
         if self.data_list_path.endswith(".header"):

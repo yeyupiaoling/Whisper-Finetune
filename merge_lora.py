@@ -9,7 +9,7 @@ from utils.utils import print_arguments, add_arguments
 
 parser = argparse.ArgumentParser(description=__doc__)
 add_arg = functools.partial(add_arguments, argparser=parser)
-add_arg("lora_model", type=str, default="output/checkpoint-final", help="微调保存的模型路径")
+add_arg("lora_model", type=str, default="output/whisper-tiny/checkpoint-best", help="微调保存的模型路径")
 add_arg('output_dir', type=str, default='models/',    help="合并模型的保存目录")
 add_arg("local_files_only", type=bool, default=False, help="是否只在本地加载模型，不尝试下载")
 args = parser.parse_args()

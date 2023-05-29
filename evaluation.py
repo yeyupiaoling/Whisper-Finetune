@@ -8,7 +8,7 @@ import numpy as np
 import torch
 from torch.utils.data import DataLoader
 from tqdm import tqdm
-from transformers import WhisperForConditionalGeneration, WhisperProcessor, WhisperFeatureExtractor
+from transformers import WhisperForConditionalGeneration, WhisperProcessor
 
 from utils.data_utils import DataCollatorSpeechSeq2SeqWithPadding, remove_punctuation, to_simple
 from utils.reader import CustomDataset
@@ -34,8 +34,7 @@ print_arguments(args)
 # 判断模型路径是否合法
 assert 'openai' == os.path.dirname(args.model_path) or os.path.exists(args.model_path), \
     f"模型文件{args.model_path}不存在，请检查是否已经成功合并模型，或者是否为huggingface存在模型"
-# 获取Whisper的特征提取器、编码器和解码器
-feature_extractor = WhisperFeatureExtractor.from_pretrained(args.model_path, local_files_only=args.local_files_only)
+# 获取Whisper的数据处理器，这个包含了特征提取器、tokenizer
 processor = WhisperProcessor.from_pretrained(args.model_path,
                                              language=args.language,
                                              task=args.task,
@@ -50,7 +49,6 @@ model.eval()
 # 获取测试数据
 test_dataset = CustomDataset(data_list_path=args.test_data,
                              processor=processor,
-                             feature_extractor=feature_extractor,
                              min_duration=args.min_audio_len,
                              max_duration=args.max_audio_len)
 print(f"测试数据：{len(test_dataset)}")
