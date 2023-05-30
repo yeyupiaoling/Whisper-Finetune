@@ -105,6 +105,7 @@ training_args = \
                              num_train_epochs=args.num_train_epochs,  # 微调训练轮数
                              save_strategy="steps",  # 指定按照步数保存检查点
                              evaluation_strategy="steps",  # 指定按照步数评估模型
+                             load_best_model_at_end=True,  # 指定是否在结束时加载最优模型
                              fp16=args.fp16,  # 是否使用半精度训练
                              report_to=["tensorboard"],  # 指定使用tensorboard保存log
                              save_steps=args.save_steps,  # 指定保存检查点的步数
