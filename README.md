@@ -77,7 +77,7 @@ OpenAI在开源了号称其英文语音辨识能力已达到人类水准的Whisp
 
 |       使用模型       |  指定语言   |                            数据集                             | aishell_test | test_net | test_meeting |                               下载地址                               |                        CTranslate2模型下载地址                         |
 |:----------------:|:-------:|:----------------------------------------------------------:|:------------:|:--------:|:------------:|:----------------------------------------------------------------:|:----------------------------------------------------------------:|
-|   whisper-tiny   | Chinese | [AIShell](https://openslr.magicdatatech.com/resources/33/) |   0.13043    | 0.4463  |   0.57728    | [点击下载](https://pan.baidu.com/s/1hIximy9ddN3cMHN4_VdhnQ?pwd=nfc2) | [点击下载](https://pan.baidu.com/s/1H-OBD9L0hYV-M_WoPEbiJA?pwd=8hbb) |
+|   whisper-tiny   | Chinese | [AIShell](https://openslr.magicdatatech.com/resources/33/) |   0.13043    |  0.4463  |   0.57728    | [点击下载](https://pan.baidu.com/s/1hIximy9ddN3cMHN4_VdhnQ?pwd=nfc2) | [点击下载](https://pan.baidu.com/s/1H-OBD9L0hYV-M_WoPEbiJA?pwd=8hbb) |
 |   whisper-base   | Chinese | [AIShell](https://openslr.magicdatatech.com/resources/33/) |   0.08999    | 0.33089  |   0.40713    | [点击下载](https://pan.baidu.com/s/1hIximy9ddN3cMHN4_VdhnQ?pwd=nfc2) | [点击下载](https://pan.baidu.com/s/1H-OBD9L0hYV-M_WoPEbiJA?pwd=8hbb) |
 |  whisper-small   | Chinese | [AIShell](https://openslr.magicdatatech.com/resources/33/) |   0.05452    | 0.19831  |   0.24229    | [点击下载](https://pan.baidu.com/s/1hIximy9ddN3cMHN4_VdhnQ?pwd=nfc2) | [点击下载](https://pan.baidu.com/s/1H-OBD9L0hYV-M_WoPEbiJA?pwd=8hbb) |
 |  whisper-medium  | Chinese | [AIShell](https://openslr.magicdatatech.com/resources/33/) |   0.03529    | 0.13554  |   0.17101    | [点击下载](https://pan.baidu.com/s/1hIximy9ddN3cMHN4_VdhnQ?pwd=nfc2) | [点击下载](https://pan.baidu.com/s/1H-OBD9L0hYV-M_WoPEbiJA?pwd=8hbb) |
@@ -136,6 +136,28 @@ python -m pip install -r requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/s
   },
   "duration": 3.97,
   "sentence": "不是她的戏或是她的八卦"
+}
+```
+
+带时间戳格式的数据：
+```json
+{
+  "audio": {
+    "path": "dataset/0.wav"
+  },
+  "sentence": [
+    {
+      "start": 0,
+      "end": 1.4,
+      "text": "近几年"
+    },
+    {
+      "start": 1.42,
+      "end": 8.4,
+      "text": "不但我用书给女儿压岁也劝说亲朋不要给女儿压岁钱而改送压岁书"
+    }
+  ],
+  "duration": 7.37
 }
 ```
 

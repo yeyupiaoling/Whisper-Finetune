@@ -40,6 +40,7 @@ def to_simple(text: str or List[str]):
 @dataclass
 class DataCollatorSpeechSeq2SeqWithPadding:
     processor: Any
+    no_timestamps: bool = True
 
     def __call__(self, features: List[Dict[str, Union[List[int], torch.Tensor]]]) -> Dict[str, torch.Tensor]:
         # split inputs and labels since they have to be of different lengths and need different padding methods
@@ -62,4 +63,10 @@ class DataCollatorSpeechSeq2SeqWithPadding:
 
         batch["labels"] = labels
 
+        if not self.no_timestamps:
+            # get the tokenized label sequences
+            decoder_input_ids = [{"input_ids": feature["decoder_input_ids"]} for feature in features]
+            # pad the labels to max length
+            decoder_input_ids = self.processor.tokenizer.pad(decoder_input_ids, return_tensors="pt").input_ids
+            batch["decoder_input_ids"] = decoder_input_ids
         return batch
