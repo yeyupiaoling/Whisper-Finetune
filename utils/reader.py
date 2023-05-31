@@ -65,7 +65,8 @@ class CustomDataset(Dataset):
         else:
             data_list = self.data_list[idx]
         # 分割音频路径和标签
-        audio_file, transcript = data_list["audio"]['path'], data_list["sentence"]
+        audio_file = data_list["audio"]['path']
+        transcript = data_list["sentence"] if self.no_timestamps else data_list["sentences"]
         if 'start_time' not in data_list["audio"].keys():
             sample, sample_rate = soundfile.read(audio_file, dtype='float32')
         else:
@@ -87,7 +88,7 @@ class CustomDataset(Dataset):
             # 将目标文本编码为标签ID
             start = t['start'] if round(t['start'] * 100) % 2 == 0 else t['start'] + 0.01
             start = self.timestamp_begin + round(start * 100) // 2
-            end = t['end'] if round(t['end'] * 100) % 2 == 0 else t['end'] + 0.01
+            end = t['end'] if round(t['end'] * 100) % 2 == 0 else t['end'] - 0.01
             end = self.timestamp_begin + round(end * 100) // 2
             label = self.processor(text=t['text']).input_ids[4:-1]
             labels.extend([start])

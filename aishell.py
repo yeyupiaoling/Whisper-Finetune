@@ -56,8 +56,9 @@ def create_annotation_text(data_dir, annotation_path):
         sample, sr = soundfile.read(audio_path)
         duration = round(sample.shape[-1] / float(sr), 2)
         lines[i]["duration"] = duration
+        lines[i]["sentences"] = [{"start": 0, "end": duration, "text": lines[i]["sentence"]}]
     for line in lines:
-        f_train.write(json.dumps(line,  ensure_ascii=False)+"\n")
+        f_train.write(json.dumps(line, ensure_ascii=False) + "\n")
     # 测试集
     audio_dir = os.path.join(data_dir, 'wav', 'test')
     lines = []
@@ -77,6 +78,7 @@ def create_annotation_text(data_dir, annotation_path):
         sample, sr = soundfile.read(audio_path)
         duration = round(sample.shape[-1] / float(sr), 2)
         lines[i]["duration"] = duration
+        lines[i]["sentences"] = [{"start": 0, "end": duration, "text": lines[i]["sentence"]}]
     for line in lines:
         f_test.write(json.dumps(line,  ensure_ascii=False)+"\n")
     f_test.close()
