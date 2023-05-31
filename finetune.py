@@ -2,15 +2,13 @@ import argparse
 import functools
 import os
 
-import evaluate
 import torch
 from peft import LoraConfig, get_peft_model, set_peft_model_state_dict, AdaLoraConfig
 from peft import prepare_model_for_int8_training
-from transformers import Seq2SeqTrainer, Seq2SeqTrainingArguments, WhisperFeatureExtractor, \
-    WhisperForConditionalGeneration, WhisperProcessor, GenerationConfig
+from transformers import Seq2SeqTrainer, Seq2SeqTrainingArguments, WhisperForConditionalGeneration, WhisperProcessor
 
+from utils.data_utils import DataCollatorSpeechSeq2SeqWithPadding
 from utils.reader import CustomDataset
-from utils.data_utils import DataCollatorSpeechSeq2SeqWithPadding, remove_punctuation, to_simple
 from utils.utils import print_arguments, SavePeftModelCallback, make_inputs_require_grad, add_arguments
 
 parser = argparse.ArgumentParser(description=__doc__)

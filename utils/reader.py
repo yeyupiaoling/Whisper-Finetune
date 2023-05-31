@@ -1,6 +1,7 @@
 import json
 import os
 from json import JSONDecodeError
+from typing import List
 
 import librosa
 import soundfile
@@ -18,20 +19,28 @@ class CustomDataset(Dataset):
                  min_duration=0.5,
                  max_duration=30):
         super(CustomDataset, self).__init__()
+        self.data_list_path = data_list_path
         self.processor = processor
         self.data_list_path = data_list_path
-        self.feature_extractor = processor.feature_extractor
         self.sample_rate = sample_rate
         self.mono = mono
+        self.min_duration = min_duration
+        self.max_duration = max_duration
+        self.data_list: List[dict] = []
+        # 加载数据列表
+        self._load_data_list()
+
+    # 加载数据列表
+    def _load_data_list(self):
         if self.data_list_path.endswith(".header"):
             # 获取二进制的数据列表
-            self.dataset_reader = DatasetReader(data_header_path=data_list_path,
-                                                min_duration=min_duration,
-                                                max_duration=max_duration)
+            self.dataset_reader = DatasetReader(data_header_path=self.data_list_path,
+                                                min_duration=self.min_duration,
+                                                max_duration=self.max_duration)
             self.data_list = self.dataset_reader.get_keys()
         else:
             # 获取数据列表
-            with open(data_list_path, 'r', encoding='utf-8') as f:
+            with open(self.data_list_path, 'r', encoding='utf-8') as f:
                 lines = f.readlines()
             self.data_list = []
             for line in lines:
@@ -39,13 +48,14 @@ class CustomDataset(Dataset):
                     line = json.loads(line)
                 if not isinstance(line, dict): continue
                 # 跳过超出长度限制的音频
-                if line["duration"] < min_duration:
+                if line["duration"] < self.min_duration:
                     continue
-                if max_duration != -1 and line["duration"] > max_duration:
+                if self.max_duration != -1 and line["duration"] > self.max_duration:
                     continue
                 self.data_list.append(dict(line))
 
-    def __getitem__(self, idx):
+    # 从数据列表里面获取音频数据、采样率和文本
+    def _get_list_data(self, idx):
         if self.data_list_path.endswith(".header"):
             data_list = self.dataset_reader.get_data(self.data_list[idx])
         else:
@@ -63,11 +73,13 @@ class CustomDataset(Dataset):
             sample = librosa.to_mono(sample)
         if self.sample_rate != sample_rate:
             sample = librosa.resample(sample, orig_sr=sample_rate, target_sr=self.sample_rate)
-        data = dict()
-        # 从输入音频数组中计算log-Mel输入特征
-        data["input_features"] = self.feature_extractor(sample, sampling_rate=self.sample_rate).input_features[0]
-        # 将目标文本编码为标签ID
-        data["labels"] = self.processor.tokenizer(transcript).input_ids
+        return sample, sample_rate, transcript
+
+    def __getitem__(self, idx):
+        # 从数据列表里面获取音频数据、采样率和文本
+        sample, sample_rate, transcript = self._get_list_data(idx=idx)
+        # 获取log-Mel特征和标签ID
+        data = self.processor(audio=sample, sampling_rate=self.sample_rate, text=transcript)
         return data
 
     def __len__(self):

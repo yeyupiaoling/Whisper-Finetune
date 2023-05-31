@@ -44,7 +44,7 @@ class DataCollatorSpeechSeq2SeqWithPadding:
     def __call__(self, features: List[Dict[str, Union[List[int], torch.Tensor]]]) -> Dict[str, torch.Tensor]:
         # split inputs and labels since they have to be of different lengths and need different padding methods
         # first treat the audio inputs by simply returning torch tensors
-        input_features = [{"input_features": feature["input_features"]} for feature in features]
+        input_features = [{"input_features": feature["input_features"][0]} for feature in features]
         batch = self.processor.feature_extractor.pad(input_features, return_tensors="pt")
 
         # get the tokenized label sequences
