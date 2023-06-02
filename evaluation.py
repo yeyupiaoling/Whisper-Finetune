@@ -23,7 +23,7 @@ add_arg("num_workers", type=int, default=8,         help="读取数据的线程�
 add_arg("language",    type=str, default="Chinese", help="设置语言，可全称也可简写，如果为None则评估的是多语言")
 add_arg("remove_pun",  type=bool, default=True,     help="是否移除标点符号")
 add_arg("to_simple",   type=bool, default=True,     help="是否转为简体中文")
-add_arg("timestamps",  type=bool, default=True,     help="评估时是否使用时间戳数据")
+add_arg("timestamps",  type=bool, default=False,    help="评估时是否使用时间戳数据")
 add_arg("min_audio_len",     type=float, default=0.5,  help="最小的音频长度，单位秒")
 add_arg("max_audio_len",     type=float, default=30,   help="最大的音频长度，单位秒")
 add_arg("local_files_only",  type=bool,  default=True, help="是否只在本地加载模型，不尝试下载")
