@@ -17,7 +17,7 @@ add_arg = functools.partial(add_arguments, argparser=parser)
 add_arg("filepath", default=None, type=str, help="压缩包data_aishell.tgz文件路径，不指定会自动下载")
 add_arg("target_dir", default="dataset/audio/", type=str, help="存放音频文件的目录")
 add_arg("annotation_text", default="dataset/", type=str, help="存放音频标注文件的目录")
-add_arg('--pun_model_path', type=str, default=None,
+add_arg('pun_model_path', default=None, type=str,
         help="添加标点符号的模型，模型来源：https://github.com/yeyupiaoling/PunctuationModel")
 args = parser.parse_args()
 
