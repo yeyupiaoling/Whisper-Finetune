@@ -28,7 +28,7 @@ add_arg("max_audio_len", type=float, default=30,    help="最大的音频长度�
 add_arg("use_adalora",   type=bool,  default=True,  help="是否使用AdaLora而不是Lora")
 add_arg("fp16",          type=bool,  default=True,  help="是否使用fp16训练模型")
 add_arg("use_8bit",      type=bool,  default=False, help="是否将模型量化为8位")
-add_arg("no_timestamps", type=bool,  default=True,  help="训练时是否不使用时间戳数据（未完成）")
+add_arg("timestamps",    type=bool,  default=True,  help="训练时是否使用时间戳数据（未大量验证）")
 add_arg("local_files_only", type=bool, default=False, help="是否只在本地加载模型，不尝试下载")
 add_arg("num_train_epochs", type=int, default=3,    help="训练的轮数")
 add_arg("language",      type=str, default="Chinese", help="设置语言，可全称也可简写，如果为None则训练的是多语言")
@@ -45,23 +45,23 @@ print_arguments(args)
 processor = WhisperProcessor.from_pretrained(args.base_model,
                                              language=args.language,
                                              task=args.task,
-                                             no_timestamps=args.no_timestamps,
+                                             no_timestamps=not args.timestamps,
                                              local_files_only=args.local_files_only)
 
 # 读取数据
 train_dataset = CustomDataset(data_list_path=args.train_data,
                               processor=processor,
-                              no_timestamps=args.no_timestamps,
+                              timestamps=args.timestamps,
                               min_duration=args.min_audio_len,
                               max_duration=args.max_audio_len)
 test_dataset = CustomDataset(data_list_path=args.test_data,
                              processor=processor,
-                             no_timestamps=args.no_timestamps,
+                             timestamps=args.timestamps,
                              min_duration=args.min_audio_len,
                              max_duration=args.max_audio_len)
 print(f"训练数据：{len(train_dataset)}，测试数据：{len(test_dataset)}")
 # 数据padding器
-data_collator = DataCollatorSpeechSeq2SeqWithPadding(processor=processor, no_timestamps=args.no_timestamps)
+data_collator = DataCollatorSpeechSeq2SeqWithPadding(processor=processor, timestamps=args.timestamps)
 
 # 获取Whisper模型
 device_map = "auto"

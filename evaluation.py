@@ -23,6 +23,7 @@ add_arg("num_workers", type=int, default=8,         help="读取数据的线程�
 add_arg("language",    type=str, default="Chinese", help="设置语言，可全称也可简写，如果为None则评估的是多语言")
 add_arg("remove_pun",  type=bool, default=True,     help="是否移除标点符号")
 add_arg("to_simple",   type=bool, default=True,     help="是否转为简体中文")
+add_arg("timestamps",  type=bool, default=True,     help="评估时是否使用时间戳数据")
 add_arg("min_audio_len",     type=float, default=0.5,  help="最小的音频长度，单位秒")
 add_arg("max_audio_len",     type=float, default=30,   help="最大的音频长度，单位秒")
 add_arg("local_files_only",  type=bool,  default=True, help="是否只在本地加载模型，不尝试下载")
@@ -38,6 +39,7 @@ assert 'openai' == os.path.dirname(args.model_path) or os.path.exists(args.model
 processor = WhisperProcessor.from_pretrained(args.model_path,
                                              language=args.language,
                                              task=args.task,
+                                             no_timestamps=not args.timestamps,
                                              local_files_only=args.local_files_only)
 forced_decoder_ids = processor.get_decoder_prompt_ids()
 # 获取模型
@@ -49,12 +51,13 @@ model.eval()
 # 获取测试数据
 test_dataset = CustomDataset(data_list_path=args.test_data,
                              processor=processor,
+                             timestamps=args.timestamps,
                              min_duration=args.min_audio_len,
                              max_duration=args.max_audio_len)
 print(f"测试数据：{len(test_dataset)}")
 
 # 数据padding器
-data_collator = DataCollatorSpeechSeq2SeqWithPadding(processor=processor)
+data_collator = DataCollatorSpeechSeq2SeqWithPadding(processor=processor, timestamps=args.timestamps)
 eval_dataloader = DataLoader(test_dataset, batch_size=args.batch_size,
                              num_workers=args.num_workers, collate_fn=data_collator)
 

@@ -15,7 +15,7 @@ class CustomDataset(Dataset):
                  data_list_path,
                  processor,
                  mono=True,
-                 no_timestamps=True,
+                 timestamps=False,
                  sample_rate=16000,
                  min_duration=0.5,
                  max_duration=30):
@@ -25,7 +25,7 @@ class CustomDataset(Dataset):
         self.data_list_path = data_list_path
         self.sample_rate = sample_rate
         self.mono = mono
-        self.no_timestamps = no_timestamps
+        self.timestamps = timestamps
         self.min_duration = min_duration
         self.max_duration = max_duration
         self.vocab = self.processor.tokenizer.get_vocab()
@@ -66,7 +66,7 @@ class CustomDataset(Dataset):
             data_list = self.data_list[idx]
         # 分割音频路径和标签
         audio_file = data_list["audio"]['path']
-        transcript = data_list["sentence"] if self.no_timestamps else data_list["sentences"]
+        transcript = data_list["sentences"] if self.timestamps else data_list["sentence"]
         if 'start_time' not in data_list["audio"].keys():
             sample, sample_rate = soundfile.read(audio_file, dtype='float32')
         else:
@@ -101,14 +101,13 @@ class CustomDataset(Dataset):
     def __getitem__(self, idx):
         # 从数据列表里面获取音频数据、采样率和文本
         sample, sample_rate, transcript = self._get_list_data(idx=idx)
-        if self.no_timestamps:
-            # 获取log-Mel特征和标签ID
-            data = self.processor(audio=sample, sampling_rate=self.sample_rate, text=transcript)
-        else:
-            # 加载带有时间戳的文本
+        if self.timestamps:  # 加载带有时间戳的文本
             data = self._load_timestamps_transcript(transcript=transcript)
             # 从输入音频数组中计算log-Mel输入特征
             data["input_features"] = self.processor(audio=sample, sampling_rate=self.sample_rate).input_features
+        else:
+            # 获取log-Mel特征和标签ID
+            data = self.processor(audio=sample, sampling_rate=self.sample_rate, text=transcript)
         return data
 
     def __len__(self):
