@@ -97,9 +97,10 @@ OpenAI在开源了号称其英文语音辨识能力已达到人类水准的Whisp
 
 4. 经过处理的数据列表，添加标点符号的模型为[PunctuationModel](https://github.com/yeyupiaoling/PunctuationModel)。
 
-| 数据列表处理方式 |                             AiShell                              |                           WenetSpeech                            | 
-|:--------:|:----------------------------------------------------------------:|:----------------------------------------------------------------:|
-|  添加标点符号  | [点击下载](https://pan.baidu.com/s/1Qzalcy0R2SyrOBSxtezN0A?pwd=v45t) | [点击下载](https://pan.baidu.com/s/1XrnD_YLYWYUs65lq4StzTg?pwd=hv3i) |
+|  数据列表处理方式  |                             AiShell                              |                           WenetSpeech                            | 
+|:----------:|:----------------------------------------------------------------:|:----------------------------------------------------------------:|
+|   添加标点符号   | [点击下载](https://pan.baidu.com/s/1Qzalcy0R2SyrOBSxtezN0A?pwd=v45t) | [点击下载](https://pan.baidu.com/s/1XrnD_YLYWYUs65lq4StzTg?pwd=hv3i) |
+| 添加标点符号和时间戳 | [点击下载](https://pan.baidu.com/s/1zC3CTqPrNkhDIwAwqlZ6kw?pwd=xun4) | [点击下载](https://pan.baidu.com/s/1JrlQ97fZfCD-JEbW7Td_2g?pwd=97ki) |
 
 **重要说明：**
 1. 在评估的时候移除模型输出的标点符号，并把繁体中文转成简体中文。
