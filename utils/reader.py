@@ -20,6 +20,8 @@ class CustomDataset(Dataset):
                  min_duration=0.5,
                  max_duration=30):
         super(CustomDataset, self).__init__()
+        assert min_duration > 0.5, f"min_duration不能小于0.5，当前为：{min_duration}"
+        assert max_duration <= 30, f"max_duration不能大于30，当前为：{max_duration}"
         self.data_list_path = data_list_path
         self.processor = processor
         self.data_list_path = data_list_path
