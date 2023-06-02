@@ -9,7 +9,8 @@ from transformers import Seq2SeqTrainer, Seq2SeqTrainingArguments, WhisperForCon
 
 from utils.data_utils import DataCollatorSpeechSeq2SeqWithPadding
 from utils.reader import CustomDataset
-from utils.utils import print_arguments, SavePeftModelCallback, make_inputs_require_grad, add_arguments
+from utils.utils import print_arguments, make_inputs_require_grad, add_arguments
+from utils.callback import SavePeftModelCallback
 
 parser = argparse.ArgumentParser(description=__doc__)
 add_arg = functools.partial(add_arguments, argparser=parser)
