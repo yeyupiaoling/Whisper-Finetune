@@ -33,7 +33,9 @@ def create_annotation_text(data_dir, annotation_path):
     f_test = open(os.path.join(annotation_path, 'test.json'), 'w', encoding='utf-8')
     transcript_path = os.path.join(data_dir, 'transcript', 'aishell_transcript_v0.8.txt')
     transcript_dict = {}
-    for line in open(transcript_path, 'r', encoding='utf-8'):
+    with open(transcript_path, 'r', encoding='utf-8') as f:
+        lines = f.readlines()
+    for line in tqdm(lines):
         line = line.strip()
         if line == '': continue
         audio_id, text = line.split(' ', 1)
