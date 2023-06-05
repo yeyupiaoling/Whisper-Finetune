@@ -128,7 +128,7 @@ sudo docker pull pytorch/pytorch:1.13.1-cuda11.6-cudnn8-devel
 然后进入到镜像中，同时将当前路径挂载到容器的`/workspace`目录下。
 ```shell
 sudo nvidia-docker run --name pytorch -it -v $PWD:/workspace pytorch/pytorch:1.13.1-cuda11.6-cudnn8-devel /bin/bash
-`
+```
 
 - 安装所需的依赖库。
 
