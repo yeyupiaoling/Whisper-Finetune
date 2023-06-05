@@ -113,11 +113,22 @@ OpenAI在开源了号称其英文语音辨识能力已达到人类水准的Whisp
 
 ## 安装环境
 
-- 首先安装的是Pytorch的GPU版本，如果已经安装过了，请跳过。
+- 首先安装的是Pytorch的GPU版本，以下介绍两种安装Pytorch的方式，只需要选择一种即可。
 
+1. 以下是使用Anaconda安装Pytorch环境，如果已经安装过了，请跳过。
 ```shell
 conda install pytorch==1.13.1 torchvision==0.14.1 torchaudio==0.13.1 pytorch-cuda=11.6 -c pytorch -c nvidia
 ```
+
+2. 以下是使用Docker镜像，拉取一个Pytorch环境的镜像。
+```shell
+sudo docker pull pytorch/pytorch:1.13.1-cuda11.6-cudnn8-devel
+```
+
+然后进入到镜像中，同时将当前路径挂载到容器的`/workspace`目录下。
+```shell
+sudo nvidia-docker run --name pytorch -it -v $PWD:/workspace pytorch/pytorch:1.13.1-cuda11.6-cudnn8-devel /bin/bash
+`
 
 - 安装所需的依赖库。
 
