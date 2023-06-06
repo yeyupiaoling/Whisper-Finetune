@@ -26,6 +26,9 @@ OpenAI在开源了号称其英文语音辨识能力已达到人类水准的Whisp
 - Ubuntu 18.04
 - GPU A100-PCIE-40GB*1
 
+
+### 视频讲解：[哔哩哔哩](https://www.bilibili.com/video/BV1S8411o7rm/)
+
 ## 目录
  - [项目主要程序介绍](#项目主要程序介绍)
  - [模型测试表](#模型测试表)
