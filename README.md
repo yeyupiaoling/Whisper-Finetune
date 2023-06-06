@@ -83,7 +83,7 @@ OpenAI在开源了号称其英文语音辨识能力已达到人类水准的Whisp
 |  whisper-medium  | Chinese | [AIShell](https://openslr.magicdatatech.com/resources/33/) |   0.03681    | 0.13073  |   0.16939    | [点击下载](https://pan.baidu.com/s/1hIximy9ddN3cMHN4_VdhnQ?pwd=nfc2) | [点击下载](https://pan.baidu.com/s/1H-OBD9L0hYV-M_WoPEbiJA?pwd=8hbb) |
 | whisper-large-v2 | Chinese | [AIShell](https://openslr.magicdatatech.com/resources/33/) |   0.03078    | 0.11359  |   0.14079    | [点击下载](https://pan.baidu.com/s/1hIximy9ddN3cMHN4_VdhnQ?pwd=nfc2) | [点击下载](https://pan.baidu.com/s/1H-OBD9L0hYV-M_WoPEbiJA?pwd=8hbb) |
 |   whisper-tiny   | Chinese |     [WenetSpeech](./tools/create_wenetspeech_data.py)      |   0.21009    | 0.29352  |   0.41506    | [点击下载](https://pan.baidu.com/s/18l6K59nP0j3XXmEQZ_Up_g?pwd=x7ay) | [点击下载](https://pan.baidu.com/s/1X37l5pvbpGmRhDkRkgYCQw?pwd=vm4k) |
-| whisper-large-v2 | Chinese |     [WenetSpeech](./tools/create_wenetspeech_data.py)      |   0.05372    | 0.10280  |   0.19834    | [点击下载](https://pan.baidu.com/s/18l6K59nP0j3XXmEQZ_Up_g?pwd=x7ay) | [点击下载](https://pan.baidu.com/s/1X37l5pvbpGmRhDkRkgYCQw?pwd=vm4k) |
+| whisper-large-v2 | Chinese |     [WenetSpeech](./tools/create_wenetspeech_data.py)      |   0.05372    | 0.10087  |   0.19834    | [点击下载](https://pan.baidu.com/s/18l6K59nP0j3XXmEQZ_Up_g?pwd=x7ay) | [点击下载](https://pan.baidu.com/s/1X37l5pvbpGmRhDkRkgYCQw?pwd=vm4k) |
 
 3. 未加速和加速后的推理速度测试表，使用GPU为GTX3090（24G）。
 
