@@ -404,6 +404,7 @@ for chunk in response.iter_lines(decode_unicode=False, delimiter=b"\0"):
 
 <br/>
 <div align="center">
+<p>打赏一块钱支持一下作者</p>
 <img src="https://yeyupiaoling.cn/reward.png" alt="打赏作者" width="400">
 </div>
 
