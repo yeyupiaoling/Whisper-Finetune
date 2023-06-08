@@ -233,16 +233,22 @@ class CustomDataset(Dataset):
     # 添加噪声
     def add_noise(self, sample, sample_rate, noise_path, snr_dB, max_gain_db=300.0):
         noise_sample, sr = librosa.load(noise_path, sr=sample_rate)
+        # 标准化音频音量，保证噪声不会太大
+        target_db = -20
+        gain = min(max_gain_db, target_db - self.rms_db(sample))
+        sample *= 10. ** (gain / 20.)
+        # 指定噪声音量
         sample_rms_db, noise_rms_db = self.rms_db(sample), self.rms_db(noise_sample)
         noise_gain_db = min(sample_rms_db - noise_rms_db - snr_dB, max_gain_db)
         noise_sample *= 10. ** (noise_gain_db / 20.)
+        # 固定噪声长度
         if noise_sample.shape[0] < sample.shape[0]:
             diff_duration = sample.shape[0] - noise_sample.shape[0]
             noise_sample = np.pad(noise_sample, (0, diff_duration), 'wrap')
         elif noise_sample.shape[0] > sample.shape[0]:
             start_frame = random.randint(0, noise_sample.shape[0] - sample.shape[0])
             noise_sample = noise_sample[start_frame:sample.shape[0] + start_frame]
-        sample = sample + noise_sample
+        sample += noise_sample
         return sample
 
     @staticmethod
