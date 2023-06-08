@@ -1,0 +1,43 @@
+[
+  {
+    "type": "noise",
+    "params": {
+      "min_snr_dB": 10,
+      "max_snr_dB": 50,
+      "noise_dir": "dataset/noise"
+    },
+    "prob": 1.0
+  },
+  {
+    "type": "resample",
+    "params": {
+      "new_sample_rates": [8000, 32000, 44100]
+    },
+    "prob": 1.0
+  },
+  {
+    "type": "speed",
+    "params": {
+      "min_speed_rate": 0.9,
+      "max_speed_rate": 1.1,
+      "num_rates": 3
+    },
+    "prob": 1.0
+  },
+  {
+    "type": "shift",
+    "params": {
+      "min_shift_ms": -5,
+      "max_shift_ms": 5
+    },
+    "prob": 1.0
+  },
+  {
+    "type": "volume",
+    "params": {
+      "min_gain_dBFS": -15,
+      "max_gain_dBFS": 15
+    },
+    "prob": 1.0
+  }
+]

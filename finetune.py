@@ -34,6 +34,7 @@ add_arg("local_files_only", type=bool, default=False, help="是否只在本地�
 add_arg("num_train_epochs", type=int, default=3,      help="训练的轮数")
 add_arg("language",      type=str, default="Chinese", help="设置语言，可全称也可简写，如果为None则训练的是多语言")
 add_arg("task",     type=str, default="transcribe", choices=['transcribe', 'translate'], help="模型的任务")
+add_arg("augment_config_path",         type=str, default=None, help="数据增强配置文件路径")
 add_arg("resume_from_checkpoint",      type=str, default=None, help="恢复训练的检查点路径")
 add_arg("per_device_train_batch_size", type=int, default=8,    help="训练的batch size")
 add_arg("per_device_eval_batch_size",  type=int, default=8,    help="评估的batch size")
@@ -54,7 +55,8 @@ train_dataset = CustomDataset(data_list_path=args.train_data,
                               processor=processor,
                               timestamps=args.timestamps,
                               min_duration=args.min_audio_len,
-                              max_duration=args.max_audio_len)
+                              max_duration=args.max_audio_len,
+                              augment_config_path=args.augment_config_path)
 test_dataset = CustomDataset(data_list_path=args.test_data,
                              processor=processor,
                              timestamps=args.timestamps,

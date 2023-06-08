@@ -1,9 +1,10 @@
 import json
 import os
-from json import JSONDecodeError
+import random
 from typing import List
 
 import librosa
+import numpy as np
 import soundfile
 from torch.utils.data import Dataset
 
@@ -18,7 +19,8 @@ class CustomDataset(Dataset):
                  timestamps=False,
                  sample_rate=16000,
                  min_duration=0.5,
-                 max_duration=30):
+                 max_duration=30,
+                 augment_config_path=None):
         super(CustomDataset, self).__init__()
         assert min_duration >= 0.5, f"min_duration不能小于0.5，当前为：{min_duration}"
         assert max_duration <= 30, f"max_duration不能大于30，当前为：{max_duration}"
@@ -35,6 +37,13 @@ class CustomDataset(Dataset):
         self.data_list: List[dict] = []
         # 加载数据列表
         self._load_data_list()
+        # 数据增强配置参数
+        self.augment_configs = None
+        self.noises_path = None
+        self.speed_rates = None
+        if augment_config_path:
+            with open(augment_config_path, 'r', encoding='utf-8') as f:
+                self.augment_configs = json.load(f)
 
     # 加载数据列表
     def _load_data_list(self):
@@ -76,10 +85,15 @@ class CustomDataset(Dataset):
             # 分割读取音频
             sample, sample_rate = self.slice_from_file(audio_file, start=start_time, end=end_time)
         sample = sample.T
+        # 转成单通道
         if self.mono:
             sample = librosa.to_mono(sample)
+        # 数据增强
+        if self.augment_configs:
+            sample, sample_rate = self.augment(sample, sample_rate)
+        # 重采样
         if self.sample_rate != sample_rate:
-            sample = librosa.resample(sample, orig_sr=sample_rate, target_sr=self.sample_rate)
+            sample = self.resample(sample, orig_sr=sample_rate, target_sr=self.sample_rate)
         return sample, sample_rate, transcript
 
     def _load_timestamps_transcript(self, transcript: List[dict]):
@@ -138,3 +152,101 @@ class CustomDataset(Dataset):
         sndfile.seek(start_frame)
         sample = sndfile.read(frames=end_frame - start_frame, dtype='float32')
         return sample, sample_rate
+
+    # 数据增强
+    def augment(self, sample, sample_rate):
+        for config in self.augment_configs:
+            if config['type'] == 'speed' and random.random() < config['prob']:
+                if self.speed_rates is None:
+                    min_speed_rate, max_speed_rate, num_rates = config['params']['min_speed_rate'], \
+                        config['params']['max_speed_rate'], config['params']['num_rates']
+                    self.speed_rates = np.linspace(min_speed_rate, max_speed_rate, num_rates, endpoint=True)
+                rate = random.choice(self.speed_rates)
+                sample = self.change_speed(sample, speed_rate=rate)
+            if config['type'] == 'shift' and random.random() < config['prob']:
+                min_shift_ms, max_shift_ms = config['params']['min_shift_ms'], config['params']['max_shift_ms']
+                shift_ms = random.uniform(min_shift_ms, max_shift_ms)
+                sample = self.shift(sample, sample_rate, shift_ms=shift_ms)
+            if config['type'] == 'volume' and random.random() < config['prob']:
+                min_gain_dBFS, max_gain_dBFS = config['params']['min_gain_dBFS'], config['params']['max_gain_dBFS']
+                gain = random.uniform(min_gain_dBFS, max_gain_dBFS)
+                sample = self.volume(sample, gain=gain)
+            if config['type'] == 'resample' and random.random() < config['prob']:
+                new_sample_rates = config['params']['new_sample_rates']
+                new_sample_rate = np.random.choice(new_sample_rates)
+                sample = self.resample(sample, orig_sr=sample_rate, target_sr=new_sample_rate)
+                sample_rate = new_sample_rate
+            if config['type'] == 'noise' and random.random() < config['prob']:
+                min_snr_dB, max_snr_dB = config['params']['min_snr_dB'], config['params']['max_snr_dB']
+                if self.noises_path is None:
+                    self.noises_path = []
+                    noise_dir = config['params']['noise_dir']
+                    if os.path.exists(noise_dir):
+                        for file in os.listdir(noise_dir):
+                            self.noises_path.append(os.path.join(noise_dir, file))
+                noise_path = random.choice(self.noises_path)
+                snr_dB = random.uniform(min_snr_dB, max_snr_dB)
+                sample = self.add_noise(sample, sample_rate, noise_path=noise_path, snr_dB=snr_dB)
+        return sample, sample_rate
+
+    # 改变语速
+    @staticmethod
+    def change_speed(sample, speed_rate):
+        if speed_rate == 1.0:
+            return sample
+        if speed_rate <= 0:
+            raise ValueError("速度速率应大于零")
+        old_length = sample.shape[0]
+        new_length = int(old_length / speed_rate)
+        old_indices = np.arange(old_length)
+        new_indices = np.linspace(start=0, stop=old_length, num=new_length)
+        sample = np.interp(new_indices, old_indices, sample).astype(np.float32)
+        return sample
+
+    # 音频偏移
+    @staticmethod
+    def shift(sample, sample_rate, shift_ms):
+        duration = sample.shape[0] / sample_rate
+        if abs(shift_ms) / 1000.0 > duration:
+            raise ValueError("shift_ms的绝对值应该小于音频持续时间")
+        shift_samples = int(shift_ms * sample_rate / 1000)
+        if shift_samples > 0:
+            sample[:-shift_samples] = sample[shift_samples:]
+            sample[-shift_samples:] = 0
+        elif shift_samples < 0:
+            sample[-shift_samples:] = sample[:shift_samples]
+            sample[:-shift_samples] = 0
+        return sample
+
+    # 改变音量
+    @staticmethod
+    def volume(sample, gain):
+        sample *= 10.**(gain / 20.)
+        return sample
+
+    # 声音重采样
+    @staticmethod
+    def resample(sample, orig_sr, target_sr):
+        sample = librosa.resample(sample, orig_sr=orig_sr, target_sr=target_sr)
+        return sample
+
+    # 添加噪声
+    def add_noise(self, sample, sample_rate, noise_path, snr_dB, max_gain_db=300.0):
+        noise_sample, sr = librosa.load(noise_path, sr=sample_rate)
+        sample_rms_db, noise_rms_db = self.rms_db(sample), self.rms_db(noise_sample)
+        noise_gain_db = min(sample_rms_db - noise_rms_db - snr_dB, max_gain_db)
+        noise_sample *= 10. ** (noise_gain_db / 20.)
+        if noise_sample.shape[0] < sample.shape[0]:
+            diff_duration = sample.shape[0] - noise_sample.shape[0]
+            noise_sample = np.pad(noise_sample, (0, diff_duration), 'wrap')
+        elif noise_sample.shape[0] > sample.shape[0]:
+            start_frame = random.uniform(0, noise_sample.shape[0] - sample.shape[0])
+            noise_sample = noise_sample[start_frame:sample.shape[0]]
+        sample = sample + noise_sample
+        return sample
+
+    @staticmethod
+    def rms_db(sample):
+        mean_square = np.mean(sample ** 2)
+        return 10 * np.log10(mean_square)
+        
