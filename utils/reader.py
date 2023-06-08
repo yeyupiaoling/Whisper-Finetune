@@ -165,11 +165,11 @@ class CustomDataset(Dataset):
                 sample = self.change_speed(sample, speed_rate=rate)
             if config['type'] == 'shift' and random.random() < config['prob']:
                 min_shift_ms, max_shift_ms = config['params']['min_shift_ms'], config['params']['max_shift_ms']
-                shift_ms = random.uniform(min_shift_ms, max_shift_ms)
+                shift_ms = random.randint(min_shift_ms, max_shift_ms)
                 sample = self.shift(sample, sample_rate, shift_ms=shift_ms)
             if config['type'] == 'volume' and random.random() < config['prob']:
                 min_gain_dBFS, max_gain_dBFS = config['params']['min_gain_dBFS'], config['params']['max_gain_dBFS']
-                gain = random.uniform(min_gain_dBFS, max_gain_dBFS)
+                gain = random.randint(min_gain_dBFS, max_gain_dBFS)
                 sample = self.volume(sample, gain=gain)
             if config['type'] == 'resample' and random.random() < config['prob']:
                 new_sample_rates = config['params']['new_sample_rates']
@@ -185,7 +185,7 @@ class CustomDataset(Dataset):
                         for file in os.listdir(noise_dir):
                             self.noises_path.append(os.path.join(noise_dir, file))
                 noise_path = random.choice(self.noises_path)
-                snr_dB = random.uniform(min_snr_dB, max_snr_dB)
+                snr_dB = random.randint(min_snr_dB, max_snr_dB)
                 sample = self.add_noise(sample, sample_rate, noise_path=noise_path, snr_dB=snr_dB)
         return sample, sample_rate
 
@@ -240,8 +240,8 @@ class CustomDataset(Dataset):
             diff_duration = sample.shape[0] - noise_sample.shape[0]
             noise_sample = np.pad(noise_sample, (0, diff_duration), 'wrap')
         elif noise_sample.shape[0] > sample.shape[0]:
-            start_frame = random.uniform(0, noise_sample.shape[0] - sample.shape[0])
-            noise_sample = noise_sample[start_frame:sample.shape[0]]
+            start_frame = random.randint(0, noise_sample.shape[0] - sample.shape[0])
+            noise_sample = noise_sample[start_frame:sample.shape[0] + start_frame]
         sample = sample + noise_sample
         return sample
 
