@@ -5,4 +5,3 @@ base-model/
 output/
 dataset/*
 !dataset/test.wav
-whisper/
