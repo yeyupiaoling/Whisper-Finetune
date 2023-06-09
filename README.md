@@ -413,3 +413,4 @@ for chunk in response.iter_lines(decode_unicode=False, delimiter=b"\0"):
 
 1. https://github.com/huggingface/peft
 2. https://github.com/guillaumekln/faster-whisper
+3. https://github.com/ggerganov/whisper.cpp
