@@ -4,14 +4,17 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:orientation="vertical"
     tools:context=".MainActivity">
 
     <Button
+        android:text="录音识别"
         android:id="@+id/start_record_activity_btn"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"/>
 
     <Button
+        android:text="文件识别"
         android:id="@+id/start_file_activity_btn"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"/>
