@@ -44,6 +44,7 @@ OpenAI在开源了号称其英文语音辨识能力已达到人类水准的Whisp
  - [GUI界面预测](#GUI界面预测)
  - [Web部署](#Web部署)
    - [接口文档](#接口文档)
+ - [Android部署](#Android部署)
  - [打赏作者](#打赏作者)
 
 <a name='项目主要程序介绍'></a>
@@ -400,8 +401,9 @@ for chunk in response.iter_lines(decode_unicode=False, delimiter=b"\0"):
 <img src="./docs/images/api.jpg" alt="文档页面" width="600"/>
 </div>
 
-## Android部署
 
+<a name='Android部署'></a>
+## Android部署
 
 <br/>
 <div align="center">
