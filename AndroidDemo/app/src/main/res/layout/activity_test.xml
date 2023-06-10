@@ -4,29 +4,32 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".RecordActivity">
+    tools:context=".TestActivity">
 
     <Button
         android:layout_alignParentBottom="true"
-        android:id="@+id/record_button"
+        android:id="@+id/start_button"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginEnd="10dp"
-        android:text="按下录音" />
+        android:text="开始测试" />
+
+    <EditText
+        android:layout_above="@id/start_button"
+        android:id="@+id/num_edit"
+        android:inputType="number"
+        android:text="2"
+        android:hint="测试次数"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"/>
 
     <TextView
-        android:layout_above="@id/record_button"
+        android:scrollbarStyle="outsideInset"
+        android:scrollbars="vertical"
+        android:layout_above="@id/num_edit"
         android:id="@+id/result_text"
         android:textSize="18sp"
         android:layout_width="match_parent"
         android:layout_height="match_parent"/>
 
-
-    <com.yeyupiaoling.whisper.AudioView
-        android:layout_above="@id/record_button"
-        android:id="@+id/audioView"
-        android:layout_width="match_parent"
-        android:layout_height="100dp"
-        android:layout_marginStart="10dp"
-        android:visibility="gone" />
 </RelativeLayout>

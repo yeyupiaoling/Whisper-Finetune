@@ -17,6 +17,9 @@
         android:theme="@style/Theme.AndroidDemo"
         tools:targetApi="31">
         <activity
+            android:name=".TestActivity"
+            android:exported="false" />
+        <activity
             android:name=".RecordActivity"
             android:exported="false" />
         <activity

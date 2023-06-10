@@ -11,14 +11,20 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        val startRecord = findViewById<Button>(R.id.start_record_activity_btn)
-        val startFile = findViewById<Button>(R.id.start_file_activity_btn)
-        startRecord.setOnClickListener { view: View? ->
+        val startRecordBtn = findViewById<Button>(R.id.start_record_activity_btn)
+        val startFileBtn = findViewById<Button>(R.id.start_file_activity_btn)
+        val testModelBtn = findViewById<Button>(R.id.start_test_activity_btn)
+
+        startRecordBtn.setOnClickListener { view: View? ->
             val intent = Intent(this@MainActivity, RecordActivity::class.java)
             startActivity(intent)
         }
-        startFile.setOnClickListener { view: View? ->
+        startFileBtn.setOnClickListener { view: View? ->
             val intent = Intent(this@MainActivity, AudioFileActivity::class.java)
+            startActivity(intent)
+        }
+        testModelBtn.setOnClickListener { view: View? ->
+            val intent = Intent(this@MainActivity, TestActivity::class.java)
             startActivity(intent)
         }
     }

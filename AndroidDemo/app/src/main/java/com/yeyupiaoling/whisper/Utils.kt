@@ -1,16 +1,20 @@
 package com.yeyupiaoling.whisper
 
 import android.content.Context
+import android.database.Cursor
 import android.net.Uri
 import android.provider.MediaStore
+import android.provider.OpenableColumns
 import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
 import java.io.IOException
+import java.io.InputStream
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 
+// 读取音频数据用于输入预测
 fun decodeWaveFile(file: File): FloatArray {
     val baos = ByteArrayOutputStream()
     file.inputStream().use { it.copyTo(baos) }
@@ -32,6 +36,7 @@ fun decodeWaveFile(file: File): FloatArray {
 }
 
 
+// 给录音的流加上文件头
 @Throws(IOException::class)
 fun writeWAVHeader(
     fos: FileOutputStream, totalAudioLen: Long, totalDataLen: Long,
@@ -87,72 +92,31 @@ fun writeWAVHeader(
 }
 
 
-fun encodeWaveFile(file: File, data: ShortArray) {
-    file.outputStream().use {
-        it.write(headerBytes(data.size * 2))
-        val buffer = ByteBuffer.allocate(data.size * 2)
-        buffer.order(ByteOrder.LITTLE_ENDIAN)
-        buffer.asShortBuffer().put(data)
-        val bytes = ByteArray(buffer.limit())
-        buffer.get(bytes)
-        it.write(bytes)
-    }
-}
-
-private fun headerBytes(totalLength: Int): ByteArray {
-    require(totalLength >= 44)
-    ByteBuffer.allocate(44).apply {
-        order(ByteOrder.LITTLE_ENDIAN)
-
-        put('R'.code.toByte())
-        put('I'.code.toByte())
-        put('F'.code.toByte())
-        put('F'.code.toByte())
-
-        putInt(totalLength - 8)
-
-        put('W'.code.toByte())
-        put('A'.code.toByte())
-        put('V'.code.toByte())
-        put('E'.code.toByte())
-
-        put('f'.code.toByte())
-        put('m'.code.toByte())
-        put('t'.code.toByte())
-        put(' '.code.toByte())
-
-        putInt(16)
-        putShort(1.toShort())
-        putShort(1.toShort())
-        putInt(16000)
-        putInt(32000)
-        putShort(2.toShort())
-        putShort(16.toShort())
-
-        put('d'.code.toByte())
-        put('a'.code.toByte())
-        put('t'.code.toByte())
-        put('a'.code.toByte())
-
-        putInt(totalLength - 44)
-        position(0)
-    }.also {
-        val bytes = ByteArray(it.limit())
-        it.get(bytes)
-        return bytes
-    }
-}
-
+// 根据返回的URI转换为路径
 fun getPathFromURI(context: Context, uri: Uri): String? {
-    val result: String?
-    val cursor = context.contentResolver.query(uri, null, null, null, null)
-    if (cursor == null) {
-        result = uri.path
-    } else {
-        cursor.moveToFirst()
-        val idx = cursor.getColumnIndex(MediaStore.Images.ImageColumns.DATA)
-        result = cursor.getString(idx)
-        cursor.close()
+    try {
+        val returnCursor: Cursor? =
+            context.contentResolver.query(uri, null, null, null, null)
+        val nameIndex: Int = returnCursor!!.getColumnIndex(OpenableColumns.DISPLAY_NAME)
+        returnCursor.moveToFirst()
+        val name: String = returnCursor.getString(nameIndex)
+        val file = File(context.getFilesDir(), name)
+        val inputStream: InputStream? = context.contentResolver.openInputStream(uri)
+        val outputStream = FileOutputStream(file)
+        var read: Int
+        val maxBufferSize = 1 * 1024 * 1024
+        val bytesAvailable: Int = inputStream!!.available()
+        val bufferSize = Math.min(bytesAvailable, maxBufferSize)
+        val buffers = ByteArray(bufferSize)
+        while (inputStream.read(buffers).also { read = it } != -1) {
+            outputStream.write(buffers, 0, read)
+        }
+        returnCursor.close()
+        inputStream.close()
+        outputStream.close()
+        return file.getPath()
+    } catch (e: Exception) {
+        e.printStackTrace()
     }
-    return result
+    return null
 }
