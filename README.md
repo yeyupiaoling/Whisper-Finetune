@@ -400,6 +400,16 @@ for chunk in response.iter_lines(decode_unicode=False, delimiter=b"\0"):
 <img src="./docs/images/api.jpg" alt="文档页面" width="600"/>
 </div>
 
+## Android部署
+
+
+<br/>
+<div align="center">
+<a href="https://yeyupiaoling.cn/whisper.apk">Android安装包</a><br>
+<img src="./docs/images/android.jpg" alt="Android安装包">
+</div>
+
+
 <a name='打赏作者'></a>
 ## 打赏作者
 
