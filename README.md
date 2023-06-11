@@ -405,12 +405,7 @@ for chunk in response.iter_lines(decode_unicode=False, delimiter=b"\0"):
 <a name='Android部署'></a>
 ## Android部署
 
-<br/>
-<div align="center">
-<a href="https://yeyupiaoling.cn/whisper.apk">Android安装包</a><br>
-<img src="./docs/images/android.jpg" alt="Android安装包">
-</div>
-
+安装部署的源码在[AndroidDemo](./AndroidDemo)目录下，具体文档可以到该目录下的[README.md](AndroidDemo/README.md)查看。
 
 <a name='打赏作者'></a>
 ## 打赏作者
