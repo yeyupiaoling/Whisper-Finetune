@@ -29,6 +29,8 @@ OpenAI在开源了号称其英文语音辨识能力已达到人类水准的Whisp
 
 ### 视频讲解：[哔哩哔哩](https://www.bilibili.com/video/BV1S8411o7rm/)
 
+### 演示地址：[Web部署](http://whisper.yeyupiaoling.cn:8081/)
+
 ## 目录
  - [项目主要程序介绍](#项目主要程序介绍)
  - [模型测试表](#模型测试表)

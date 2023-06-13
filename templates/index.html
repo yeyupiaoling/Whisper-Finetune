@@ -105,7 +105,7 @@
     function uploadAudioFile() {
         const input = document.createElement("input");
         input.type = "file";
-        input.accept = "audio/*";
+        input.accept = "audio/*,video/*";
         input.click();
         input.onchange = function () {
             const file = input.files[0];
