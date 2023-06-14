@@ -3,6 +3,7 @@ import functools
 import os
 
 import torch
+import bitsandbytes as bnb
 from peft import LoraConfig, get_peft_model, set_peft_model_state_dict, AdaLoraConfig
 from peft import prepare_model_for_int8_training
 from transformers import Seq2SeqTrainer, Seq2SeqTrainingArguments, WhisperForConditionalGeneration, WhisperProcessor
@@ -83,15 +84,22 @@ model.config.suppress_tokens = []
 # 量化8bit模型
 if args.use_8bit:
     model = prepare_model_for_int8_training(model)
+# 获取Lora的target_modules
+cls = bnb.nn.Linear8bitLt if args.use_8bit else torch.nn.Linear
+lora_module_names = set()
+for name, module in model.named_modules():
+    if isinstance(module, cls):
+        names = name.split('.')
+        lora_module_names.add(names[0] if len(names) == 1 else names[-1])
+target_modules = list(lora_module_names)
 # 注册forward，否则多卡训练会失败
 model.model.encoder.conv1.register_forward_hook(make_inputs_require_grad)
 # 设置Lora参数
 if args.use_adalora:
     config = AdaLoraConfig(init_r=12, target_r=4, beta1=0.85, beta2=0.85, tinit=200, tfinal=1000, deltaT=10,
-                           lora_alpha=32, lora_dropout=0.1, orth_reg_weight=0.5,
-                           target_modules=["k_proj", "q_proj", "v_proj", "out_proj", "fc1", "fc2"])
+                           lora_alpha=32, lora_dropout=0.1, orth_reg_weight=0.5, target_modules=target_modules)
 else:
-    config = LoraConfig(r=32, lora_alpha=64, target_modules=["q_proj", "v_proj"], lora_dropout=0.05, bias="none")
+    config = LoraConfig(r=32, lora_alpha=64, target_modules=target_modules, lora_dropout=0.05, bias="none")
 model = get_peft_model(model, config)
 # 恢复训练时加载Lora参数
 if args.resume_from_checkpoint:
