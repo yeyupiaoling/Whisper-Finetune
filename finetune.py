@@ -2,8 +2,7 @@ import argparse
 import functools
 import os
 
-import torch
-from peft import LoraConfig, get_peft_model, set_peft_model_state_dict, AdaLoraConfig
+from peft import LoraConfig, get_peft_model, AdaLoraConfig, PeftModel
 from peft import prepare_model_for_int8_training
 from transformers import Seq2SeqTrainer, Seq2SeqTrainingArguments, WhisperForConditionalGeneration, WhisperProcessor
 
@@ -84,22 +83,24 @@ model.config.suppress_tokens = []
 # 量化8bit模型
 if args.use_8bit:
     model = prepare_model_for_int8_training(model)
-# 获取Lora的target_modules
-target_modules = find_all_linear_names(args.use_8bit, model)
-print(target_modules)
 # 注册forward，否则多卡训练会失败
 model.model.encoder.conv1.register_forward_hook(make_inputs_require_grad)
-# 设置Lora参数
-if args.use_adalora:
-    config = AdaLoraConfig(init_r=12, target_r=4, beta1=0.85, beta2=0.85, tinit=200, tfinal=1000, deltaT=10,
-                           lora_alpha=32, lora_dropout=0.1, orth_reg_weight=0.5, target_modules=target_modules)
-else:
-    config = LoraConfig(r=32, lora_alpha=64, target_modules=target_modules, lora_dropout=0.05, bias="none")
-model = get_peft_model(model, config)
-# 恢复训练时加载Lora参数
+
+print('加载LoRA模块...')
 if args.resume_from_checkpoint:
-    adapters_dict = torch.load(f'{args.resume_from_checkpoint}/pytorch_model.bin')
-    set_peft_model_state_dict(model=model, peft_model_state_dict=adapters_dict)
+    # 恢复训练时加载Lora参数
+    print("Loading adapters from checkpoint.")
+    model = PeftModel.from_pretrained(model, args.resume_from_checkpoint, is_trainable=True)
+else:
+    print(f'adding LoRA modules...')
+    target_modules = find_all_linear_names(args.bits, model)
+    print(target_modules)
+    if args.use_adalora:
+        config = AdaLoraConfig(init_r=12, target_r=4, beta1=0.85, beta2=0.85, tinit=200, tfinal=1000, deltaT=10,
+                               lora_alpha=32, lora_dropout=0.1, orth_reg_weight=0.5, target_modules=target_modules)
+    else:
+        config = LoraConfig(r=32, lora_alpha=64, target_modules=target_modules, lora_dropout=0.05, bias="none")
+    model = get_peft_model(model, config)
 
 output_dir = os.path.join(args.output_dir, os.path.basename(args.base_model))
 # 定义训练参数
