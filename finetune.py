@@ -3,15 +3,15 @@ import functools
 import os
 
 import torch
-import bitsandbytes as bnb
 from peft import LoraConfig, get_peft_model, set_peft_model_state_dict, AdaLoraConfig
 from peft import prepare_model_for_int8_training
 from transformers import Seq2SeqTrainer, Seq2SeqTrainingArguments, WhisperForConditionalGeneration, WhisperProcessor
 
+from utils.callback import SavePeftModelCallback
 from utils.data_utils import DataCollatorSpeechSeq2SeqWithPadding
+from utils.model_utils import load_from_checkpoint, find_all_linear_names
 from utils.reader import CustomDataset
 from utils.utils import print_arguments, make_inputs_require_grad, add_arguments
-from utils.callback import SavePeftModelCallback
 
 parser = argparse.ArgumentParser(description=__doc__)
 add_arg = functools.partial(add_arguments, argparser=parser)
@@ -85,13 +85,8 @@ model.config.suppress_tokens = []
 if args.use_8bit:
     model = prepare_model_for_int8_training(model)
 # 获取Lora的target_modules
-cls = bnb.nn.Linear8bitLt if args.use_8bit else torch.nn.Linear
-lora_module_names = set()
-for name, module in model.named_modules():
-    if isinstance(module, cls):
-        names = name.split('.')
-        lora_module_names.add(names[0] if len(names) == 1 else names[-1])
-target_modules = list(lora_module_names)
+target_modules = find_all_linear_names(args.bits, model)
+print(target_modules)
 # 注册forward，否则多卡训练会失败
 model.model.encoder.conv1.register_forward_hook(make_inputs_require_grad)
 # 设置Lora参数
@@ -145,9 +140,8 @@ trainer = Seq2SeqTrainer(args=training_args,
                          tokenizer=processor.feature_extractor,
                          callbacks=[SavePeftModelCallback])
 model.config.use_cache = False
+trainer._load_from_checkpoint = load_from_checkpoint
 
-if training_args.local_rank == 0 or training_args.local_rank == -1:
-    print("如果加载恢复训练参数，出现miss keys警告，请忽略它。")
 # 开始训练
 trainer.train(resume_from_checkpoint=args.resume_from_checkpoint)
 
