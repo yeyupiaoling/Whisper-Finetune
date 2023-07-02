@@ -85,7 +85,7 @@ model.config.suppress_tokens = []
 if args.use_8bit:
     model = prepare_model_for_int8_training(model)
 # 获取Lora的target_modules
-target_modules = find_all_linear_names(args.bits, model)
+target_modules = find_all_linear_names(args.use_8bit, model)
 print(target_modules)
 # 注册forward，否则多卡训练会失败
 model.model.encoder.conv1.register_forward_hook(make_inputs_require_grad)
