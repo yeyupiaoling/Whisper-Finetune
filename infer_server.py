@@ -58,7 +58,7 @@ def release_model_semaphore():
 
 
 def recognition(file: File, to_simple: int, remove_pun: int, language: str = "zh", task: str = "transcribe"):
-    segments, info = model.transcribe(file, beam_size=10, task=task, language=language)
+    segments, info = model.transcribe(file, beam_size=10, task=task, language=language, vad_filter=args.vad_filter)
     for segment in segments:
         text = segment.text
         if to_simple == 1:
