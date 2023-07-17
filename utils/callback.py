@@ -14,15 +14,18 @@ class SavePeftModelCallback(TrainerCallback):
                 control: TrainerControl,
                 **kwargs, ):
         if args.local_rank == 0 or args.local_rank == -1:
+            # 复制Lora模型，主要是兼容旧版本的peft
             checkpoint_folder = os.path.join(args.output_dir, f"{PREFIX_CHECKPOINT_DIR}-{state.global_step}")
             peft_model_dir = os.path.join(checkpoint_folder, "adapter_model")
             kwargs["model"].save_pretrained(peft_model_dir)
-            # 更换恢复训练时的模型参数
+            peft_config_path = os.path.join(checkpoint_folder, "adapter_model/adapter_config.json")
             peft_model_path = os.path.join(checkpoint_folder, "adapter_model/adapter_model.bin")
-            pytorch_model_path = os.path.join(checkpoint_folder, "pytorch_model.bin")
-            if os.path.exists(pytorch_model_path):
-                os.remove(pytorch_model_path)
-            shutil.copy(peft_model_path, pytorch_model_path)
+            if not os.path.exists(peft_config_path):
+                os.remove(peft_config_path)
+            if not os.path.exists(peft_model_path):
+                os.remove(peft_model_path)
+            if os.path.exists(peft_model_dir):
+                shutil.rmtree(peft_model_dir)
             # 保存效果最好的模型
             best_checkpoint_folder = os.path.join(args.output_dir, f"{PREFIX_CHECKPOINT_DIR}-best")
             # 因为只保存最新5个检查点，所以要确保不是之前的检查点

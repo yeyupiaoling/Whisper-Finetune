@@ -249,9 +249,9 @@ accelerate launch finetune.py --base_model=openai/whisper-tiny --output_dir=outp
 
 ## 合并模型
 
-微调完成之后会有两个模型，第一个是Whisper基础模型，第二个是Lora模型，需要把这两个模型合并之后才能之后的操作。这个程序只需要传递两个参数，`--lora_model`指定的是训练结束后保存的Lora模型路径，注意如果不是最后的`checkpoint-final`后面还有`adapter_model`文件夹，第二个`--output_dir`是合并后模型的保存目录。
+微调完成之后会有两个模型，第一个是Whisper基础模型，第二个是Lora模型，需要把这两个模型合并之后才能之后的操作。这个程序只需要传递两个参数，`--lora_model`指定的是训练结束后保存的Lora模型路径，其实就是检查点文件夹路径，第二个`--output_dir`是合并后模型的保存目录。
 ```shell
-python merge_lora.py --lora_model=output/whisper-tiny/checkpoint-best/adapter_model --output_dir=models/
+python merge_lora.py --lora_model=output/whisper-tiny/checkpoint-best/ --output_dir=models/
 ```
 
 <a name='评估模型'></a>
@@ -412,6 +412,13 @@ for chunk in response.iter_lines(decode_unicode=False, delimiter=b"\0"):
 ## Android部署
 
 安装部署的源码在[AndroidDemo](./AndroidDemo)目录下，具体文档可以到该目录下的[README.md](AndroidDemo/README.md)查看。
+<br/>
+<div align="center">
+<img src="./docs/images/android2.jpg" alt="Android效果图" width="200">
+<img src="./docs/images/android1.jpg" alt="Android效果图" width="200">
+<img src="./docs/images/android3.jpg" alt="Android效果图" width="200">
+<img src="./docs/images/android4.jpg" alt="Android效果图" width="200">
+</div>
 
 <a name='打赏作者'></a>
 ## 打赏作者
