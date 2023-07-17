@@ -429,7 +429,7 @@ for chunk in response.iter_lines(decode_unicode=False, delimiter=b"\0"):
 
 <br/>
 <div align="center">
-<img src="./docs/images/desktop1.jpg" alt="Windows桌面应用效果图" width="200">
+<img src="./docs/images/desktop1.jpg" alt="Windows桌面应用效果图">
 </div>
 
 
