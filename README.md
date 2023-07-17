@@ -51,6 +51,7 @@ OpenAI在开源了号称其英文语音辨识能力已达到人类水准的Whisp
  - [Web部署](#Web部署)
    - [接口文档](#接口文档)
  - [Android部署](#Android部署)
+ - [Windows桌面应用](#Windows桌面应用)
  - [打赏作者](#打赏作者)
 
 <a name='项目主要程序介绍'></a>
@@ -73,7 +74,7 @@ OpenAI在开源了号称其英文语音辨识能力已达到人类水准的Whisp
 
 1. 原始模型字错率测试表。
 
-|       使用模型       |  指定语言   | aishell_test | test_net | test_meeting |                               下载地址                               |                        CTranslate2模型下载地址                         |
+|       使用模型       |  指定语言   | aishell_test | test_net | test_meeting |                               下载地址                               |                           CTranslate2                            |
 |:----------------:|:-------:|:------------:|:--------:|:------------:|:----------------------------------------------------------------:|:----------------------------------------------------------------:|
 |   whisper-tiny   | Chinese |   0.31898    | 0.40482  |   0.75332    | [点击下载](https://pan.baidu.com/s/1q8xHr71XPe1dnRHv2IzldQ?pwd=wjrf) | [点击下载](https://pan.baidu.com/s/1Rg8KM1gDKLw8kObZEJQG1A?pwd=hnhe) |
 |   whisper-base   | Chinese |   0.22196    | 0.30404  |   0.50378    | [点击下载](https://pan.baidu.com/s/1q8xHr71XPe1dnRHv2IzldQ?pwd=wjrf) | [点击下载](https://pan.baidu.com/s/1Rg8KM1gDKLw8kObZEJQG1A?pwd=hnhe) |
@@ -85,7 +86,7 @@ OpenAI在开源了号称其英文语音辨识能力已达到人类水准的Whisp
 
 2. 微调[AIShell](https://openslr.magicdatatech.com/resources/33/)数据集后字错率测试表。
 
-|       使用模型       |  指定语言   |                            数据集                             | aishell_test | test_net | test_meeting |                               下载地址                               |                        CTranslate2模型下载地址                         |
+|       使用模型       |  指定语言   |                            数据集                             | aishell_test | test_net | test_meeting |                               下载地址                               |                           CTranslate2                            |
 |:----------------:|:-------:|:----------------------------------------------------------:|:------------:|:--------:|:------------:|:----------------------------------------------------------------:|:----------------------------------------------------------------:|
 |   whisper-tiny   | Chinese | [AIShell](https://openslr.magicdatatech.com/resources/33/) |   0.13043    |  0.4463  |   0.57728    | [点击下载](https://pan.baidu.com/s/1hIximy9ddN3cMHN4_VdhnQ?pwd=nfc2) | [点击下载](https://pan.baidu.com/s/1H-OBD9L0hYV-M_WoPEbiJA?pwd=8hbb) |
 |   whisper-base   | Chinese | [AIShell](https://openslr.magicdatatech.com/resources/33/) |   0.08999    | 0.33089  |   0.40713    | [点击下载](https://pan.baidu.com/s/1hIximy9ddN3cMHN4_VdhnQ?pwd=nfc2) | [点击下载](https://pan.baidu.com/s/1H-OBD9L0hYV-M_WoPEbiJA?pwd=8hbb) |
@@ -420,6 +421,18 @@ for chunk in response.iter_lines(decode_unicode=False, delimiter=b"\0"):
 <img src="./docs/images/android4.jpg" alt="Android效果图" width="200">
 </div>
 
+
+<a name='Windows桌面应用'></a>
+## Windows桌面应用
+
+程序在[WhisperDesktop](./WhisperDesktop)目录下，具体文档可以到该目录下的[README.md](WhisperDesktop/README.md)查看。
+
+<br/>
+<div align="center">
+<img src="./docs/images/desktop1.jpg" alt="Windows桌面应用效果图" width="200">
+</div>
+
+
 <a name='打赏作者'></a>
 ## 打赏作者
 
@@ -434,3 +447,4 @@ for chunk in response.iter_lines(decode_unicode=False, delimiter=b"\0"):
 1. https://github.com/huggingface/peft
 2. https://github.com/guillaumekln/faster-whisper
 3. https://github.com/ggerganov/whisper.cpp
+4. https://github.com/Const-me/Whisper
