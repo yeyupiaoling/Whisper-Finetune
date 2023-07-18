@@ -1,6 +1,7 @@
 import argparse
 import functools
 import json
+import os
 import struct
 
 import numpy as np
@@ -67,6 +68,7 @@ with np.load(f"{args.whisper_dir}/whisper/assets/mel_filters.npz") as f:
 
 tokens = json.load(open(f"{args.model_dir}/vocab.json", "r", encoding="utf8"))
 
+os.makedirs(os.path.dirname(args.output_path), exist_ok=True)
 fout = open(args.output_path, "wb")
 
 fout.write(struct.pack("i", 0x67676d6c))  # magic: ggml in hex

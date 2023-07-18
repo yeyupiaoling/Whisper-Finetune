@@ -93,7 +93,8 @@ if args.resume_from_checkpoint:
     model = PeftModel.from_pretrained(model, args.resume_from_checkpoint, is_trainable=True)
 else:
     print(f'adding LoRA modules...')
-    target_modules = find_all_linear_names(args.use_8bit, model)
+    # target_modules = find_all_linear_names(args.use_8bit, model)
+    target_modules = ["k_proj", "q_proj", "v_proj", "out_proj", "fc1", "fc2"]
     print(target_modules)
     if args.use_adalora:
         config = AdaLoraConfig(init_r=12, target_r=4, beta1=0.85, beta2=0.85, tinit=200, tfinal=1000, deltaT=10,
