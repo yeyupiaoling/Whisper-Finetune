@@ -7,6 +7,7 @@ import librosa
 import numpy as np
 import soundfile
 from torch.utils.data import Dataset
+from tqdm import tqdm
 
 from utils.binary import DatasetReader
 
@@ -72,7 +73,7 @@ class CustomDataset(Dataset):
             with open(self.data_list_path, 'r', encoding='utf-8') as f:
                 lines = f.readlines()
             self.data_list = []
-            for line in lines:
+            for line in tqdm(lines, desc='读取数据列表'):
                 if isinstance(line, str):
                     line = json.loads(line)
                 if not isinstance(line, dict): continue

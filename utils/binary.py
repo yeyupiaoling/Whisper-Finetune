@@ -3,6 +3,8 @@ import mmap
 
 import struct
 
+from tqdm import tqdm
+
 
 class DatasetWriter(object):
     def __init__(self, prefix):
@@ -39,7 +41,7 @@ class DatasetReader(object):
         self.offset_dict = {}
         self.fp = open(data_header_path.replace('.header', '.data'), 'rb')
         self.m = mmap.mmap(self.fp.fileno(), 0, access=mmap.ACCESS_READ)
-        for line in open(data_header_path, 'rb'):
+        for line in tqdm(open(data_header_path, 'rb'), desc='读取数据列表'):
             key, val_pos, val_len = line.split('\t'.encode('ascii'))
             data = self.m[int(val_pos):int(val_pos) + int(val_len)]
             data = str(data, encoding="utf-8")

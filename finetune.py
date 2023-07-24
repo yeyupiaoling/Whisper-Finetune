@@ -7,7 +7,7 @@ from transformers import Seq2SeqTrainer, Seq2SeqTrainingArguments, WhisperForCon
 
 from utils.callback import SavePeftModelCallback
 from utils.data_utils import DataCollatorSpeechSeq2SeqWithPadding
-from utils.model_utils import load_from_checkpoint
+from utils.model_utils import load_from_checkpoint, find_all_linear_names
 from utils.reader import CustomDataset
 from utils.utils import print_arguments, make_inputs_require_grad, add_arguments
 
@@ -93,8 +93,8 @@ if args.resume_from_checkpoint:
     model = PeftModel.from_pretrained(model, args.resume_from_checkpoint, is_trainable=True)
 else:
     print(f'adding LoRA modules...')
-    # target_modules = find_all_linear_names(args.use_8bit, model)
-    target_modules = ["k_proj", "q_proj", "v_proj", "out_proj", "fc1", "fc2"]
+    # ["k_proj", "q_proj", "v_proj", "out_proj", "fc1", "fc2"]
+    target_modules = find_all_linear_names(args.use_8bit, model)
     print(target_modules)
     if args.use_adalora:
         config = AdaLoraConfig(init_r=12, target_r=4, beta1=0.85, beta2=0.85, tinit=200, tfinal=1000, deltaT=10,
