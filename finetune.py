@@ -2,13 +2,12 @@ import argparse
 import functools
 import os
 
-from peft import LoraConfig, get_peft_model, AdaLoraConfig, PeftModel
-from peft import prepare_model_for_int8_training
+from peft import LoraConfig, get_peft_model, AdaLoraConfig, PeftModel, prepare_model_for_kbit_training
 from transformers import Seq2SeqTrainer, Seq2SeqTrainingArguments, WhisperForConditionalGeneration, WhisperProcessor
 
 from utils.callback import SavePeftModelCallback
 from utils.data_utils import DataCollatorSpeechSeq2SeqWithPadding
-from utils.model_utils import load_from_checkpoint, find_all_linear_names
+from utils.model_utils import load_from_checkpoint
 from utils.reader import CustomDataset
 from utils.utils import print_arguments, make_inputs_require_grad, add_arguments
 
@@ -53,12 +52,14 @@ processor = WhisperProcessor.from_pretrained(args.base_model,
 # 读取数据
 train_dataset = CustomDataset(data_list_path=args.train_data,
                               processor=processor,
+                              language=args.language,
                               timestamps=args.timestamps,
                               min_duration=args.min_audio_len,
                               max_duration=args.max_audio_len,
                               augment_config_path=args.augment_config_path)
 test_dataset = CustomDataset(data_list_path=args.test_data,
                              processor=processor,
+                             language=args.language,
                              timestamps=args.timestamps,
                              min_duration=args.min_audio_len,
                              max_duration=args.max_audio_len)
@@ -80,9 +81,8 @@ model = WhisperForConditionalGeneration.from_pretrained(args.base_model,
                                                         local_files_only=args.local_files_only)
 model.config.forced_decoder_ids = None
 model.config.suppress_tokens = []
-# 量化8bit模型
-if args.use_8bit:
-    model = prepare_model_for_int8_training(model)
+# 量化模型
+model = prepare_model_for_kbit_training(model)
 # 注册forward，否则多卡训练会失败
 model.model.encoder.conv1.register_forward_hook(make_inputs_require_grad)
 

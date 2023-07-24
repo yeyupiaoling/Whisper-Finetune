@@ -16,11 +16,24 @@ class CustomDataset(Dataset):
                  data_list_path,
                  processor,
                  mono=True,
+                 language=None,
                  timestamps=False,
                  sample_rate=16000,
                  min_duration=0.5,
                  max_duration=30,
                  augment_config_path=None):
+        """
+        Args:
+            data_list_path: 数据列表文件的路径，或者二进制列表的头文件路径
+            processor: Whisper的预处理工具，WhisperProcessor.from_pretrained获取
+            mono: 是否将音频转换成单通道，这个必须是True
+            language: 微调数据的语言
+            timestamps: 微调时是否使用时间戳
+            sample_rate: 音频的采样率，默认是16000
+            min_duration: 小于这个时间段的音频将被截断，单位秒，不能小于0.5，默认0.5s
+            max_duration: 大于这个时间段的音频将被截断，单位秒，不能大于30，默认30s
+            augment_config_path: 数据增强配置参数文件路径
+        """
         super(CustomDataset, self).__init__()
         assert min_duration >= 0.5, f"min_duration不能小于0.5，当前为：{min_duration}"
         assert max_duration <= 30, f"max_duration不能大于30，当前为：{max_duration}"
@@ -29,6 +42,7 @@ class CustomDataset(Dataset):
         self.data_list_path = data_list_path
         self.sample_rate = sample_rate
         self.mono = mono
+        self.language = language
         self.timestamps = timestamps
         self.min_duration = min_duration
         self.max_duration = max_duration
@@ -78,6 +92,7 @@ class CustomDataset(Dataset):
         # 分割音频路径和标签
         audio_file = data_list["audio"]['path']
         transcript = data_list["sentences"] if self.timestamps else data_list["sentence"]
+        language = data_list["language"] if 'language' in data_list.keys() else None
         if 'start_time' not in data_list["audio"].keys():
             sample, sample_rate = soundfile.read(audio_file, dtype='float32')
         else:
@@ -94,7 +109,7 @@ class CustomDataset(Dataset):
         # 重采样
         if self.sample_rate != sample_rate:
             sample = self.resample(sample, orig_sr=sample_rate, target_sr=self.sample_rate)
-        return sample, sample_rate, transcript
+        return sample, sample_rate, transcript, language
 
     def _load_timestamps_transcript(self, transcript: List[dict]):
         assert isinstance(transcript, list), f"transcript应该为list，当前为：{type(transcript)}"
@@ -116,8 +131,11 @@ class CustomDataset(Dataset):
 
     def __getitem__(self, idx):
         # 从数据列表里面获取音频数据、采样率和文本
-        sample, sample_rate, transcript = self._get_list_data(idx=idx)
-        if self.timestamps:  # 加载带有时间戳的文本
+        sample, sample_rate, transcript, language = self._get_list_data(idx=idx)
+        # 可以为单独数据设置语言
+        self.processor.tokenizer.set_prefix_tokens(language=language if language is not None else self.language)
+        # 加载带有时间戳的文本
+        if self.timestamps:
             data = self._load_timestamps_transcript(transcript=transcript)
             # 从输入音频数组中计算log-Mel输入特征
             data["input_features"] = self.processor(audio=sample, sampling_rate=self.sample_rate).input_features
