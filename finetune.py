@@ -65,7 +65,7 @@ test_dataset = CustomDataset(data_list_path=args.test_data,
                              max_duration=args.max_audio_len)
 print(f"训练数据：{len(train_dataset)}，测试数据：{len(test_dataset)}")
 # 数据padding器
-data_collator = DataCollatorSpeechSeq2SeqWithPadding(processor=processor, timestamps=args.timestamps)
+data_collator = DataCollatorSpeechSeq2SeqWithPadding(processor=processor)
 
 # 获取Whisper模型
 device_map = "auto"

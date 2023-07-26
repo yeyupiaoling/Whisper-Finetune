@@ -49,6 +49,9 @@ class CustomDataset(Dataset):
         self.max_duration = max_duration
         self.vocab = self.processor.tokenizer.get_vocab()
         self.timestamp_begin = self.vocab['<|notimestamps|>'] + 1
+        self.startoftranscript = self.vocab['<|startoftranscript|>']
+        self.endoftext = self.vocab['<|endoftext|>']
+        self.nocaptions = self.vocab['<|nocaptions|>']
         self.data_list: List[dict] = []
         # 加载数据列表
         self._load_data_list()
@@ -126,7 +129,7 @@ class CustomDataset(Dataset):
             labels.extend([start])
             labels.extend(label)
             labels.extend([end])
-        data['labels'] = labels + [self.vocab['<|endoftext|>']]
+        data['labels'] = labels + [self.endoftext]
         return data
 
     def __getitem__(self, idx):
@@ -134,14 +137,19 @@ class CustomDataset(Dataset):
         sample, sample_rate, transcript, language = self._get_list_data(idx=idx)
         # 可以为单独数据设置语言
         self.processor.tokenizer.set_prefix_tokens(language=language if language is not None else self.language)
-        # 加载带有时间戳的文本
-        if self.timestamps:
-            data = self._load_timestamps_transcript(transcript=transcript)
-            # 从输入音频数组中计算log-Mel输入特征
-            data["input_features"] = self.processor(audio=sample, sampling_rate=self.sample_rate).input_features
+        if len(transcript) > 0:
+            # 加载带有时间戳的文本
+            if self.timestamps:
+                data = self._load_timestamps_transcript(transcript=transcript)
+                # 从输入音频数组中计算log-Mel输入特征
+                data["input_features"] = self.processor(audio=sample, sampling_rate=self.sample_rate).input_features
+            else:
+                # 获取log-Mel特征和标签ID
+                data = self.processor(audio=sample, sampling_rate=self.sample_rate, text=transcript)
         else:
-            # 获取log-Mel特征和标签ID
-            data = self.processor(audio=sample, sampling_rate=self.sample_rate, text=transcript)
+            # 如果没有文本，则使用<|nocaptions|>标记
+            data = self.processor(audio=sample, sampling_rate=self.sample_rate)
+            data['labels'] = [self.startoftranscript, self.nocaptions, self.endoftext]
         return data
 
     def __len__(self):
