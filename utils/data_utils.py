@@ -63,10 +63,4 @@ class DataCollatorSpeechSeq2SeqWithPadding:
 
         batch["labels"] = labels
 
-        if self.timestamps:
-            # get the tokenized label sequences
-            decoder_input_ids = [{"input_ids": feature["decoder_input_ids"]} for feature in features]
-            # pad the labels to max length
-            decoder_input_ids = self.processor.tokenizer.pad(decoder_input_ids, return_tensors="pt").input_ids
-            batch["decoder_input_ids"] = decoder_input_ids
         return batch

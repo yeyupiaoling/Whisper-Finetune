@@ -126,8 +126,7 @@ class CustomDataset(Dataset):
             labels.extend([start])
             labels.extend(label)
             labels.extend([end])
-        data['decoder_input_ids'] = labels
-        data['labels'] = labels[1:] + [self.vocab['<|endoftext|>']]
+        data['labels'] = labels + [self.vocab['<|endoftext|>']]
         return data
 
     def __getitem__(self, idx):
