@@ -1,13 +1,17 @@
 import argparse
+import json
+import math
+import multiprocessing
 import os
+from multiprocessing import cpu_count
 
 import ijson
+import soundfile
 from tqdm import tqdm
 import sys
 
 sys.path.insert(0, sys.path[0] + "/../")
 from utils.binary import DatasetWriter
-
 
 parser = argparse.ArgumentParser(description=__doc__)
 parser.add_argument('--wenetspeech_json', type=str, default='/media/WenetSpeech数据集/WenetSpeech.json',
@@ -84,20 +88,142 @@ def main():
                                "start_time": round(start_time, 3),
                                "end_time": round(end_time, 3)},
                         sentence=text,
-                        sentences=[{"start": 0,
-                                    "end": round(end_time - start_time, 3),
-                                    "text": text}],
                         duration=round(end_time - start_time, 3))
             data_type = long_audio_path.split('/')[-4]
             if data_type == 'test_net':
-                f_test_net.write('{}\n'.format(str(line).replace("'", '"')))
+                f_test_net.write(json.dumps(line, ensure_ascii=False) + '\n')
             if data_type == 'test_meeting':
-                f_test_meeting.write('{}\n'.format(str(line).replace("'", '"')))
+                f_test_meeting.write(json.dumps(line, ensure_ascii=False) + '\n')
             if data_type == 'train':
-                f_train.write('{}\n'.format(str(line).replace("'", '"')))
+                f_train.write(json.dumps(line, ensure_ascii=False) + '\n')
     f_train.close()
     f_test_meeting.close()
     f_test_net.close()
+
+
+# 合并多条音频，增加时间戳，同时加速训练
+def merge_list():
+    for file_path in [train_list_path, test_net_path, test_meeting_path]:
+        with open(file_path, 'r', encoding='utf-8') as f:
+            lines = f.readlines()
+        with open(file_path, 'w', encoding='utf-8') as f:
+            sentences = []
+            duration = 0
+            start_time = 0
+            text = ''
+            for i in tqdm(range(len(lines))):
+                data = json.loads(lines[i])
+                sentence = data["sentence"]
+                # 新数据
+                if duration == 0:
+                    start_time = data['audio']["start_time"]
+                duration = data['audio']["end_time"] - start_time
+                # 带时间戳数据
+                sentences.append({"start": round(data['audio']["start_time"] - start_time, 2),
+                                  "end": round(data['audio']['end_time'] - start_time, 2),
+                                  "text": sentence})
+                # 对文本最后如果是感叹号，就转成句号，因为很多感叹号标注不准确
+                if sentence[-1] == '！':
+                    if sentence[-2] == '啊' or sentence[-2] == '呀':
+                        text += sentence
+                    else:
+                        sentence = sentence[:-1] + '。'
+                        text += sentence
+                else:
+                    text += sentence
+                name = data['audio']['path']
+                if i < len(lines) - 2:
+                    next_data = json.loads(lines[i + 1])
+                    next_name = next_data['audio']['path']
+                    # 如果下一条数据是新数据或者加上就大于30秒，就写入数据
+                    if next_name != name or duration + next_data['duration'] >= 30:
+                        data1 = dict()
+                        data1['audio'] = {"path": data['audio']['path']}
+                        data1['audio']['start_time'] = start_time
+                        data1['audio']['end_time'] = data['audio']['end_time']
+                        data1['duration'] = round(data['audio']['end_time'] - start_time, 2)
+                        data1['sentence'] = text
+                        data1['sentences'] = sentences
+                        f.write(f'{json.dumps(data1, ensure_ascii=False)}\n')
+                        sentences = []
+                        duration = 0
+                        start_time = 0
+                        text = ''
+                else:
+                    # 最后一条数据处理方式
+                    data1 = dict()
+                    data1['audio'] = {"path": data['audio']['path']}
+                    data1['audio']['start_time'] = start_time
+                    data1['audio']['end_time'] = data['audio']['end_time']
+                    data1['duration'] = round(data['audio']['end_time'] - start_time, 2)
+                    data1['sentence'] = text
+                    data1['sentences'] = sentences
+                    f.write(f'{json.dumps(data1, ensure_ascii=False)}\n')
+                    sentences = []
+                    duration = 0
+                    start_time = 0
+                    text = ''
+
+
+# 设置空白音频和转换格式
+def process_audio(data, i):
+    for path, sentences in tqdm(data, desc=f"处理进程{i}"):
+        if not os.path.exists(path): continue
+        sample, sr = soundfile.read(path)
+        for sentence in sentences:
+            start, end = sentence
+            start = max(int((start + 0.1) * sr), 0)
+            end = min(int((end - 0.1) * sr), len(sample))
+            sample[start:end] = 0
+        soundfile.write(path[:-5] + '.mp3', sample, sr)
+
+
+# 设置没有标注的位置静音
+def set_silence():
+    for file_path in [train_list_path, test_net_path]:
+        with open(file_path, 'r', encoding='utf-8') as f:
+            lines = f.readlines()
+        all_data = {}
+        for line in tqdm(lines, desc='读取数据列表'):
+            data = json.loads(line)
+            path = data['audio']['path']
+            start_a = data['audio']['start_time']
+            sentences = data['sentences']
+            last_end = start_a
+            for sentence in sentences:
+                start = round(start_a + sentence['start'], 3)
+                if start - last_end > 1:
+                    if path in all_data.keys():
+                        all_data[path].append([last_end, start])
+                    else:
+                        all_data[path] = [[last_end, start]]
+                last_end = round(start_a + sentence['end'], 3)
+        # 多进程处理数据
+        all_data = list(all_data.items())
+        num_worker = cpu_count()
+        length = math.ceil(len(all_data) / num_worker)
+        data = [all_data[i * length:(i + 1) * length] for i in range(num_worker)]
+        my_process = []
+        for i in range(num_worker):
+            process = multiprocessing.Process(target=process_audio, args=(data[i], i))
+            my_process.append(process)
+        for process in my_process:
+            process.start()
+        for process in my_process:
+            process.join()
+        # 修改路径，因为是转成mp3了
+        with open(file_path, 'w', encoding='utf-8') as f:
+            for line in tqdm(lines, desc='修改路径后缀'):
+                data = json.loads(line)
+                path = data['audio']['path']
+                path = path[:-5] + '.mp3'
+                if not os.path.exists(path):
+                    print(f'{path}文件不存在', file=sys.stderr)
+                    continue
+                data['audio']['path'] = path
+                f.write(json.dumps(data, ensure_ascii=False) + '\n')
+                # 会删除旧的语音
+                os.remove(path)
 
 
 # 转成二进制文件，减少内存占用
@@ -114,6 +240,10 @@ def create_binary():
 
 if __name__ == '__main__':
     main()
+    # 合并多条音频，增加时间戳，同时加速训练
+    merge_list()
+    # 设置没有标注的位置静音
+    set_silence()
     # 转成二进制文件，减少内存占用
     create_binary()
 
