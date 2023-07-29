@@ -169,13 +169,15 @@ def merge_list():
 def process_audio(data, i):
     for path, sentences in tqdm(data, desc=f"处理进程{i}"):
         if not os.path.exists(path): continue
+        save_path = path[:-5] + '.flac'
+        if os.path.exists(save_path): continue
         sample, sr = soundfile.read(path)
         for sentence in sentences:
             start, end = sentence
             start = max(int((start + 0.1) * sr), 0)
             end = min(int((end - 0.1) * sr), len(sample))
             sample[start:end] = 0
-        soundfile.write(path[:-5] + '.mp3', sample, sr)
+        soundfile.write(save_path, sample, sr)
 
 
 # 设置没有标注的位置静音
@@ -187,6 +189,7 @@ def set_silence():
         for line in tqdm(lines, desc='读取数据列表'):
             data = json.loads(line)
             path = data['audio']['path']
+            if os.path.splitext(path)[-1] != '.opus': continue
             start_a = data['audio']['start_time']
             sentences = data['sentences']
             last_end = start_a
@@ -197,6 +200,9 @@ def set_silence():
                         all_data[path].append([last_end, start])
                     else:
                         all_data[path] = [[last_end, start]]
+                else:
+                    if path not in all_data.keys():
+                        all_data[path] = []
                 last_end = round(start_a + sentence['end'], 3)
         # 多进程处理数据
         all_data = list(all_data.items())
@@ -216,14 +222,12 @@ def set_silence():
             for line in tqdm(lines, desc='修改路径后缀'):
                 data = json.loads(line)
                 path = data['audio']['path']
-                path = path[:-5] + '.mp3'
+                path = path.replace('.opus', '.flac')
                 if not os.path.exists(path):
                     print(f'{path}文件不存在', file=sys.stderr)
                     continue
                 data['audio']['path'] = path
                 f.write(json.dumps(data, ensure_ascii=False) + '\n')
-                # 会删除旧的语音
-                os.remove(path)
 
 
 # 转成二进制文件，减少内存占用
