@@ -18,7 +18,7 @@ parser.add_argument('--wenetspeech_json', type=str, default='/media/WenetSpeech�
                     help="WenetSpeech的标注json文件路径")
 parser.add_argument('--pun_model_path', type=str, default=None,
                     help="添加标点符号的模型，模型来源：https://github.com/yeyupiaoling/PunctuationModel")
-parser.add_argument('--annotation_dir', type=str, default='dataset/', help="存放数据列表的文件夹路径")
+parser.add_argument('--annotation_dir', type=str, default='../dataset/', help="存放数据列表的文件夹路径")
 args = parser.parse_args()
 
 # 使用符号模型
