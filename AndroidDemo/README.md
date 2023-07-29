@@ -1,8 +1,10 @@
 # Android部署项目
 
+简体中文 | [English](./README_en.md)
+
 ## 转换模型
 
-1. 首先要克隆Whisper原生的源码，因为需要它的一些文件，请在`Whisper-Finetune`项目根目录下执行下面命令。
+1. To start by cloning the Whisper native source code, as we need some of its files, run the following command from the root of the `whisper-finetune` project.
 ```shell
 git clone https://github.com/openai/whisper.git
 ```

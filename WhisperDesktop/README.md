@@ -1,5 +1,7 @@
 # Windows桌面应用
 
+简体中文 | [English](./README_en.md)
+
 该程序是使用[Whisper](https://github.com/Const-me/Whisper)翻译得的，源码可以前面该项目查看。该程序使用的模型格式是GGML格式，跟Android部署的一样，所以需要转换模型格式才能使用。
 
 ## 转换模型

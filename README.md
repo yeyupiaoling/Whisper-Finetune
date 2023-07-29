@@ -1,5 +1,13 @@
 # 微调Whisper语音识别模型和加速推理
 
+简体中文 | [English](./README_en.md)
+
+![python version](https://img.shields.io/badge/python-3.8+-orange.svg)
+![GitHub forks](https://img.shields.io/github/forks/yeyupiaoling/Whisper-Finetune)
+![GitHub Repo stars](https://img.shields.io/github/stars/yeyupiaoling/Whisper-Finetune)
+![GitHub](https://img.shields.io/github/license/yeyupiaoling/Whisper-Finetune)
+![支持系统](https://img.shields.io/badge/支持系统-Win/Linux/MAC-9cf)
+
 ## 前言
 
 OpenAI在开源了号称其英文语音辨识能力已达到人类水准的Whisper项目，且它亦支持其它98种语言的自动语音辨识。Whisper所提供的自动语音识与翻译任务，它们能将各种语言的语音变成文本，也能将这些文本翻译成英文。本项目主要的目的是为了对Whisper模型使用Lora进行微调，**支持无时间戳数据训练，有时间戳数据训练、无语音数据训练**。目前开源了好几个模型，具体可以在[openai](https://huggingface.co/openai)查看，下面列出了常用的几个模型。另外项目最后还支持CTranslate2加速推理和GGML加速推理，提示一下，加速推理支持直接使用Whisper原模型转换，并不一定需要微调。支持Windows桌面应用，Android应用和服务器部署。
@@ -22,7 +30,7 @@ OpenAI在开源了号称其英文语音辨识能力已达到人类水准的Whisp
 </div>
 
 
-使用环境：
+**使用环境：**
 
 - Anaconda 3
 - Python 3.8
@@ -66,6 +74,9 @@ OpenAI在开源了号称其英文语音辨识能力已达到人类水准的Whisp
 6. `infer_ct2.py`：使用转换为CTranslate2的模型预测，主要参考这个程序用法。
 7. `infer_gui.py`：有GUI界面操作，使用转换为CTranslate2的模型预测。
 8. `infer_server.py`：使用转换为CTranslate2的模型部署到服务器端，提供给客户端调用。
+9. `convert-ggml.py`：转换模型为GGML格式模型，给Android应用或者Windows应用使用。
+10. `AndroidDemo`：该目录存放的是部署模型到Android的源码。
+11. `WhisperDesktop`：该目录存放的是Windows桌面应用的程序。
 
 
 <a name='模型测试表'></a>
@@ -152,12 +163,14 @@ python -m pip install -r requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/s
 
 ## 准备数据
 
-训练的数据集如下，是一个jsonlines的数据列表，也就是每一行都是一个JSON数据，数据格式如下。Whisper是支持有标点符号的，所以训练的数据集中可以带有标点符号。本项目提供了一个制作AIShell数据集的程序`aishell.py`，执行这个程序可以自动下载并生成如下列格式的训练集和测试集，**注意：** 这个程序可以通过指定AIShell的压缩文件来跳过下载过程的，如果直接下载会非常慢，可以使用一些如迅雷等下载器下载该数据集，然后通过参数`--filepath`指定下载的压缩文件路径，如`/home/test/data_aishell.tgz`。
+训练的数据集如下，是一个jsonlines的数据列表，也就是每一行都是一个JSON数据，数据格式如下。本项目提供了一个制作AIShell数据集的程序`aishell.py`，执行这个程序可以自动下载并生成如下列格式的训练集和测试集，**注意：** 这个程序可以通过指定AIShell的压缩文件来跳过下载过程的，如果直接下载会非常慢，可以使用一些如迅雷等下载器下载该数据集，然后通过参数`--filepath`指定下载的压缩文件路径，如`/home/test/data_aishell.tgz`。
 
 **小提示：**
-1. 如果不使用时间戳训练，可以不包含`sentences`部分的数据。
+1. 如果不使用时间戳训练，可以不包含`sentences`字段的数据。
 2. 如果只有一种语言的数据，可以不包含`language`字段数据。
 3. 如果训练空语音数据，`sentences`字段为`[]`，`sentence`字段为`""`，`language`字段可以不存在。
+4. 数据可以不包含标点符号，但微调的模型会损失添加符号能力。
+
 ```json
 {
    "audio": {
