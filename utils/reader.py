@@ -1,6 +1,7 @@
 import json
 import os
 import random
+import sys
 from typing import List
 
 import librosa
@@ -133,24 +134,28 @@ class CustomDataset(Dataset):
         return data
 
     def __getitem__(self, idx):
-        # 从数据列表里面获取音频数据、采样率和文本
-        sample, sample_rate, transcript, language = self._get_list_data(idx=idx)
-        # 可以为单独数据设置语言
-        self.processor.tokenizer.set_prefix_tokens(language=language if language is not None else self.language)
-        if len(transcript) > 0:
-            # 加载带有时间戳的文本
-            if self.timestamps:
-                data = self._load_timestamps_transcript(transcript=transcript)
-                # 从输入音频数组中计算log-Mel输入特征
-                data["input_features"] = self.processor(audio=sample, sampling_rate=self.sample_rate).input_features
+        try:
+            # 从数据列表里面获取音频数据、采样率和文本
+            sample, sample_rate, transcript, language = self._get_list_data(idx=idx)
+            # 可以为单独数据设置语言
+            self.processor.tokenizer.set_prefix_tokens(language=language if language is not None else self.language)
+            if len(transcript) > 0:
+                # 加载带有时间戳的文本
+                if self.timestamps:
+                    data = self._load_timestamps_transcript(transcript=transcript)
+                    # 从输入音频数组中计算log-Mel输入特征
+                    data["input_features"] = self.processor(audio=sample, sampling_rate=self.sample_rate).input_features
+                else:
+                    # 获取log-Mel特征和标签ID
+                    data = self.processor(audio=sample, sampling_rate=self.sample_rate, text=transcript)
             else:
-                # 获取log-Mel特征和标签ID
-                data = self.processor(audio=sample, sampling_rate=self.sample_rate, text=transcript)
-        else:
-            # 如果没有文本，则使用<|nocaptions|>标记
-            data = self.processor(audio=sample, sampling_rate=self.sample_rate)
-            data['labels'] = [self.startoftranscript, self.nocaptions, self.endoftext]
-        return data
+                # 如果没有文本，则使用<|nocaptions|>标记
+                data = self.processor(audio=sample, sampling_rate=self.sample_rate)
+                data['labels'] = [self.startoftranscript, self.nocaptions, self.endoftext]
+            return data
+        except Exception as e:
+            print(f'读取数据出错，序号：{idx}，错误信息：{e}', file=sys.stderr)
+            return self.__getitem__(random.randint(0, self.__len__() - 1))
 
     def __len__(self):
         return len(self.data_list)
