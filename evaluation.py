@@ -57,7 +57,7 @@ test_dataset = CustomDataset(data_list_path=args.test_data,
 print(f"测试数据：{len(test_dataset)}")
 
 # 数据padding器
-data_collator = DataCollatorSpeechSeq2SeqWithPadding(processor=processor, timestamps=args.timestamps)
+data_collator = DataCollatorSpeechSeq2SeqWithPadding(processor=processor)
 eval_dataloader = DataLoader(test_dataset, batch_size=args.batch_size,
                              num_workers=args.num_workers, collate_fn=data_collator)
 
