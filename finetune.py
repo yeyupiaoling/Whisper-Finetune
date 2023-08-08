@@ -1,7 +1,9 @@
 import argparse
 import functools
 import os
+import platform
 
+import torch
 from peft import LoraConfig, get_peft_model, AdaLoraConfig, PeftModel, prepare_model_for_kbit_training
 from transformers import Seq2SeqTrainer, Seq2SeqTrainingArguments, WhisperForConditionalGeneration, WhisperProcessor
 
@@ -131,6 +133,10 @@ if training_args.local_rank == 0 or training_args.local_rank == -1:
     print('=' * 90)
     model.print_trainable_parameters()
     print('=' * 90)
+
+# 使用Pytorch2.0的编译器
+if torch.__version__ >= "2" and platform.system().lower() == 'windows':
+    model = torch.compile(model)
 
 # 定义训练器
 trainer = Seq2SeqTrainer(args=training_args,
