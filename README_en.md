@@ -154,6 +154,12 @@ sudo nvidia-docker run --name pytorch -it -v $PWD:/workspace pytorch/pytorch:1.1
 python -m pip install -r requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/simple
 ```
 
+
+- Windows requires a separate installation of bitsandbytes.
+```shell
+python -m pip install https://github.com/jllllll/bitsandbytes-windows-webui/releases/download/wheels/bitsandbytes-0.40.1.post1-py3-none-win_amd64.whl
+```
+
 <a name='准备数据'></a>
 
 ## Prepare the data
