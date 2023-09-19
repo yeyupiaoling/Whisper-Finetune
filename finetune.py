@@ -135,7 +135,7 @@ if training_args.local_rank == 0 or training_args.local_rank == -1:
     print('=' * 90)
 
 # 使用Pytorch2.0的编译器
-if torch.__version__ >= "2" and platform.system().lower() == 'windows':
+if torch.__version__ >= "2" and platform.system().lower() != 'windows':
     model = torch.compile(model)
 
 # 定义训练器
