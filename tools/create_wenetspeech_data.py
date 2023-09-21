@@ -1,41 +1,40 @@
 import argparse
 import json
+import logging
 import math
 import multiprocessing
 import os
+import sys
 from multiprocessing import cpu_count
 
 import ijson
 import soundfile
+from modelscope.pipelines import pipeline
+from modelscope.utils.constant import Tasks
+from modelscope.utils.logger import get_logger
 from tqdm import tqdm
-import sys
 
 sys.path.insert(0, sys.path[0] + "/../")
 from utils.binary import DatasetWriter
 
+logger = get_logger(log_level=logging.CRITICAL)
+logger.setLevel(logging.CRITICAL)
+
+
 parser = argparse.ArgumentParser(description=__doc__)
 parser.add_argument('--wenetspeech_json', type=str, default='/media/WenetSpeech数据集/WenetSpeech.json',
                     help="WenetSpeech的标注json文件路径")
-parser.add_argument('--pun_model_path', type=str, default=None,
-                    help="添加标点符号的模型，模型来源：https://github.com/yeyupiaoling/PunctuationModel")
+parser.add_argument('--add_pun', type=bool, default=True, help="是否添加标点符")
 parser.add_argument('--annotation_dir', type=str, default='../dataset/', help="存放数据列表的文件夹路径")
 args = parser.parse_args()
 
-# 使用符号模型
-if args.pun_model_path:
-    from utils.pun_predictor import PunctuationExecutor
-    pun_executor = PunctuationExecutor(model_dir=args.pun_model_path, use_gpu=True)
-
 if not os.path.exists(args.annotation_dir):
     os.makedirs(args.annotation_dir)
-# 训练数据列表
-train_list_path = os.path.join(args.annotation_dir, 'train.json')
-f_train = open(train_list_path, 'w', encoding='utf-8')
-# 测试数据列表
+
+# 训练、测试数据列表
+train_list_path = os.path.join(args.annotation_dir, 'train_wenet.json')
 test_net_path = os.path.join(args.annotation_dir, 'test_net.json')
 test_meeting_path = os.path.join(args.annotation_dir, 'test_meeting.json')
-f_test_net = open(test_net_path, 'w', encoding='utf-8')
-f_test_meeting = open(test_meeting_path, 'w', encoding='utf-8')
 
 
 # 获取标注信息
@@ -71,6 +70,10 @@ def get_data(wenetspeech_json):
 
 
 def main():
+    f_train = open(train_list_path, 'w', encoding='utf-8')
+    f_test_net = open(test_net_path, 'w', encoding='utf-8')
+    f_test_meeting = open(test_meeting_path, 'w', encoding='utf-8')
+
     all_data = get_data(args.wenetspeech_json)
     print(f'总数据量为：{len(all_data)}')
     for data in tqdm(all_data):
@@ -79,9 +82,6 @@ def main():
             start_time = float(segment_file['begin_time'])
             end_time = float(segment_file['end_time'])
             text = segment_file['text']
-            # 添加标点符号
-            if args.pun_model_path:
-                text = pun_executor(text)
             confidence = segment_file['confidence']
             if confidence < 0.95: continue
             line = dict(audio={"path": long_audio_path,
@@ -122,21 +122,14 @@ def merge_list():
                 sentences.append({"start": round(data['audio']["start_time"] - start_time, 2),
                                   "end": round(data['audio']['end_time'] - start_time, 2),
                                   "text": sentence})
-                # 对文本最后如果是感叹号，就转成句号，因为很多感叹号标注不准确
-                if sentence[-1] == '！':
-                    if sentence[-2] == '啊' or sentence[-2] == '呀':
-                        text += sentence
-                    else:
-                        sentence = sentence[:-1] + '。'
-                        text += sentence
-                else:
-                    text += sentence
+                text += sentence
                 name = data['audio']['path']
                 if i < len(lines) - 2:
                     next_data = json.loads(lines[i + 1])
                     next_name = next_data['audio']['path']
+                    next_end_time = next_data['audio']["end_time"]
                     # 如果下一条数据是新数据或者加上就大于30秒，就写入数据
-                    if next_name != name or duration + next_data['duration'] >= 30:
+                    if next_name != name or next_end_time - start_time >= 30:
                         data1 = dict()
                         data1['audio'] = {"path": data['audio']['path']}
                         data1['audio']['start_time'] = start_time
@@ -217,7 +210,7 @@ def set_silence():
             process.start()
         for process in my_process:
             process.join()
-        # 修改路径，因为是转成mp3了
+        # 修改路径，因为是转成flac了
         with open(file_path, 'w', encoding='utf-8') as f:
             for line in tqdm(lines, desc='修改路径后缀'):
                 data = json.loads(line)
@@ -228,6 +221,55 @@ def set_silence():
                     continue
                 data['audio']['path'] = path
                 f.write(json.dumps(data, ensure_ascii=False) + '\n')
+
+
+# 添加标点符号
+def process_pun(data, i):
+    inference_pipline = pipeline(task=Tasks.punctuation,
+                                 model='damo/punc_ct-transformer_cn-en-common-vocab471067-large',
+                                 model_revision="v1.0.0")
+    f = open(f'temp{i}.txt', 'w', encoding='utf-8')
+    for line in tqdm(data, desc=f"处理进程{i}"):
+        data = json.loads(line)
+        sentence = data['sentence']
+        sentence = sentence.replace('，', '').replace('。', '').replace('？', '').replace('！', '').replace('、', '')
+        sentence = inference_pipline(text_in=sentence)['text']
+        data['sentence'] = sentence
+
+        param_dict = {"cache": []}
+        sentences = data['sentences']
+        for i in range(len(sentences)):
+            text = sentences[i]['text']
+            text = text.replace('，', '').replace('。', '').replace('？', '').replace('！', '').replace('、', '')
+            text = inference_pipline(text_in=text, param_dict=param_dict)['text']
+            sentences[i]['text'] = text
+        f.write(json.dumps(data, ensure_ascii=False) + '\n')
+
+
+# 多进程添加标点符号
+def add_pun():
+    for file_path in [train_list_path, test_net_path, test_meeting_path]:
+        with open(file_path, 'r', encoding='utf-8') as f:
+            all_data = f.readlines()
+        # 多进程添加标点符号，根据自己的显存大小调整
+        num_worker = 4
+        length = math.ceil(len(all_data) / num_worker)
+        data = [all_data[i * length:(i + 1) * length] for i in range(num_worker)]
+        my_process = []
+        for i in range(num_worker):
+            process = multiprocessing.Process(target=process_pun, args=(data[i], i))
+            my_process.append(process)
+        for process in my_process:
+            process.start()
+        for process in my_process:
+            process.join()
+        # 合并文件
+        with open(file_path, 'w', encoding='utf-8') as fw:
+            for i in range(num_worker):
+                with open(f'temp{i}.txt', 'r', encoding='utf-8') as fr:
+                    lines = fr.readlines()
+                for line in lines:
+                    fw.write(line)
 
 
 # 转成二进制文件，减少内存占用
@@ -248,6 +290,8 @@ if __name__ == '__main__':
     merge_list()
     # 设置没有标注的位置静音
     set_silence()
+    # 添加标点符号
+    if args.add_pun:
+        add_pun()
     # 转成二进制文件，减少内存占用
     create_binary()
-
