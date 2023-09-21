@@ -23,7 +23,7 @@ OpenAI在开源了号称其英文语音辨识能力已达到人类水准的Whisp
  - openai/whisper-large
  - openai/whisper-large-v2
 
-**欢迎大家扫码入知识星球或者QQ群讨论，知识星球里面提供项目的模型文件和博主其他相关项目的模型文件，也包括其他一些资源。**
+**欢迎大家扫码入知识星球（左）或者QQ群（右）讨论，知识星球里面提供项目的模型文件和博主其他相关项目的模型文件，也包括其他一些资源。**
 
 <div align="center">
   <img src="https://yeyupiaoling.cn/zsxq.png" alt="知识星球" width="400">
@@ -42,7 +42,7 @@ OpenAI在开源了号称其英文语音辨识能力已达到人类水准的Whisp
 
 ### 视频讲解：[哔哩哔哩](https://www.bilibili.com/video/BV1S8411o7rm/)
 
-### 演示地址：[Web部署](http://whisper.yeyupiaoling.cn:8081/)
+### 演示地址：[Web部署](https://whisper.yeyupiaoling.cn:8082/)
 
 ## 目录
  - [项目主要程序介绍](#项目主要程序介绍)
@@ -86,27 +86,27 @@ OpenAI在开源了号称其英文语音辨识能力已达到人类水准的Whisp
 
 1. 原始模型字错率测试表。
 
-|       使用模型       |  指定语言   | aishell_test | test_net | test_meeting |                               下载地址                               |                           CTranslate2                            |                               GGML                               |
-|:----------------:|:-------:|:------------:|:--------:|:------------:|:----------------------------------------------------------------:|:----------------------------------------------------------------:|:----------------------------------------------------------------:|
-|   whisper-tiny   | Chinese |   0.31898    | 0.40482  |   0.75332    | [点击下载](https://pan.baidu.com/s/1q8xHr71XPe1dnRHv2IzldQ?pwd=wjrf) | [点击下载](https://pan.baidu.com/s/1Rg8KM1gDKLw8kObZEJQG1A?pwd=hnhe) | [点击下载](https://pan.baidu.com/s/1AjkdrF2YC5oP_CiGtAtZKg?pwd=4w9k) |
-|   whisper-base   | Chinese |   0.22196    | 0.30404  |   0.50378    | [点击下载](https://pan.baidu.com/s/1q8xHr71XPe1dnRHv2IzldQ?pwd=wjrf) | [点击下载](https://pan.baidu.com/s/1Rg8KM1gDKLw8kObZEJQG1A?pwd=hnhe) | [点击下载](https://pan.baidu.com/s/1AjkdrF2YC5oP_CiGtAtZKg?pwd=4w9k) |
-|  whisper-small   | Chinese |   0.13897    | 0.18417  |   0.31154    | [点击下载](https://pan.baidu.com/s/1q8xHr71XPe1dnRHv2IzldQ?pwd=wjrf) | [点击下载](https://pan.baidu.com/s/1Rg8KM1gDKLw8kObZEJQG1A?pwd=hnhe) | [点击下载](https://pan.baidu.com/s/1AjkdrF2YC5oP_CiGtAtZKg?pwd=4w9k) |
-|  whisper-medium  | Chinese |   0.09538    | 0.13591  |   0.26669    | [点击下载](https://pan.baidu.com/s/1q8xHr71XPe1dnRHv2IzldQ?pwd=wjrf) | [点击下载](https://pan.baidu.com/s/1Rg8KM1gDKLw8kObZEJQG1A?pwd=hnhe) | [点击下载](https://pan.baidu.com/s/1AjkdrF2YC5oP_CiGtAtZKg?pwd=4w9k) |
-|  whisper-large   | Chinese |   0.08969    | 0.12933  |   0.23439    | [点击下载](https://pan.baidu.com/s/1q8xHr71XPe1dnRHv2IzldQ?pwd=wjrf) | [点击下载](https://pan.baidu.com/s/1Rg8KM1gDKLw8kObZEJQG1A?pwd=hnhe) | [点击下载](https://pan.baidu.com/s/1AjkdrF2YC5oP_CiGtAtZKg?pwd=4w9k) |
-| whisper-large-v2 | Chinese |   0.08817    | 0.12332  |   0.26547    | [点击下载](https://pan.baidu.com/s/1q8xHr71XPe1dnRHv2IzldQ?pwd=wjrf) | [点击下载](https://pan.baidu.com/s/1Rg8KM1gDKLw8kObZEJQG1A?pwd=hnhe) | [点击下载](https://pan.baidu.com/s/1AjkdrF2YC5oP_CiGtAtZKg?pwd=4w9k) |
+|       使用模型       |  指定语言   | aishell_test | test_net | test_meeting |   模型获取   | 
+|:----------------:|:-------:|:------------:|:--------:|:------------:|:--------:|
+|   whisper-tiny   | Chinese |   0.31898    | 0.40482  |   0.75332    | 加入知识星球获取 |
+|   whisper-base   | Chinese |   0.22196    | 0.30404  |   0.50378    | 加入知识星球获取 |
+|  whisper-small   | Chinese |   0.13897    | 0.18417  |   0.31154    | 加入知识星球获取 |
+|  whisper-medium  | Chinese |   0.09538    | 0.13591  |   0.26669    | 加入知识星球获取 |
+|  whisper-large   | Chinese |   0.08969    | 0.12933  |   0.23439    | 加入知识星球获取 |
+| whisper-large-v2 | Chinese |   0.08817    | 0.12332  |   0.26547    | 加入知识星球获取 |
 
 
 2. 微调数据集后字错率测试表。
 
-|       使用模型       |  指定语言   |                            数据集                             | aishell_test | test_net | test_meeting |                               下载地址                               |                           CTranslate2                            |                               GGML                               |
-|:----------------:|:-------:|:----------------------------------------------------------:|:------------:|:--------:|:------------:|:----------------------------------------------------------------:|:----------------------------------------------------------------:|:----------------------------------------------------------------:|
-|   whisper-tiny   | Chinese | [AIShell](https://openslr.magicdatatech.com/resources/33/) |   0.13043    |  0.4463  |   0.57728    | [点击下载](https://pan.baidu.com/s/1hIximy9ddN3cMHN4_VdhnQ?pwd=nfc2) | [点击下载](https://pan.baidu.com/s/1H-OBD9L0hYV-M_WoPEbiJA?pwd=8hbb) | [点击下载](https://pan.baidu.com/s/1HV6q0JvCRwDSYtMIzD33aw?pwd=h0bn) |
-|   whisper-base   | Chinese | [AIShell](https://openslr.magicdatatech.com/resources/33/) |   0.08999    | 0.33089  |   0.40713    | [点击下载](https://pan.baidu.com/s/1hIximy9ddN3cMHN4_VdhnQ?pwd=nfc2) | [点击下载](https://pan.baidu.com/s/1H-OBD9L0hYV-M_WoPEbiJA?pwd=8hbb) | [点击下载](https://pan.baidu.com/s/1HV6q0JvCRwDSYtMIzD33aw?pwd=h0bn) |
-|  whisper-small   | Chinese | [AIShell](https://openslr.magicdatatech.com/resources/33/) |   0.05452    | 0.19831  |   0.24229    | [点击下载](https://pan.baidu.com/s/1hIximy9ddN3cMHN4_VdhnQ?pwd=nfc2) | [点击下载](https://pan.baidu.com/s/1H-OBD9L0hYV-M_WoPEbiJA?pwd=8hbb) | [点击下载](https://pan.baidu.com/s/1HV6q0JvCRwDSYtMIzD33aw?pwd=h0bn) |
-|  whisper-medium  | Chinese | [AIShell](https://openslr.magicdatatech.com/resources/33/) |   0.03681    | 0.13073  |   0.16939    | [点击下载](https://pan.baidu.com/s/1hIximy9ddN3cMHN4_VdhnQ?pwd=nfc2) | [点击下载](https://pan.baidu.com/s/1H-OBD9L0hYV-M_WoPEbiJA?pwd=8hbb) | [点击下载](https://pan.baidu.com/s/1HV6q0JvCRwDSYtMIzD33aw?pwd=h0bn) |
-| whisper-large-v2 | Chinese | [AIShell](https://openslr.magicdatatech.com/resources/33/) |   0.03139    | 0.12201  |   0.15776    | [点击下载](https://pan.baidu.com/s/1hIximy9ddN3cMHN4_VdhnQ?pwd=nfc2) | [点击下载](https://pan.baidu.com/s/1H-OBD9L0hYV-M_WoPEbiJA?pwd=8hbb) | [点击下载](https://pan.baidu.com/s/1HV6q0JvCRwDSYtMIzD33aw?pwd=h0bn) |
-|   whisper-tiny   | Chinese |     [WenetSpeech](./tools/create_wenetspeech_data.py)      |   0.17711    | 0.24783  |   0.39226    | [点击下载](https://pan.baidu.com/s/18l6K59nP0j3XXmEQZ_Up_g?pwd=x7ay) | [点击下载](https://pan.baidu.com/s/1X37l5pvbpGmRhDkRkgYCQw?pwd=vm4k) | [点击下载](https://pan.baidu.com/s/1lTthRHJxeJCHrMqC0gN2yQ?pwd=48of) |
-| whisper-large-v2 | Chinese |     [WenetSpeech](./tools/create_wenetspeech_data.py)      |   0.05372    | 0.10087  |   0.19834    | [点击下载](https://pan.baidu.com/s/18l6K59nP0j3XXmEQZ_Up_g?pwd=x7ay) | [点击下载](https://pan.baidu.com/s/1X37l5pvbpGmRhDkRkgYCQw?pwd=vm4k) | [点击下载](https://pan.baidu.com/s/1lTthRHJxeJCHrMqC0gN2yQ?pwd=48of) |
+|       使用模型       |  指定语言   |                            数据集                             | aishell_test | test_net | test_meeting |   模型获取   |  
+|:----------------:|:-------:|:----------------------------------------------------------:|:------------:|:--------:|:------------:|:--------:|
+|   whisper-tiny   | Chinese | [AIShell](https://openslr.magicdatatech.com/resources/33/) |   0.13043    |  0.4463  |   0.57728    | 加入知识星球获取 |
+|   whisper-base   | Chinese | [AIShell](https://openslr.magicdatatech.com/resources/33/) |   0.08999    | 0.33089  |   0.40713    | 加入知识星球获取 |
+|  whisper-small   | Chinese | [AIShell](https://openslr.magicdatatech.com/resources/33/) |   0.05452    | 0.19831  |   0.24229    | 加入知识星球获取 |
+|  whisper-medium  | Chinese | [AIShell](https://openslr.magicdatatech.com/resources/33/) |   0.03681    | 0.13073  |   0.16939    | 加入知识星球获取 |
+| whisper-large-v2 | Chinese | [AIShell](https://openslr.magicdatatech.com/resources/33/) |   0.03139    | 0.12201  |   0.15776    | 加入知识星球获取 |
+|   whisper-tiny   | Chinese |     [WenetSpeech](./tools/create_wenetspeech_data.py)      |   0.17711    | 0.24783  |   0.39226    | 加入知识星球获取 |
+| whisper-large-v2 | Chinese |     [WenetSpeech](./tools/create_wenetspeech_data.py)      |   0.05372    | 0.10087  |   0.19834    | 加入知识星球获取 |
 
 3. 未加速和加速后的推理速度测试表，使用GPU为GTX3090（24G）。
 
@@ -118,12 +118,12 @@ OpenAI在开源了号称其英文语音辨识能力已达到人类水准的Whisp
 |  whisper-medium  |       0.13       |             0.10             |               0.10                |  
 | whisper-large-v2 |       0.19       |             0.12             |               0.12                |
 
-4. 经过处理的数据列表，添加标点符号的模型为[PunctuationModel](https://github.com/yeyupiaoling/PunctuationModel)。
+4. 经过处理的数据列表。
 
-|  数据列表处理方式  |                             AiShell                              |                           WenetSpeech                            | 
-|:----------:|:----------------------------------------------------------------:|:----------------------------------------------------------------:|
-|   添加标点符号   | [点击下载](https://pan.baidu.com/s/1Qzalcy0R2SyrOBSxtezN0A?pwd=v45t) | [点击下载](https://pan.baidu.com/s/1XrnD_YLYWYUs65lq4StzTg?pwd=hv3i) |
-| 添加标点符号和时间戳 | [点击下载](https://pan.baidu.com/s/1zC3CTqPrNkhDIwAwqlZ6kw?pwd=xun4) | [点击下载](https://pan.baidu.com/s/1JrlQ97fZfCD-JEbW7Td_2g?pwd=97ki) |
+|  数据列表处理方式  | AiShell  | WenetSpeech | 
+|:----------:|:--------:|:-----------:|
+|   添加标点符号   | 加入知识星球获取 |  加入知识星球获取   |
+| 添加标点符号和时间戳 | 加入知识星球获取 |  加入知识星球获取   |
 
 **重要说明：**
 1. 在评估的时候移除模型输出的标点符号，并把繁体中文转成简体中文。

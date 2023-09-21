@@ -74,26 +74,26 @@ OpenAI open-sourced project Whisper, which claims to have human-level speech rec
 
 1. Test table for cer of the original model.
 
-|      Model       | Language | aishell_test | test_net | test_meeting |                            Download link                             |                             CTranslate2                              |                                 GGML                                 |
-|:----------------:|:--------:|:------------:|:--------:|:------------:|:--------------------------------------------------------------------:|:--------------------------------------------------------------------:|:--------------------------------------------------------------------:|
-|   whisper-tiny   | Chinese  |   0.31898    | 0.40482  |   0.75332    | [Download](https://pan.baidu.com/s/1q8xHr71XPe1dnRHv2IzldQ?pwd=wjrf) | [Download](https://pan.baidu.com/s/1Rg8KM1gDKLw8kObZEJQG1A?pwd=hnhe) | [Download](https://pan.baidu.com/s/1AjkdrF2YC5oP_CiGtAtZKg?pwd=4w9k) |
-|   whisper-base   | Chinese  |   0.22196    | 0.30404  |   0.50378    | [Download](https://pan.baidu.com/s/1q8xHr71XPe1dnRHv2IzldQ?pwd=wjrf) | [Download](https://pan.baidu.com/s/1Rg8KM1gDKLw8kObZEJQG1A?pwd=hnhe) | [Download](https://pan.baidu.com/s/1AjkdrF2YC5oP_CiGtAtZKg?pwd=4w9k) |
-|  whisper-small   | Chinese  |   0.13897    | 0.18417  |   0.31154    | [Download](https://pan.baidu.com/s/1q8xHr71XPe1dnRHv2IzldQ?pwd=wjrf) | [Download](https://pan.baidu.com/s/1Rg8KM1gDKLw8kObZEJQG1A?pwd=hnhe) | [Download](https://pan.baidu.com/s/1AjkdrF2YC5oP_CiGtAtZKg?pwd=4w9k) |
-|  whisper-medium  | Chinese  |   0.09538    | 0.13591  |   0.26669    | [Download](https://pan.baidu.com/s/1q8xHr71XPe1dnRHv2IzldQ?pwd=wjrf) | [Download](https://pan.baidu.com/s/1Rg8KM1gDKLw8kObZEJQG1A?pwd=hnhe) | [Download](https://pan.baidu.com/s/1AjkdrF2YC5oP_CiGtAtZKg?pwd=4w9k) |
-|  whisper-large   | Chinese  |   0.08969    | 0.12933  |   0.23439    | [Download](https://pan.baidu.com/s/1q8xHr71XPe1dnRHv2IzldQ?pwd=wjrf) | [Download](https://pan.baidu.com/s/1Rg8KM1gDKLw8kObZEJQG1A?pwd=hnhe) | [Download](https://pan.baidu.com/s/1AjkdrF2YC5oP_CiGtAtZKg?pwd=4w9k) |
-| whisper-large-v2 | Chinese  |   0.08817    | 0.12332  |   0.26547    | [Download](https://pan.baidu.com/s/1q8xHr71XPe1dnRHv2IzldQ?pwd=wjrf) | [Download](https://pan.baidu.com/s/1Rg8KM1gDKLw8kObZEJQG1A?pwd=hnhe) | [Download](https://pan.baidu.com/s/1AjkdrF2YC5oP_CiGtAtZKg?pwd=4w9k) |
+|      Model       | Language | aishell_test | test_net | test_meeting |
+|:----------------:|:--------:|:------------:|:--------:|:------------:|
+|   whisper-tiny   | Chinese  |   0.31898    | 0.40482  |   0.75332    |
+|   whisper-base   | Chinese  |   0.22196    | 0.30404  |   0.50378    |
+|  whisper-small   | Chinese  |   0.13897    | 0.18417  |   0.31154    |
+|  whisper-medium  | Chinese  |   0.09538    | 0.13591  |   0.26669    |
+|  whisper-large   | Chinese  |   0.08969    | 0.12933  |   0.23439    |
+| whisper-large-v2 | Chinese  |   0.08817    | 0.12332  |   0.26547    |
 
 2. Cer test table after fine-tuning the dataset.
 
-|      Model       | Language |                          Dataset                           | aishell_test | test_net | test_meeting |                            Download link                             |                             CTranslate2                              |                                 GGML                                 |
-|:----------------:|:--------:|:----------------------------------------------------------:|:------------:|:--------:|:------------:|:--------------------------------------------------------------------:|:--------------------------------------------------------------------:|:--------------------------------------------------------------------:|
-|   whisper-tiny   | Chinese  | [AIShell](https://openslr.magicdatatech.com/resources/33/) |   0.13043    |  0.4463  |   0.57728    | [Download](https://pan.baidu.com/s/1hIximy9ddN3cMHN4_VdhnQ?pwd=nfc2) | [Download](https://pan.baidu.com/s/1H-OBD9L0hYV-M_WoPEbiJA?pwd=8hbb) | [Download](https://pan.baidu.com/s/1HV6q0JvCRwDSYtMIzD33aw?pwd=h0bn) |
-|   whisper-base   | Chinese  | [AIShell](https://openslr.magicdatatech.com/resources/33/) |   0.08999    | 0.33089  |   0.40713    | [Download](https://pan.baidu.com/s/1hIximy9ddN3cMHN4_VdhnQ?pwd=nfc2) | [Download](https://pan.baidu.com/s/1H-OBD9L0hYV-M_WoPEbiJA?pwd=8hbb) | [Download](https://pan.baidu.com/s/1HV6q0JvCRwDSYtMIzD33aw?pwd=h0bn) |
-|  whisper-small   | Chinese  | [AIShell](https://openslr.magicdatatech.com/resources/33/) |   0.05452    | 0.19831  |   0.24229    | [Download](https://pan.baidu.com/s/1hIximy9ddN3cMHN4_VdhnQ?pwd=nfc2) | [Download](https://pan.baidu.com/s/1H-OBD9L0hYV-M_WoPEbiJA?pwd=8hbb) | [Download](https://pan.baidu.com/s/1HV6q0JvCRwDSYtMIzD33aw?pwd=h0bn) |
-|  whisper-medium  | Chinese  | [AIShell](https://openslr.magicdatatech.com/resources/33/) |   0.03681    | 0.13073  |   0.16939    | [Download](https://pan.baidu.com/s/1hIximy9ddN3cMHN4_VdhnQ?pwd=nfc2) | [Download](https://pan.baidu.com/s/1H-OBD9L0hYV-M_WoPEbiJA?pwd=8hbb) | [Download](https://pan.baidu.com/s/1HV6q0JvCRwDSYtMIzD33aw?pwd=h0bn) |
-| whisper-large-v2 | Chinese  | [AIShell](https://openslr.magicdatatech.com/resources/33/) |   0.03139    | 0.12201  |   0.15776    | [Download](https://pan.baidu.com/s/1hIximy9ddN3cMHN4_VdhnQ?pwd=nfc2) | [Download](https://pan.baidu.com/s/1H-OBD9L0hYV-M_WoPEbiJA?pwd=8hbb) | [Download](https://pan.baidu.com/s/1HV6q0JvCRwDSYtMIzD33aw?pwd=h0bn) |
-|   whisper-tiny   | Chinese  |     [WenetSpeech](./tools/create_wenetspeech_data.py)      |   0.21009    | 0.29352  |   0.41506    | [Download](https://pan.baidu.com/s/18l6K59nP0j3XXmEQZ_Up_g?pwd=x7ay) | [Download](https://pan.baidu.com/s/1X37l5pvbpGmRhDkRkgYCQw?pwd=vm4k) | [Download](https://pan.baidu.com/s/1lTthRHJxeJCHrMqC0gN2yQ?pwd=48of) |
-| whisper-large-v2 | Chinese  |     [WenetSpeech](./tools/create_wenetspeech_data.py)      |   0.05372    | 0.10087  |   0.19834    | [Download](https://pan.baidu.com/s/18l6K59nP0j3XXmEQZ_Up_g?pwd=x7ay) | [Download](https://pan.baidu.com/s/1X37l5pvbpGmRhDkRkgYCQw?pwd=vm4k) | [Download](https://pan.baidu.com/s/1lTthRHJxeJCHrMqC0gN2yQ?pwd=48of) |
+|      Model       | Language |                          Dataset                           | aishell_test | test_net | test_meeting |                            
+|:----------------:|:--------:|:----------------------------------------------------------:|:------------:|:--------:|:------------:|
+|   whisper-tiny   | Chinese  | [AIShell](https://openslr.magicdatatech.com/resources/33/) |   0.13043    |  0.4463  |   0.57728    | 
+|   whisper-base   | Chinese  | [AIShell](https://openslr.magicdatatech.com/resources/33/) |   0.08999    | 0.33089  |   0.40713    | 
+|  whisper-small   | Chinese  | [AIShell](https://openslr.magicdatatech.com/resources/33/) |   0.05452    | 0.19831  |   0.24229    | 
+|  whisper-medium  | Chinese  | [AIShell](https://openslr.magicdatatech.com/resources/33/) |   0.03681    | 0.13073  |   0.16939    | 
+| whisper-large-v2 | Chinese  | [AIShell](https://openslr.magicdatatech.com/resources/33/) |   0.03139    | 0.12201  |   0.15776    |
+|   whisper-tiny   | Chinese  |     [WenetSpeech](./tools/create_wenetspeech_data.py)      |   0.21009    | 0.29352  |   0.41506    | 
+| whisper-large-v2 | Chinese  |     [WenetSpeech](./tools/create_wenetspeech_data.py)      |   0.05372    | 0.10087  |   0.19834    | 
 
 3. inference speed test table, using the GPU GTX3090 (24G).
 
@@ -105,13 +105,6 @@ OpenAI open-sourced project Whisper, which claims to have human-level speech rec
 |  whisper-medium  |             0.13             |             0.10             |               0.10                |  
 | whisper-large-v2 |             0.19             |             0.12             |               0.12                |
 
-4. The list of processed data. The model for adding punctuation
-   is[PunctuationModel](https://github.com/yeyupiaoling/PunctuationModel)。
-
-|   Data list process method    |                               AiShell                                |                             WenetSpeech                              | 
-|:-----------------------------:|:--------------------------------------------------------------------:|:--------------------------------------------------------------------:|
-|        Add punctuation        | [Download](https://pan.baidu.com/s/1Qzalcy0R2SyrOBSxtezN0A?pwd=v45t) | [Download](https://pan.baidu.com/s/1XrnD_YLYWYUs65lq4StzTg?pwd=hv3i) |
-| Add punctuation and timestamp | [Download](https://pan.baidu.com/s/1zC3CTqPrNkhDIwAwqlZ6kw?pwd=xun4) | [Download](https://pan.baidu.com/s/1JrlQ97fZfCD-JEbW7Td_2g?pwd=97ki) |
 
 **Important explanation**:
 
