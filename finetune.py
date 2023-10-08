@@ -104,6 +104,8 @@ else:
         config = LoraConfig(r=32, lora_alpha=64, target_modules=target_modules, lora_dropout=0.05, bias="none")
     model = get_peft_model(model, config)
 
+if args.base_model.endswith("/"):
+    args.base_model = args.base_model[:-1]
 output_dir = os.path.join(args.output_dir, os.path.basename(args.base_model))
 # 定义训练参数
 training_args = \
