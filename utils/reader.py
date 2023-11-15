@@ -49,10 +49,15 @@ class CustomDataset(Dataset):
         self.min_duration = min_duration
         self.max_duration = max_duration
         self.vocab = self.processor.tokenizer.get_vocab()
-        self.timestamp_begin = self.vocab['<|notimestamps|>'] + 1
         self.startoftranscript = self.vocab['<|startoftranscript|>']
         self.endoftext = self.vocab['<|endoftext|>']
-        self.nocaptions = self.vocab['<|nocaptions|>']
+        if '<|nospeech|>' in self.vocab.keys():
+            self.nospeech = self.vocab['<|nospeech|>']
+            self.timestamp_begin = None
+        else:
+            # 兼容旧模型
+            self.nospeech = self.vocab['<|nocaptions|>']
+            self.timestamp_begin = self.vocab['<|notimestamps|>'] + 1
         self.data_list: List[dict] = []
         # 加载数据列表
         self._load_data_list()
@@ -123,9 +128,15 @@ class CustomDataset(Dataset):
         for t in transcript:
             # 将目标文本编码为标签ID
             start = t['start'] if round(t['start'] * 100) % 2 == 0 else t['start'] + 0.01
-            start = self.timestamp_begin + round(start * 100) // 2
+            if self.timestamp_begin is None:
+                start = self.vocab[f'<|{start:.2f}|>']
+            else:
+                start = self.timestamp_begin + round(start * 100) // 2
             end = t['end'] if round(t['end'] * 100) % 2 == 0 else t['end'] - 0.01
-            end = self.timestamp_begin + round(end * 100) // 2
+            if self.timestamp_begin is None:
+                end = self.vocab[f'<|{end:.2f}|>']
+            else:
+                end = self.timestamp_begin + round(end * 100) // 2
             label = self.processor(text=t['text']).input_ids[4:-1]
             labels.extend([start])
             labels.extend(label)
@@ -149,9 +160,9 @@ class CustomDataset(Dataset):
                     # 获取log-Mel特征和标签ID
                     data = self.processor(audio=sample, sampling_rate=self.sample_rate, text=transcript)
             else:
-                # 如果没有文本，则使用<|nocaptions|>标记
+                # 如果没有文本，则使用<|nospeech|>标记
                 data = self.processor(audio=sample, sampling_rate=self.sample_rate)
-                data['labels'] = [self.startoftranscript, self.nocaptions, self.endoftext]
+                data['labels'] = [self.startoftranscript, self.nospeech, self.endoftext]
             return data
         except Exception as e:
             print(f'读取数据出错，序号：{idx}，错误信息：{e}', file=sys.stderr)

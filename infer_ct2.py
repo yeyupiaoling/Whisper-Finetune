@@ -34,6 +34,11 @@ if args.use_gpu:
 else:
     model = WhisperModel(args.model_path, device="cpu", compute_type="int8", num_workers=args.num_workers,
                          local_files_only=args.local_files_only)
+# 支持large-v3模型
+if 'large-v3' in args.model_path:
+    model.feature_extractor.mel_filters = \
+        model.feature_extractor.get_mel_filters(model.feature_extractor.sampling_rate,
+                                                model.feature_extractor.n_fft, n_mels=128)
 # 预热
 _, _ = model.transcribe("dataset/test.wav", beam_size=5)
 

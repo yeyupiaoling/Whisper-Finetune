@@ -59,6 +59,9 @@ def bytes_to_unicode():
 encoder = json.load(open(f"{args.model_dir}/vocab.json", "r", encoding="utf8"))
 encoder_added = json.load(open(f"{args.model_dir}/added_tokens.json", "r", encoding="utf8"))
 hparams = json.load(open(f"{args.model_dir}/config.json", "r", encoding="utf8"))
+# 支持large-v3模型
+if "max_length" not in hparams.keys():
+    hparams["max_length"] = hparams["max_target_positions"]
 
 model = WhisperForConditionalGeneration.from_pretrained(args.model_dir)
 

@@ -74,14 +74,15 @@ OpenAI open-sourced project Whisper, which claims to have human-level speech rec
 
 1. Test table for cer of the original model.
 
-|      Model       | Language | aishell_test | test_net | test_meeting |
-|:----------------:|:--------:|:------------:|:--------:|:------------:|
-|   whisper-tiny   | Chinese  |   0.31898    | 0.40482  |   0.75332    |
-|   whisper-base   | Chinese  |   0.22196    | 0.30404  |   0.50378    |
-|  whisper-small   | Chinese  |   0.13897    | 0.18417  |   0.31154    |
-|  whisper-medium  | Chinese  |   0.09538    | 0.13591  |   0.26669    |
-|  whisper-large   | Chinese  |   0.08969    | 0.12933  |   0.23439    |
-| whisper-large-v2 | Chinese  |   0.08817    | 0.12332  |   0.26547    |
+|      Model       | Language  | aishell_test | test_net | test_meeting |
+|:----------------:|:---------:|:------------:|:--------:|:------------:|
+|   whisper-tiny   |  Chinese  |   0.31898    | 0.40482  |   0.75332    |
+|   whisper-base   |  Chinese  |   0.22196    | 0.30404  |   0.50378    |
+|  whisper-small   |  Chinese  |   0.13897    | 0.18417  |   0.31154    |
+|  whisper-medium  |  Chinese  |   0.09538    | 0.13591  |   0.26669    |
+|  whisper-large   |  Chinese  |   0.08969    | 0.12933  |   0.23439    |
+| whisper-large-v2 |  Chinese  |   0.08817    | 0.12332  |   0.26547    |
+| whisper-large-v3 |  Chinese  |   0.08086    |          |              |
 
 2. Cer test table after fine-tuning the dataset.
 
@@ -97,6 +98,7 @@ OpenAI open-sourced project Whisper, which claims to have human-level speech rec
 |  whisper-small   | Chinese  |     [WenetSpeech](./tools/create_wenetspeech_data.py)      |   0.08484    | 0.11801  |   0.23471    |
 |  whisper-medium  | Chinese  |     [WenetSpeech](./tools/create_wenetspeech_data.py)      |   0.05861    | 0.08794  |   0.19486    | 
 | whisper-large-v2 | Chinese  |     [WenetSpeech](./tools/create_wenetspeech_data.py)      |   0.05443    | 0.08367  |   0.19087    | 
+| whisper-large-v3 | Chinese  |     [WenetSpeech](./tools/create_wenetspeech_data.py)      |              |          |              | 
 
 3. inference speed test table, using the GPU GTX3090 (24G).
 
@@ -337,7 +339,7 @@ of the transformed CTranslate2 model, and the `--quantization` parameter quantiz
 quantize the model, you can drop this parameter.
 
 ```shell
-ct2-transformers-converter --model models/whisper-tiny-finetune --output_dir models/whisper-tiny-finetune-ct2 --copy_files tokenizer.json --quantization float16
+ct2-transformers-converter --model models/whisper-tiny-finetune --output_dir models/whisper-tiny-finetune-ct2 --copy_files tokenizer.json preprocessor_config.json --quantization float16
 ```
 
 Execute the following program to accelerate speech recognition, where the `--audio_path` argument specifies the audio
