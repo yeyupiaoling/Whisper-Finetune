@@ -7,7 +7,6 @@ import torch
 from peft import LoraConfig, get_peft_model, AdaLoraConfig, PeftModel, prepare_model_for_kbit_training
 from transformers import Seq2SeqTrainer, Seq2SeqTrainingArguments, WhisperForConditionalGeneration, WhisperProcessor
 
-from utils.callback import SavePeftModelCallback
 from utils.data_utils import DataCollatorSpeechSeq2SeqWithPadding
 from utils.model_utils import load_from_checkpoint
 from utils.reader import CustomDataset
@@ -31,6 +30,7 @@ add_arg("use_adalora",   type=bool,  default=True,  help="是否使用AdaLora而
 add_arg("fp16",          type=bool,  default=True,  help="是否使用fp16训练模型")
 add_arg("use_8bit",      type=bool,  default=False, help="是否将模型量化为8位")
 add_arg("timestamps",    type=bool,  default=False, help="训练时是否使用时间戳数据")
+add_arg("use_compile",   type=bool, default=False, help="是否使用Pytorch2.0的编译器")
 add_arg("local_files_only", type=bool, default=False, help="是否只在本地加载模型，不尝试下载")
 add_arg("num_train_epochs", type=int, default=3,      help="训练的轮数")
 add_arg("language",      type=str, default="Chinese", help="设置语言，可全称也可简写，如果为None则训练的是多语言")
@@ -104,6 +104,8 @@ else:
         config = LoraConfig(r=32, lora_alpha=64, target_modules=target_modules, lora_dropout=0.05, bias="none")
     model = get_peft_model(model, config)
 
+if args.base_model.endswith("/"):
+    args.base_model = args.base_model[:-1]
 output_dir = os.path.join(args.output_dir, os.path.basename(args.base_model))
 # 定义训练参数
 training_args = \
@@ -134,9 +136,10 @@ if training_args.local_rank == 0 or training_args.local_rank == -1:
     model.print_trainable_parameters()
     print('=' * 90)
 
-# 使用Pytorch2.0的编译器
-if torch.__version__ >= "2" and platform.system().lower() != 'windows':
-    model = torch.compile(model)
+if args.use_compile:
+    # 使用Pytorch2.0的编译器
+    if torch.__version__ >= "2" and platform.system().lower() != 'windows':
+        model = torch.compile(model)
 
 # 定义训练器
 trainer = Seq2SeqTrainer(args=training_args,
@@ -144,8 +147,7 @@ trainer = Seq2SeqTrainer(args=training_args,
                          train_dataset=train_dataset,
                          eval_dataset=test_dataset,
                          data_collator=data_collator,
-                         tokenizer=processor.feature_extractor,
-                         callbacks=[SavePeftModelCallback])
+                         tokenizer=processor.feature_extractor)
 model.config.use_cache = False
 trainer._load_from_checkpoint = load_from_checkpoint
 

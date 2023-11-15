@@ -36,6 +36,8 @@ model = model.merge_and_unload()
 model.train(False)
 
 # 保存的文件夹路径
+if peft_config.base_model_name_or_path.endswith("/"):
+    peft_config.base_model_name_or_path = peft_config.base_model_name_or_path[:-1]
 save_directory = os.path.join(args.output_dir, f'{os.path.basename(peft_config.base_model_name_or_path)}-finetune')
 os.makedirs(save_directory, exist_ok=True)
 

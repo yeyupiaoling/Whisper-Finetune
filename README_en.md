@@ -14,7 +14,7 @@
 
 OpenAI open-sourced project Whisper, which claims to have human-level speech recognition in English, and it also supports automatic speech recognition in 98 other languages. Whisper provides automatic speech recognition and translation tasks. They can turn speech into text in various languages and translate that text into English. The main purpose of this project is to fine-tune the Whisper model using Lora. It supports training on non-timestamped data, with timestamped data, and without speech data. Currently open source for several models, specific can be [openai](https://huggingface.co/openai) to view, the following is a list of commonly used several models. In addition, the project also supports CTranslate2 accelerated reasoning and GGML accelerated reasoning. As a hint, accelerated reasoning supports direct use of Whisper original model transformation, and does not necessarily need to be fine-tuned. Supports Windows desktop applications, Android applications, and server deployments.
 
-### please`star`
+### please :star: 
 
 ## Supporting models
 
@@ -74,14 +74,15 @@ OpenAI open-sourced project Whisper, which claims to have human-level speech rec
 
 1. Test table for cer of the original model.
 
-|      Model       | Language | aishell_test | test_net | test_meeting |
-|:----------------:|:--------:|:------------:|:--------:|:------------:|
-|   whisper-tiny   | Chinese  |   0.31898    | 0.40482  |   0.75332    |
-|   whisper-base   | Chinese  |   0.22196    | 0.30404  |   0.50378    |
-|  whisper-small   | Chinese  |   0.13897    | 0.18417  |   0.31154    |
-|  whisper-medium  | Chinese  |   0.09538    | 0.13591  |   0.26669    |
-|  whisper-large   | Chinese  |   0.08969    | 0.12933  |   0.23439    |
-| whisper-large-v2 | Chinese  |   0.08817    | 0.12332  |   0.26547    |
+|      Model       | Language  | aishell_test | test_net | test_meeting |
+|:----------------:|:---------:|:------------:|:--------:|:------------:|
+|   whisper-tiny   |  Chinese  |   0.31898    | 0.40482  |   0.75332    |
+|   whisper-base   |  Chinese  |   0.22196    | 0.30404  |   0.50378    |
+|  whisper-small   |  Chinese  |   0.13897    | 0.18417  |   0.31154    |
+|  whisper-medium  |  Chinese  |   0.09538    | 0.13591  |   0.26669    |
+|  whisper-large   |  Chinese  |   0.08969    | 0.12933  |   0.23439    |
+| whisper-large-v2 |  Chinese  |   0.08817    | 0.12332  |   0.26547    |
+| whisper-large-v3 |  Chinese  |   0.08086    |          |              |
 
 2. Cer test table after fine-tuning the dataset.
 
@@ -93,7 +94,11 @@ OpenAI open-sourced project Whisper, which claims to have human-level speech rec
 |  whisper-medium  | Chinese  | [AIShell](https://openslr.magicdatatech.com/resources/33/) |   0.03681    | 0.13073  |   0.16939    | 
 | whisper-large-v2 | Chinese  | [AIShell](https://openslr.magicdatatech.com/resources/33/) |   0.03139    | 0.12201  |   0.15776    |
 |   whisper-tiny   | Chinese  |     [WenetSpeech](./tools/create_wenetspeech_data.py)      |   0.21009    | 0.29352  |   0.41506    | 
-| whisper-large-v2 | Chinese  |     [WenetSpeech](./tools/create_wenetspeech_data.py)      |   0.05443    | 0.10087  |   0.19087    | 
+|   whisper-base   | Chinese  |     [WenetSpeech](./tools/create_wenetspeech_data.py)      |   0.14548    | 0.17747  |   0.30590    |
+|  whisper-small   | Chinese  |     [WenetSpeech](./tools/create_wenetspeech_data.py)      |   0.08484    | 0.11801  |   0.23471    |
+|  whisper-medium  | Chinese  |     [WenetSpeech](./tools/create_wenetspeech_data.py)      |   0.05861    | 0.08794  |   0.19486    | 
+| whisper-large-v2 | Chinese  |     [WenetSpeech](./tools/create_wenetspeech_data.py)      |   0.05443    | 0.08367  |   0.19087    | 
+| whisper-large-v3 | Chinese  |     [WenetSpeech](./tools/create_wenetspeech_data.py)      |              |          |              | 
 
 3. inference speed test table, using the GPU GTX3090 (24G).
 
@@ -334,7 +339,7 @@ of the transformed CTranslate2 model, and the `--quantization` parameter quantiz
 quantize the model, you can drop this parameter.
 
 ```shell
-ct2-transformers-converter --model models/whisper-tiny-finetune --output_dir models/whisper-tiny-finetune-ct2 --copy_files tokenizer.json --quantization float16
+ct2-transformers-converter --model models/whisper-tiny-finetune --output_dir models/whisper-tiny-finetune-ct2 --copy_files tokenizer.json preprocessor_config.json --quantization float16
 ```
 
 Execute the following program to accelerate speech recognition, where the `--audio_path` argument specifies the audio

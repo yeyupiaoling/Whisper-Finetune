@@ -62,7 +62,7 @@ eval_dataloader = DataLoader(test_dataset, batch_size=args.batch_size,
                              num_workers=args.num_workers, collate_fn=data_collator)
 
 # 获取评估方法
-metric = evaluate.load(args.metric)
+metric = evaluate.load(f'metrics/{args.metric}.py')
 
 # 开始评估
 for step, batch in enumerate(tqdm(eval_dataloader)):

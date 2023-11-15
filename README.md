@@ -12,7 +12,7 @@
 
 OpenAI在开源了号称其英文语音辨识能力已达到人类水准的Whisper项目，且它亦支持其它98种语言的自动语音辨识。Whisper所提供的自动语音识与翻译任务，它们能将各种语言的语音变成文本，也能将这些文本翻译成英文。本项目主要的目的是为了对Whisper模型使用Lora进行微调，**支持无时间戳数据训练，有时间戳数据训练、无语音数据训练**。目前开源了好几个模型，具体可以在[openai](https://huggingface.co/openai)查看，下面列出了常用的几个模型。另外项目最后还支持CTranslate2加速推理和GGML加速推理，提示一下，加速推理支持直接使用Whisper原模型转换，并不一定需要微调。支持Windows桌面应用，Android应用和服务器部署。
 
-### 请先点`star`
+### 请先点 :star: 
 
 ## 支持模型
 
@@ -86,27 +86,34 @@ OpenAI在开源了号称其英文语音辨识能力已达到人类水准的Whisp
 
 1. 原始模型字错率测试表。
 
-|       使用模型       |  指定语言   | aishell_test | test_net | test_meeting |   模型获取   | 
-|:----------------:|:-------:|:------------:|:--------:|:------------:|:--------:|
-|   whisper-tiny   | Chinese |   0.31898    | 0.40482  |   0.75332    | 加入知识星球获取 |
-|   whisper-base   | Chinese |   0.22196    | 0.30404  |   0.50378    | 加入知识星球获取 |
-|  whisper-small   | Chinese |   0.13897    | 0.18417  |   0.31154    | 加入知识星球获取 |
-|  whisper-medium  | Chinese |   0.09538    | 0.13591  |   0.26669    | 加入知识星球获取 |
-|  whisper-large   | Chinese |   0.08969    | 0.12933  |   0.23439    | 加入知识星球获取 |
-| whisper-large-v2 | Chinese |   0.08817    | 0.12332  |   0.26547    | 加入知识星球获取 |
+|       使用模型       |  指定语言   | aishell_test | test_net | test_meeting | 粤语测试集 |   模型获取   | 
+|:----------------:|:-------:|:------------:|:--------:|:------------:|:-----:|:--------:|
+|   whisper-tiny   | Chinese |   0.31898    | 0.40482  |   0.75332    |  N/A  | 加入知识星球获取 |
+|   whisper-base   | Chinese |   0.22196    | 0.30404  |   0.50378    |  N/A  | 加入知识星球获取 |
+|  whisper-small   | Chinese |   0.13897    | 0.18417  |   0.31154    |  N/A  | 加入知识星球获取 |
+|  whisper-medium  | Chinese |   0.09538    | 0.13591  |   0.26669    |  N/A  | 加入知识星球获取 |
+|  whisper-large   | Chinese |   0.08969    | 0.12933  |   0.23439    |  N/A  | 加入知识星球获取 |
+| whisper-large-v2 | Chinese |   0.08817    | 0.12332  |   0.26547    |  N/A  | 加入知识星球获取 |
+| whisper-large-v3 | Chinese |   0.08086    |          |              |       | 加入知识星球获取 |
 
 
 2. 微调数据集后字错率测试表。
 
-|       使用模型       |  指定语言   |                            数据集                             | aishell_test | test_net | test_meeting |   模型获取   |  
-|:----------------:|:-------:|:----------------------------------------------------------:|:------------:|:--------:|:------------:|:--------:|
-|   whisper-tiny   | Chinese | [AIShell](https://openslr.magicdatatech.com/resources/33/) |   0.13043    |  0.4463  |   0.57728    | 加入知识星球获取 |
-|   whisper-base   | Chinese | [AIShell](https://openslr.magicdatatech.com/resources/33/) |   0.08999    | 0.33089  |   0.40713    | 加入知识星球获取 |
-|  whisper-small   | Chinese | [AIShell](https://openslr.magicdatatech.com/resources/33/) |   0.05452    | 0.19831  |   0.24229    | 加入知识星球获取 |
-|  whisper-medium  | Chinese | [AIShell](https://openslr.magicdatatech.com/resources/33/) |   0.03681    | 0.13073  |   0.16939    | 加入知识星球获取 |
-| whisper-large-v2 | Chinese | [AIShell](https://openslr.magicdatatech.com/resources/33/) |   0.03139    | 0.12201  |   0.15776    | 加入知识星球获取 |
-|   whisper-tiny   | Chinese |     [WenetSpeech](./tools/create_wenetspeech_data.py)      |   0.17711    | 0.24783  |   0.39226    | 加入知识星球获取 |
-| whisper-large-v2 | Chinese |     [WenetSpeech](./tools/create_wenetspeech_data.py)      |   0.05443    | 0.10087  |   0.19087    | 加入知识星球获取 |
+|       使用模型       |   指定语言    |                            数据集                             | aishell_test | test_net | test_meeting | 粤语测试集 |   模型获取   |  
+|:----------------:|:---------:|:----------------------------------------------------------:|:------------:|:--------:|:------------:|:-----:|:--------:|
+|   whisper-tiny   |  Chinese  | [AIShell](https://openslr.magicdatatech.com/resources/33/) |   0.13043    |  0.4463  |   0.57728    |  N/A  | 加入知识星球获取 |
+|   whisper-base   |  Chinese  | [AIShell](https://openslr.magicdatatech.com/resources/33/) |   0.08999    | 0.33089  |   0.40713    |  N/A  | 加入知识星球获取 |
+|  whisper-small   |  Chinese  | [AIShell](https://openslr.magicdatatech.com/resources/33/) |   0.05452    | 0.19831  |   0.24229    |  N/A  | 加入知识星球获取 |
+|  whisper-medium  |  Chinese  | [AIShell](https://openslr.magicdatatech.com/resources/33/) |   0.03681    | 0.13073  |   0.16939    |  N/A  | 加入知识星球获取 |
+| whisper-large-v2 |  Chinese  | [AIShell](https://openslr.magicdatatech.com/resources/33/) |   0.03139    | 0.12201  |   0.15776    |  N/A  | 加入知识星球获取 |
+| whisper-large-v3 |  Chinese  | [AIShell](https://openslr.magicdatatech.com/resources/33/) |              |          |              |  N/A  | 加入知识星球获取 |
+| whisper-large-v3 | Cantonese |                           粤语数据集                            |              |          |              |       | 加入知识星球获取 |
+|   whisper-tiny   |  Chinese  |     [WenetSpeech](./tools/create_wenetspeech_data.py)      |   0.17711    | 0.24783  |   0.39226    |  N/A  | 加入知识星球获取 |
+|   whisper-base   |  Chinese  |     [WenetSpeech](./tools/create_wenetspeech_data.py)      |   0.14548    | 0.17747  |   0.30590    |  N/A  | 加入知识星球获取 |
+|  whisper-small   |  Chinese  |     [WenetSpeech](./tools/create_wenetspeech_data.py)      |   0.08484    | 0.11801  |   0.23471    |  N/A  | 加入知识星球获取 |
+|  whisper-medium  |  Chinese  |     [WenetSpeech](./tools/create_wenetspeech_data.py)      |   0.05861    | 0.08794  |   0.19486    |  N/A  | 加入知识星球获取 |
+| whisper-large-v2 |  Chinese  |     [WenetSpeech](./tools/create_wenetspeech_data.py)      |   0.05443    | 0.08367  |   0.19087    |  N/A  | 加入知识星球获取 |
+| whisper-large-v3 |  Chinese  |     [WenetSpeech](./tools/create_wenetspeech_data.py)      |              |          |              |       | 加入知识星球获取 |
 
 3. 未加速和加速后的推理速度测试表，使用GPU为GTX3090（24G）。
 
@@ -304,7 +311,7 @@ python infer_tfs.py --audio_path=dataset/test.wav --model_path=models/whisper-ti
 
 众所周知，直接使用Whisper模型推理是比较慢的，所以这里提供了一个加速的方式，主要是使用了CTranslate2进行加速，首先要转换模型，把合并后的模型转换为CTranslate2模型。如下命令，`--model`参数指定的是合并后的模型路径，同时也支持直接使用Whisper原模型，例如直接指定`openai/whisper-large-v2`。`--output_dir`参数指定的是转换后的CTranslate2模型路径，`--quantization`参数指定的是量化模型大小，不希望量化模型的可以直接去掉这个参数。
 ```shell
-ct2-transformers-converter --model models/whisper-tiny-finetune --output_dir models/whisper-tiny-finetune-ct2 --copy_files tokenizer.json --quantization float16
+ct2-transformers-converter --model models/whisper-tiny-finetune --output_dir models/whisper-tiny-finetune-ct2 --copy_files tokenizer.json preprocessor_config.json --quantization float16
 ```
 
 执行以下程序进行加速语音识别，`--audio_path`参数指定的是要预测的音频路径。`--model_path`指定的是转换后的CTranslate2模型。其他更多的参数请查看这个程序。

@@ -94,6 +94,11 @@ class SpeechRecognitionApp:
         else:
             self.model = WhisperModel(args.model_path, device="cpu", compute_type="int8",
                                       local_files_only=args.local_files_only)
+        # 支持large-v3模型
+        if 'large-v3' in args.model_path:
+            self.model.feature_extractor.mel_filters = \
+                self.model.feature_extractor.get_mel_filters(self.model.feature_extractor.sampling_rate,
+                                                             self.model.feature_extractor.n_fft, n_mels=128)
         # 预热
         _, _ = self.model.transcribe("dataset/test.wav", beam_size=5)
 
