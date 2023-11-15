@@ -14,5 +14,8 @@ endif
 LOCAL_CFLAGS    += -DSTDC_HEADERS -std=c11 -I $(WHISPER_LIB_DIR)
 LOCAL_CPPFLAGS  += -std=c++11
 LOCAL_SRC_FILES := $(WHISPER_LIB_DIR)/ggml.c \
+                   $(WHISPER_LIB_DIR)/ggml-alloc.c \
+                   $(WHISPER_LIB_DIR)/ggml-backend.c \
+                   $(WHISPER_LIB_DIR)/ggml-quants.c \
                    $(WHISPER_LIB_DIR)/whisper.cpp \
                    $(LOCAL_PATH)/jni.c

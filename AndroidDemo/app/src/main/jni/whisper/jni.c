@@ -24,7 +24,7 @@ static inline int max(int a, int b) {
 
 struct input_stream_context {
     size_t offset;
-    JNIEnv * env;
+    JNIEnv *env;
     jobject thiz;
     jobject input_stream;
 
@@ -32,21 +32,23 @@ struct input_stream_context {
     jmethodID mid_read;
 };
 
-size_t inputStreamRead(void * ctx, void * output, size_t read_size) {
-    struct input_stream_context* is = (struct input_stream_context*)ctx;
+size_t inputStreamRead(void *ctx, void *output, size_t read_size) {
+    struct input_stream_context *is = (struct input_stream_context *) ctx;
 
     jint avail_size = (*is->env)->CallIntMethod(is->env, is->input_stream, is->mid_available);
-    jint size_to_copy = read_size < avail_size ? (jint)read_size : avail_size;
+    jint size_to_copy = read_size < avail_size ? (jint) read_size : avail_size;
 
     jbyteArray byte_array = (*is->env)->NewByteArray(is->env, size_to_copy);
 
-    jint n_read = (*is->env)->CallIntMethod(is->env, is->input_stream, is->mid_read, byte_array, 0, size_to_copy);
+    jint n_read = (*is->env)->CallIntMethod(is->env, is->input_stream, is->mid_read, byte_array, 0,
+                                            size_to_copy);
 
     if (size_to_copy != read_size || size_to_copy != n_read) {
-        LOGI("Insufficient Read: Req=%zu, ToCopy=%d, Available=%d", read_size, size_to_copy, n_read);
+        LOGI("Insufficient Read: Req=%zu, ToCopy=%d, Available=%d", read_size, size_to_copy,
+             n_read);
     }
 
-    jbyte* byte_array_elements = (*is->env)->GetByteArrayElements(is->env, byte_array, NULL);
+    jbyte *byte_array_elements = (*is->env)->GetByteArrayElements(is->env, byte_array, NULL);
     memcpy(output, byte_array_elements, size_to_copy);
     (*is->env)->ReleaseByteArrayElements(is->env, byte_array, byte_array_elements, JNI_ABORT);
 
@@ -56,13 +58,15 @@ size_t inputStreamRead(void * ctx, void * output, size_t read_size) {
 
     return size_to_copy;
 }
-bool inputStreamEof(void * ctx) {
-    struct input_stream_context* is = (struct input_stream_context*)ctx;
+
+bool inputStreamEof(void *ctx) {
+    struct input_stream_context *is = (struct input_stream_context *) ctx;
 
     jint result = (*is->env)->CallIntMethod(is->env, is->input_stream, is->mid_available);
     return result <= 0;
 }
-void inputStreamClose(void * ctx) {
+
+void inputStreamClose(void *ctx) {
 
 }
 
@@ -127,7 +131,7 @@ static struct whisper_context *whisper_init_from_asset(
             .close = &asset_close
     };
 
-    return whisper_init(&loader);
+    return whisper_init_with_params(&loader, whisper_context_default_params());
 }
 
 JNIEXPORT jlong JNICALL
@@ -147,7 +151,8 @@ Java_com_yeyupiaoling_whisper_WhisperLib_00024Companion_initContext(
     UNUSED(thiz);
     struct whisper_context *context = NULL;
     const char *model_path_chars = (*env)->GetStringUTFChars(env, model_path_str, NULL);
-    context = whisper_init_from_file(model_path_chars);
+    context = whisper_init_from_file_with_params(model_path_chars,
+                                                 whisper_context_default_params());
     (*env)->ReleaseStringUTFChars(env, model_path_str, model_path_chars);
     return (jlong) context;
 }
@@ -163,15 +168,11 @@ Java_com_yeyupiaoling_whisper_WhisperLib_00024Companion_freeContext(
 
 JNIEXPORT void JNICALL
 Java_com_yeyupiaoling_whisper_WhisperLib_00024Companion_fullTranscribe(
-        JNIEnv *env, jobject thiz, jlong context_ptr, jfloatArray audio_data) {
+        JNIEnv *env, jobject thiz, jlong context_ptr, jint num_threads, jfloatArray audio_data) {
     UNUSED(thiz);
     struct whisper_context *context = (struct whisper_context *) context_ptr;
     jfloat *audio_data_arr = (*env)->GetFloatArrayElements(env, audio_data, NULL);
     const jsize audio_data_length = (*env)->GetArrayLength(env, audio_data);
-
-    // Leave 2 processors free (i.e. the high-efficiency cores).
-    int max_threads = max(1, min(8, get_nprocs() - 2));
-    LOGI("Selecting %d threads", max_threads);
 
     // The below adapted from the Objective-C iOS sample
     struct whisper_full_params params = whisper_full_default_params(WHISPER_SAMPLING_GREEDY);
@@ -181,7 +182,7 @@ Java_com_yeyupiaoling_whisper_WhisperLib_00024Companion_fullTranscribe(
     params.print_special = false;
     params.translate = false;
     params.language = "en";
-    params.n_threads = max_threads;
+    params.n_threads = num_threads;
     params.offset_ms = 0;
     params.no_context = true;
     params.single_segment = false;
@@ -228,7 +229,7 @@ Java_com_yeyupiaoling_whisper_WhisperLib_00024Companion_getSystemInfo(
 
 JNIEXPORT jstring JNICALL
 Java_com_yeyupiaoling_whisper_WhisperLib_00024Companion_benchMemcpy(JNIEnv *env, jobject thiz,
-                                                                      jint n_threads) {
+                                                                    jint n_threads) {
     UNUSED(thiz);
     const char *bench_ggml_memcpy = whisper_bench_memcpy_str(n_threads);
     jstring string = (*env)->NewStringUTF(env, bench_ggml_memcpy);
@@ -236,7 +237,7 @@ Java_com_yeyupiaoling_whisper_WhisperLib_00024Companion_benchMemcpy(JNIEnv *env,
 
 JNIEXPORT jstring JNICALL
 Java_com_yeyupiaoling_whisper_WhisperLib_00024Companion_benchGgmlMulMat(JNIEnv *env, jobject thiz,
-                                                                          jint n_threads) {
+                                                                        jint n_threads) {
     UNUSED(thiz);
     const char *bench_ggml_mul_mat = whisper_bench_ggml_mul_mat_str(n_threads);
     jstring string = (*env)->NewStringUTF(env, bench_ggml_mul_mat);
