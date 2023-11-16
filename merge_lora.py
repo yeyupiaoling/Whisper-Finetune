@@ -42,7 +42,7 @@ save_directory = os.path.join(args.output_dir, f'{os.path.basename(peft_config.b
 os.makedirs(save_directory, exist_ok=True)
 
 # 保存模型到指定目录中
-model.save_pretrained(save_directory)
+model.save_pretrained(save_directory, max_shard_size='4GB')
 feature_extractor.save_pretrained(save_directory)
 tokenizer.save_pretrained(save_directory)
 processor.save_pretrained(save_directory)
