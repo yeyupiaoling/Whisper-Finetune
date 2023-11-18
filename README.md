@@ -116,7 +116,7 @@ OpenAI在开源了号称其英文语音辨识能力已达到人类水准的Whisp
 | whisper-large-v2 |  Chinese  |     [WenetSpeech](./tools/create_wenetspeech_data.py)      |   0.05443    | 0.08367  |   0.19087    |  N/A  | 加入知识星球获取 |
 | whisper-large-v3 |  Chinese  |     [WenetSpeech](./tools/create_wenetspeech_data.py)      |              |          |              |       | 加入知识星球获取 |
 
-3. 推理速度测试表，使用GPU为GTX3090（24G），音频为`test_long.wav`，时长为3分钟整，测试程序在`tools/run.sh`。
+3. 推理速度测试表，使用GPU为GTX3090（24G），音频为`test_long.wav`，时长为3分钟整，测试程序在`tools/run_compute.sh`。
 
 |                                   加速方式                                    |  tiny  |  base  | small  | medium  | large-v2 | large-v3 |
 |:-------------------------------------------------------------------------:|:------:|:------:|:------:|:-------:|:--------:|:--------:|
