@@ -2,6 +2,7 @@ import _thread
 import argparse
 import functools
 import os
+import platform
 import time
 import tkinter.messagebox
 from tkinter import *
@@ -10,7 +11,8 @@ from tkinter.filedialog import askopenfilename
 import numpy as np
 import soundcard
 import soundfile
-from faster_whisper import WhisperModel
+import torch
+from transformers import AutoModelForSpeechSeq2Seq, AutoProcessor, pipeline, AutoModelForCausalLM
 from zhconv import convert
 
 from utils.utils import print_arguments, add_arguments
@@ -19,13 +21,17 @@ os.environ['KMP_DUPLICATE_LIB_OK'] = 'True'
 
 parser = argparse.ArgumentParser(description=__doc__)
 add_arg = functools.partial(add_arguments, argparser=parser)
-add_arg("model_path",  type=str,  default="models/whisper-tiny-finetune-ct2", help="转换后的模型路径，转换方式看文档")
-add_arg("language",    type=str, default="zh",    help="设置语言，必须简写，如果为None则自动检测语言")
-add_arg("use_gpu",     type=bool, default=True,   help="是否使用gpu进行预测")
-add_arg("use_int8",    type=bool, default=False,  help="是否使用int8进行预测")
-add_arg("beam_size",   type=int,  default=10,     help="解码搜索大小")
-add_arg("vad_filter",  type=bool, default=True,  help="是否使用VAD过滤掉部分没有讲话的音频")
-add_arg("local_files_only", type=bool, default=True, help="是否只在本地加载模型，不尝试下载")
+add_arg("model_path",  type=str,  default="models/whisper-tiny-finetune/", help="合并模型的路径，或者是huggingface上模型的名称")
+add_arg("language",    type=str,  default="chinese", help="设置语言，如果为None则预测的是多语言")
+add_arg("use_gpu",     type=bool, default=True,      help="是否使用gpu进行预测")
+add_arg("num_beams",   type=int,  default=1,         help="解码搜索大小")
+add_arg("batch_size",  type=int,  default=16,        help="预测batch_size大小")
+add_arg("use_compile", type=bool, default=False,     help="是否使用Pytorch2.0的编译器")
+add_arg("task",        type=str,  default="transcribe", choices=['transcribe', 'translate'], help="模型的任务")
+add_arg("assistant_model_path",  type=str, default=None, help="助手模型，可以提高推理速度，例如openai/whisper-tiny")
+add_arg("local_files_only",      type=bool, default=True, help="是否只在本地加载模型，不尝试下载")
+add_arg("use_flash_attention_2", type=bool, default=False, help="是否使用FlashAttention2加速")
+add_arg("use_bettertransformer", type=bool, default=False, help="是否使用BetterTransformer加速")
 args = parser.parse_args()
 print_arguments(args)
 
@@ -81,26 +87,49 @@ class SpeechRecognitionApp:
         self.check_frame.grid(row=1)
         self.check_frame.place(x=600, y=10)
 
-        # 检查模型文件是否存在
-        assert os.path.exists(args.model_path), f"模型文件{args.model_path}不存在"
-        # 加载模型
-        if args.use_gpu:
-            if not args.use_int8:
-                self.model = WhisperModel(args.model_path, device="cuda", compute_type="float16",
-                                          local_files_only=args.local_files_only)
-            else:
-                self.model = WhisperModel(args.model_path, device="cuda", compute_type="int8_float16",
-                                          local_files_only=args.local_files_only)
-        else:
-            self.model = WhisperModel(args.model_path, device="cpu", compute_type="int8",
-                                      local_files_only=args.local_files_only)
-        # 支持large-v3模型
-        if 'large-v3' in args.model_path:
-            self.model.feature_extractor.mel_filters = \
-                self.model.feature_extractor.get_mel_filters(self.model.feature_extractor.sampling_rate,
-                                                             self.model.feature_extractor.n_fft, n_mels=128)
+        # 设置设备
+        device = "cuda:0" if torch.cuda.is_available() and args.use_gpu else "cpu"
+        torch_dtype = torch.float16 if torch.cuda.is_available() and args.use_gpu else torch.float32
+
+        # 获取Whisper的特征提取器、编码器和解码器
+        processor = AutoProcessor.from_pretrained(args.model_path)
+
+        # 获取模型
+        model = AutoModelForSpeechSeq2Seq.from_pretrained(
+            args.model_path, torch_dtype=torch_dtype, low_cpu_mem_usage=True, use_safetensors=True,
+            use_flash_attention_2=args.use_flash_attention_2
+        )
+        if args.use_bettertransformer and not args.use_flash_attention_2:
+            model = model.to_bettertransformer()
+        # 使用Pytorch2.0的编译器
+        if args.use_compile:
+            if torch.__version__ >= "2" and platform.system().lower() != 'windows':
+                model = torch.compile(model)
+        model.to(device)
+
+        # 获取助手模型
+        generate_kwargs_pipeline = None
+        if args.assistant_model_path is not None:
+            assistant_model = AutoModelForCausalLM.from_pretrained(
+                args.assistant_model_path, torch_dtype=torch_dtype, low_cpu_mem_usage=True, use_safetensors=True
+            )
+            assistant_model.to(device)
+            generate_kwargs_pipeline = {"assistant_model": assistant_model}
+
+        # 获取管道
+        self.infer_pipe = pipeline("automatic-speech-recognition",
+                                   model=model,
+                                   tokenizer=processor.tokenizer,
+                                   feature_extractor=processor.feature_extractor,
+                                   max_new_tokens=128,
+                                   chunk_length_s=30,
+                                   batch_size=2,
+                                   torch_dtype=torch_dtype,
+                                   generate_kwargs=generate_kwargs_pipeline,
+                                   device=device)
+
         # 预热
-        _, _ = self.model.transcribe("dataset/test.wav", beam_size=5)
+        _ = self.infer_pipe("dataset/test.wav")
 
     # 预测短语音线程
     def predict_audio_thread(self):
@@ -121,24 +150,31 @@ class SpeechRecognitionApp:
         self.result_text.delete('1.0', 'end')
         try:
             task = "transcribe" if self.task_check_var.get() else "translate"
-            segments, info = self.model.transcribe(wav_path, beam_size=args.beam_size, language=args.language,
-                                                   vad_filter=args.vad_filter, task=task)
-            result_text = ''
-            for segment in segments:
-                text = segment.text
+            # 推理参数
+            generate_kwargs = {"task": task, "num_beams": args.num_beams}
+            if args.language is not None:
+                generate_kwargs["language"] = args.language
+            # 推理
+            result = self.infer_pipe(wav_path, return_timestamps=True, generate_kwargs=generate_kwargs)
+            # 判断是否要分段输出
+            if self.joint_text_check_var.get():
+                text = result['text']
                 # 繁体转简体
                 if self.to_simple_check_var.get():
                     text = convert(text, 'zh-cn')
-                # 判断是否要分段输出
-                if self.joint_text_check_var.get():
-                    result_text += text
-                    self.result_text.delete('1.0', 'end')
-                    self.result_text.insert(END, f"{result_text}\n")
-                else:
-                    self.result_text.insert(END, f"[{round(segment.start, 2)} - {round(segment.end, 2)}]：{text}\n")
+                self.result_text.delete('1.0', 'end')
+                self.result_text.insert(END, f"{text}\n")
+            else:
+                for chunk in result["chunks"]:
+                    text = chunk['text']
+                    # 繁体转简体
+                    if self.to_simple_check_var.get():
+                        text = convert(text, 'zh-cn')
+                    self.result_text.insert(END, f"[{chunk['timestamp'][0]} - {chunk['timestamp'][1]}]：{text}\n")
+            self.predicting = False
         except Exception as e:
             print(e)
-        self.predicting = False
+            self.predicting = False
 
     # 录音识别线程
     def record_audio_thread(self):

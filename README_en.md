@@ -45,10 +45,10 @@ OpenAI open-sourced project Whisper, which claims to have human-level speech rec
 - [Merge model](#合并模型)
 - [Evaluation](#评估模型)
 - [Inference](#预测)
-- [Accelerate inference](#加速预测)
 - [GUI inference](#GUI界面预测)
 - [Web deploy](#Web部署)
-    - [API docs](#接口文档)
+      - [API docs](#接口文档)
+- [Ctranslate2 inference](#使用Ctranslate2格式模型预测)
 - [Android](#Android部署)
 - [Windows Desktop](#Windows桌面应用)
 
@@ -60,10 +60,10 @@ OpenAI open-sourced project Whisper, which claims to have human-level speech rec
 2. `finetune.py`: Fine-tune the model.
 3. `merge_lora.py`: Merge Whisper and Lora models.
 4. `evaluation.py`: Evaluate the fine-tuned model or the original Whisper model.
-5. `infer_tfs.py`: Use the transformers library to directly call the fine-tuned model or the original Whisper model for prediction, suitable only for inference on short audio clips.
+5. `infer.py`: Call the fine-tuned model or Whisper model on transformers for prediction.
 6. `infer_ct2.py`: Use the converted CTranslate2 model for prediction, primarily as a reference for program usage.
-7. `infer_gui.py`: Has a GUI interface for operation, using the converted CTranslate2 model for prediction.
-8. `infer_server.py`: Deploys the converted CTranslate2 model to the server for use by client applications.
+7. `infer_gui.py`: There is a GUI to make predictions using either the fine-tuned model or the Whisper model on transformers.
+8. `infer_server.py`: Call the fine-tuned model or Whisper model on transformers and deploy it to the server for the client to call.
 9. `convert-ggml.py`: Converts the model to GGML format for use in Android or Windows applications.
 10. `AndroidDemo`: Contains the source code for deploying the model to Android.
 11. `WhisperDesktop`: Contains the program for the Windows desktop application.
@@ -100,27 +100,27 @@ OpenAI open-sourced project Whisper, which claims to have human-level speech rec
 | whisper-large-v2 | Chinese  |     [WenetSpeech](./tools/create_wenetspeech_data.py)      |   0.05443    | 0.08367  |   0.19087    | 
 | whisper-large-v3 | Chinese  |     [WenetSpeech](./tools/create_wenetspeech_data.py)      |              |          |              | 
 
-3. inference speed test table, using the GPU GTX3090 (24G).
+3. inference speed test table, using the GPU GTX3090 (24G), The audio is' test long.wav 'and is 3 minutes long. Test in `'tools/run.sh`.
 
-|      Model       | RTF for Transformer(float16) | RTF for CTranslate2(float16) | RTF for CTranslate2(int8_float16) |
-|:----------------:|:----------------------------:|:----------------------------:|:---------------------------------:|
-|   whisper-tiny   |             0.03             |             0.06             |               0.06                |
-|   whisper-base   |             0.04             |             0.06             |               0.06                |    
-|  whisper-small   |             0.08             |             0.08             |               0.08                | 
-|  whisper-medium  |             0.13             |             0.10             |               0.10                |  
-| whisper-large-v2 |             0.19             |             0.12             |               0.12                |
+|                           Mode of acceleration                            |  tiny  |  base  | small  | medium  | large-v2 | large-v3 |
+|:-------------------------------------------------------------------------:|:------:|:------:|:------:|:-------:|:--------:|:--------:|
+|                  Transformers (`fp16` + `batch_size=16`)                  | 1.458s | 1.671s | 2.331s | 11.071s |  4.779s  | 12.826s  |    
+|            Transformers (`fp16` + `batch_size=16` + `Compile`)            | 1.477s | 1.675s | 2.357s | 11.003s |  4.799s  | 12.643s  |    
+|       Transformers (`fp16` + `batch_size=16` + `BetterTransformer`)       | 1.461s | 1.676s | 2.301s | 11.062s |  4.608s  | 12.505s  |    
+|       Transformers (`fp16` + `batch_size=16` + `Flash Attention 2`)       | 1.436s | 1.630s | 2.258s | 10.533s |  4.344s  | 11.651s  |    
+| Transformers (`fp16` + `batch_size=16` + `Compile` + `BetterTransformer`) | 1.442s | 1.686s | 2.277s | 11.000s |  4.543s  | 12.592s  |    
+| Transformers (`fp16` + `batch_size=16` + `Compile` + `Flash Attention 2`) | 1.409s | 1.643s | 2.220s | 10.390s |  4.377s  | 11.703s  |    
+|                 Faster Whisper (`fp16` + `beam_size=1` )                  | 2.179s | 1.492s | 2.327s | 3.752s  |  5.677s  | 31.541s  |    
+|                 Faster Whisper (`8-bit` + `beam_size=1` )                 | 2.609s | 1.728s | 2.744s | 4.688s  |  6.571s  | 29.307s  |    
 
 
 **Important explanation**:
 
-1. Remove the punctuation marks from the model output during evaluation, and convert traditional Chinese to simplified
-   Chinese.
+1. Remove the punctuation marks from the model output during evaluation, and convert traditional Chinese to simplified Chinese.
 2. `aishell_test` is the test set of AIShell, while `test_net` and `test_meeting` are the test sets of WenetSpeech.
-3. RTF = Total duration of all audio (in seconds) / ASR recognition processing time for all audio (in seconds).
-4. The audio for testing speed is `dataset/test.wav`, with a duration of 8 seconds.
-5. The training data uses data with punctuation marks, resulting in a slightly higher cer.
-6. The AiShell data used for fine-tuning does not include timestamp information, while the WenetSpeech data used for
-   fine-tuning includes timestamp information.
+3. The audio for testing speed is `dataset/test_long.wav`, with a audio is' test long.wav 'and is 3 minutes long.
+4. The training data uses data with punctuation marks, resulting in a slightly higher cer.
+5. The AiShell data used for fine-tuning does not include timestamp information, while the WenetSpeech data used for fine-tuning includes timestamp information.
 
 <a name='安装环境'></a>
 
@@ -131,13 +131,13 @@ OpenAI open-sourced project Whisper, which claims to have human-level speech rec
 1. Here's how to install Pytorch using Anaconda. If you already have it, please skip it.
 
 ```shell
-conda install pytorch==1.13.1 torchvision==0.14.1 torchaudio==0.13.1 pytorch-cuda=11.6 -c pytorch -c nvidia
+conda install pytorch==2.1.0 torchvision==0.16.0 torchaudio==2.1.0 pytorch-cuda=11.8 -c pytorch -c nvidia
 ```
 
 2. Here's how to pull an image of a Pytorch environment using a Docker image.
 
 ```shell
-sudo docker pull pytorch/pytorch:1.13.1-cuda11.6-cudnn8-devel
+sudo docker pull pytorch/pytorch:2.1.0-cuda11.8-cudnn8-devel
 ```
 
 It then moves into the image and mounts the current path to the container's '/workspace' directory.
@@ -162,19 +162,13 @@ python -m pip install https://github.com/jllllll/bitsandbytes-windows-webui/rele
 
 ## Prepare the data
 
-The training dataset is a list of jsonlines, meaning that each line is a JSON data in the following format: This project
-provides a program to make the AIShell dataset, 'aishell.py'. Executing this program will automatically download and
-generate the training and test sets in the following format. This program can skip the download process by specifying
-the compressed file of AIShell. If the direct download would be very slow, you can use some downloader such as
-thunderbolt to download the dataset and then specify the compressed filepath through the '--filepath' parameter.
-Like `/home/test/data_aishell.tgz`.
+The training dataset is a list of jsonlines, meaning that each line is a JSON data in the following format: This project provides a program to make the AIShell dataset, 'aishell.py'. Executing this program will automatically download and generate the training and test sets in the following format. This program can skip the download process by specifying the compressed file of AIShell. If the direct download would be very slow, you can use some downloader such as thunderbolt to download the dataset and then specify the compressed filepath through the '--filepath' parameter. Like `/home/test/data_aishell.tgz`.
 
 **Note:**
 
 1. If timestamp training is not used, the `sentences` field can be excluded from the data.
 2. If data is only available for one language, the language field can be excluded from the data.
-3. If training empty speech data, the `sentences` field should be `[]`, the `sentence` field should be `""`, and the
-   language field can be absent.
+3. If training empty speech data, the `sentences` field should be `[]`, the `sentence` field should be `""`, and the language field can be absent.
 4. Data may exclude punctuation marks, but the fine-tuned model may lose the ability to add punctuation marks.
 
 ```json
@@ -204,13 +198,7 @@ Like `/home/test/data_aishell.tgz`.
 
 ## Fine-tune
 
-Once we have our data ready, we are ready to fine-tune our model. Training is the most important two parameters,
-respectively, `--base_model` specified fine-tuning the Whisper of model, the parameter values need to be
-in [HuggingFace](https://huggingface.co/openai), the don't need to download in advance, It can be downloaded
-automatically when starting training, or in advance, if `--base_model` is specified as the path and `--local_files_only`
-is set to True. The second `--output_path` is the Lora checkpoint path saved during training as we use Lora to fine-tune
-the model. If you want to save enough, it's best to set `--use_8bit` to False, which makes training much faster. See
-this program for more parameters.
+Once we have our data ready, we are ready to fine-tune our model. Training is the most important two parameters, respectively, `--base_model` specified fine-tuning the Whisper of model, the parameter values need to be in [HuggingFace](https://huggingface.co/openai), the don't need to download in advance, It can be downloaded automatically when starting training, or in advance, if `--base_model` is specified as the path and `--local_files_only`is set to True. The second `--output_path` is the Lora checkpoint path saved during training as we use Lora to fine-tune the model. If you want to save enough, it's best to set `--use_8bit` to False, which makes training much faster. See this program for more parameters.
 
 <a name='单卡训练'></a>
 
@@ -226,8 +214,7 @@ CUDA_VISIBLE_DEVICES=0 python finetune.py --base_model=openai/whisper-tiny --out
 
 ### Multi-GPU
 
-torchrun and accelerate are two different methods for multi-card training, which developers can use according to their
-preferences.
+torchrun and accelerate are two different methods for multi-card training, which developers can use according to their preferences.
 
 1. To start multi-card training with torchrun, use `--nproc_per_node` to specify the number of graphics cards to use.
 
@@ -235,11 +222,9 @@ preferences.
 torchrun --nproc_per_node=2 finetune.py --base_model=openai/whisper-tiny --output_dir=output/
 ```
 
-2. Start multi-card training with accelerate, and if this is the first time you're using accelerate, configure the
-   training parameters as follows:
+2. Start multi-card training with accelerate, and if this is the first time you're using accelerate, configure the training parameters as follows:
 
-The first step is to configure the training parameters. The process is to ask the developer to answer a few questions.
-Basically, the default is ok, but there are a few parameters that need to be set according to the actual situation.
+The first step is to configure the training parameters. The process is to ask the developer to answer a few questions. Basically, the default is ok, but there are a few parameters that need to be set according to the actual situation.
 
 ```shell
 accelerate config
@@ -290,10 +275,7 @@ log:
 
 ## Merge model
 
-After fine-tuning, there will be two models, the first is the Whisper base model, and the second is the Lora model.
-These two models need to be merged before the next operation. This program only needs to pass two
-arguments, `--lora_model` is the path of the Lora model saved after training, which is the checkpoint folder, and the
-second `--output_dir` is the saved directory of the merged model.
+After fine-tuning, there will be two models, the first is the Whisper base model, and the second is the Lora model. These two models need to be merged before the next operation. This program only needs to pass two arguments, `--lora_model` is the path of the Lora model saved after training, which is the checkpoint folder, and the second `--output_dir` is the saved directory of the merged model.
 
 ```shell
 python merge_lora.py --lora_model=output/whisper-tiny/checkpoint-best/ --output_dir=models/
@@ -303,11 +285,7 @@ python merge_lora.py --lora_model=output/whisper-tiny/checkpoint-best/ --output_
 
 ## Evaluation
 
-The following procedure is performed to evaluate the model, the most important two parameters are respectively. The
-first `--model_path` specifies the path of the merged model, but also supports direct use of the original whisper model,
-such as directly specifying `openai/Whisper-large-v2`, and the second `--metric` specifies the evaluation method. For
-example, there are word error rate `cer` and word error rate `wer`. Note: Models without fine-tuning may have
-punctuation in their output, affecting accuracy. See this program for more parameters.
+The following procedure is performed to evaluate the model, the most important two parameters are respectively. The first `--model_path` specifies the path of the merged model, but also supports direct use of the original whisper model, such as directly specifying `openai/Whisper-large-v2`, and the second `--metric` specifies the evaluation method. For example, there are word error rate `cer` and word error rate `wer`. Note: Models without fine-tuning may have punctuation in their output, affecting accuracy. See this program for more parameters.
 
 ```shell
 python evaluation.py --model_path=models/whisper-tiny-finetune --metric=cer
@@ -317,64 +295,20 @@ python evaluation.py --model_path=models/whisper-tiny-finetune --metric=cer
 
 ## Inference
 
-Execute the following program for speech recognition, this uses transformers to directly call the fine-tuned model or
-Whisper's original model prediction, only suitable for reasoning short audio, long speech or refer to the use
-of `infer_ct2.py`. The first `--audio_path` argument specifies the audio path to predict. The second `--model_path`
-specifies the path of the merged model. It also allows you to use the original whisper model directly, for
-example `openai/whisper-large-v2`. See this program for more parameters.
+Execute the following program for speech recognition, this uses transformers to directly call the fine-tuned model or Whisper's original model prediction, only suitable for reasoning short audio, long speech or refer to the use of `infer_ct2.py`. The first `--audio_path` argument specifies the audio path to predict. The second `--model_path` specifies the path of the merged model. It also allows you to use the original whisper model directly, for example `openai/whisper-large-v2`. See this program for more parameters.
 
 ```shell
 python infer_tfs.py --audio_path=dataset/test.wav --model_path=models/whisper-tiny-finetune
-```
-
-<a name='加速预测'></a>
-
-## Accelerate inference
-
-As we all know, directly using the Whisper model reasoning is relatively slow, so here provides a way to accelerate,
-mainly using CTranslate2 for acceleration, first to transform the model, transform the combined model into CTranslate2
-model. In the following command, the `--model` parameter is the path of the merged model, but it is also possible to use
-the original whisper model directly, such as `openai/whisper-large-v2`. The `--output_dir` parameter specifies the path
-of the transformed CTranslate2 model, and the `--quantization` parameter quantizes the model size. If you don't want to
-quantize the model, you can drop this parameter.
-
-```shell
-ct2-transformers-converter --model models/whisper-tiny-finetune --output_dir models/whisper-tiny-finetune-ct2 --copy_files tokenizer.json preprocessor_config.json --quantization float16
-```
-
-Execute the following program to accelerate speech recognition, where the `--audio_path` argument specifies the audio
-path to predict. `--model_path` specifies the transformed CTranslate2 model. See this program for more parameters.
-
-```shell
-python infer_ct2.py --audio_path=dataset/test.wav --model_path=models/whisper-tiny-finetune-ct2
-```
-
-Output:
-
-```shell
------------  Configuration Arguments -----------
-audio_path: dataset/test.wav
-model_path: models/whisper-tiny-finetune-ct2
-language: zh
-use_gpu: True
-use_int8: False
-beam_size: 10
-num_workers: 1
-vad_filter: False
-local_files_only: True
-------------------------------------------------
-[0.0 - 8.0]：近几年,不但我用书给女儿压碎,也全说亲朋不要给女儿压碎钱,而改送压碎书。
 ```
 
 <a name='GUI界面预测'></a>
 
 ## GUI inference
 
-Here again, CTranslate2 is used for acceleration, and the transformation model is shown in the above
-documentation. `--model_path` specifies the transformed CTranslate2 model. See this program for more parameters.
+`--model_path` specifies Transformers model. See this program for more parameters.
 
 ```shell
-python infer_gui.py --model_path=models/whisper-tiny-finetune-ct2
+python infer_gui.py --model_path=models/whisper-tiny-finetune
 ```
 
 After startup, the screen is as follows:
@@ -387,11 +321,7 @@ After startup, the screen is as follows:
 
 ## Web deploy
 
-Web deployment is also accelerated using CTranslate2, as shown in the documentation above. `--host` specifies the
-address where the service will be started, here `0.0.0.0`, which means any address will be accessible. `--port`
-specifies the port number to use. `--model_path` specifies the transformed CTranslate2 model. `--num_workers` specifies
-how many threads to use for concurrent inference, which is important in Web deployments where multiple concurrent
-accesses can be inferred at the same time. See this program for more parameters.
+`--host` specifies the address where the service will be started, here `0.0.0.0`, which means any address will be accessible. `--port`specifies the port number to use. `--model_path` specifies Transformers model. `--num_workers` specifies how many threads to use for concurrent inference, which is important in Web deployments where multiple concurrent accesses can be inferred at the same time. See this program for more parameters.
 
 ```shell
 python infer_server.py --host=0.0.0.0 --port=5000 --model_path=models/whisper-tiny-finetune-ct2 --num_workers=2
@@ -399,10 +329,7 @@ python infer_server.py --host=0.0.0.0 --port=5000 --model_path=models/whisper-ti
 
 ### API docs
 
-At present, two interfaces are provided, the common recognition interface `/recognition` and the stream return
-result `/recognition_stream`. Note that the stream refers to the stream return recognition result, which is also to
-upload the complete audio and then stream back the recognition result. This method is very good for long speech
-recognition experience. Their document interface is exactly the same, and the interface parameters are as follows.
+At present recognition interface `/recognition`, and the interface parameters are as follows.
 
 |   Field    | Need |  type  |  Default   |                                  Explain                                  |
 |:----------:|:----:|:------:|:----------:|:-------------------------------------------------------------------------:|
@@ -448,25 +375,6 @@ response = requests.post(url="http://127.0.0.1:5000/recognition",
 print(response.text)
 ```
 
-Here is how `/recognition stream` is called.
-
-```python
-import json
-import requests
-
-response = requests.post(url="http://127.0.0.1:5000/recognition_stream",
-                         files=[("audio", ("test.wav", open("dataset/test_long.wav", 'rb'), 'audio/wav'))],
-                         json={"to_simple": 1, "remove_pun": 0, "language": "zh", "task": "transcribe"}, stream=True,
-                         timeout=20)
-for chunk in response.iter_lines(decode_unicode=False, delimiter=b"\0"):
-    if chunk:
-        result = json.loads(chunk.decode())
-        text = result["result"]
-        start = result["start"]
-        end = result["end"]
-        print(f"[{start} - {end}]：{text}")
-```
-
 The provided test page is as follows:
 
 The home page `http://127.0.0.1:5000/` looks like this:
@@ -477,9 +385,39 @@ The home page `http://127.0.0.1:5000/` looks like this:
 
 Document page `http://127.0.0.1:5000/docs` page is as follows:
 
-<div align="center">
-<img src="./docs/images/api.jpg" alt="文档页面" width="600"/>
-</div>
+
+<a name='使用Ctranslate2格式模型预测'></a>
+
+## Ctranslate2 inference
+
+As we all know, directly using the Whisper model reasoning is relatively slow, so here provides a way to accelerate, mainly using CTranslate2 for acceleration, first to transform the model, transform the combined model into CTranslate2 model. In the following command, the `--model` parameter is the path of the merged model, but it is also possible to use the original whisper model directly, such as `openai/whisper-large-v2`. The `--output_dir` parameter specifies the path of the transformed CTranslate2 model, and the `--quantization` parameter quantizes the model size. If you don't want to quantize the model, you can drop this parameter.
+
+```shell
+ct2-transformers-converter --model models/whisper-tiny-finetune --output_dir models/whisper-tiny-finetune-ct2 --copy_files tokenizer.json preprocessor_config.json --quantization float16
+```
+
+Execute the following program to accelerate speech recognition, where the `--audio_path` argument specifies the audio path to predict. `--model_path` specifies the transformed CTranslate2 model. See this program for more parameters.
+
+```shell
+python infer_ct2.py --audio_path=dataset/test.wav --model_path=models/whisper-tiny-finetune-ct2
+```
+
+Output:
+
+```shell
+-----------  Configuration Arguments -----------
+audio_path: dataset/test.wav
+model_path: models/whisper-tiny-finetune-ct2
+language: zh
+use_gpu: True
+use_int8: False
+beam_size: 10
+num_workers: 1
+vad_filter: False
+local_files_only: True
+------------------------------------------------
+[0.0 - 8.0]：近几年,不但我用书给女儿压碎,也全说亲朋不要给女儿压碎钱,而改送压碎书。
+```
 
 
 <a name='Android部署'></a>

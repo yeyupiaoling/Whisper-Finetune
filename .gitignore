@@ -5,4 +5,5 @@ base-model/
 output/
 dataset/*
 !dataset/test.wav
+!dataset/test_long.wav
 test.py

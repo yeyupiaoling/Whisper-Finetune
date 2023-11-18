@@ -56,11 +56,11 @@ OpenAI在开源了号称其英文语音辨识能力已达到人类水准的Whisp
  - [合并模型](#合并模型)
  - [评估模型](#评估模型)
  - [预测](#预测)
- - [加速预测](#加速预测)
  - [GUI界面预测](#GUI界面预测)
- - [Web部署](#Web部署)
-   - [接口文档](#接口文档)
- - [Android部署](#Android部署)
+- [Web部署](#Web部署)
+    - [接口文档](#接口文档)
+- [使用Ctranslate2格式模型预测](#使用Ctranslate2格式模型预测)
+- [Android部署](#Android部署)
  - [Windows桌面应用](#Windows桌面应用)
  - [打赏作者](#打赏作者)
 
@@ -72,10 +72,10 @@ OpenAI在开源了号称其英文语音辨识能力已达到人类水准的Whisp
 2. `finetune.py`：微调模型。
 3. `merge_lora.py`：合并Whisper和Lora的模型。
 4. `evaluation.py`：评估使用微调后的模型或者Whisper原模型。
-5. `infer.py`：使用transformers直接调用微调后的模型或者Whisper原模型预测。
+5. `infer.py`：使用调用微调后的模型或者transformers上的Whisper模型预测。
 6. `infer_ct2.py`：使用转换为CTranslate2的模型预测，主要参考这个程序用法。
-7. `infer_gui.py`：有GUI界面操作，使用转换为CTranslate2的模型预测。
-8. `infer_server.py`：使用转换为CTranslate2的模型部署到服务器端，提供给客户端调用。
+7. `infer_gui.py`：有GUI界面操作，使用调用微调后的模型或者transformers上的Whisper模型预测。
+8. `infer_server.py`：使用调用微调后的模型或者transformers上的Whisper模型部署到服务器端，提供给客户端调用。
 9. `convert-ggml.py`：转换模型为GGML格式模型，给Android应用或者Windows应用使用。
 10. `AndroidDemo`：该目录存放的是部署模型到Android的源码。
 11. `WhisperDesktop`：该目录存放的是Windows桌面应用的程序。
@@ -116,15 +116,18 @@ OpenAI在开源了号称其英文语音辨识能力已达到人类水准的Whisp
 | whisper-large-v2 |  Chinese  |     [WenetSpeech](./tools/create_wenetspeech_data.py)      |   0.05443    | 0.08367  |   0.19087    |  N/A  | 加入知识星球获取 |
 | whisper-large-v3 |  Chinese  |     [WenetSpeech](./tools/create_wenetspeech_data.py)      |              |          |              |       | 加入知识星球获取 |
 
-3. 未加速和加速后的推理速度测试表，使用GPU为GTX3090（24G）。
+3. 推理速度测试表，使用GPU为GTX3090（24G），音频为`test_long.wav`，时长为3分钟整，测试程序在`tools/run.sh`。
 
-|       使用模型       | 原生模型实时率(float16) | 转换CTranslate2加速后实时率(float16) | 转换CTranslate2加速后实时率(int8_float16) |
-|:----------------:|:----------------:|:----------------------------:|:---------------------------------:|
-|   whisper-tiny   |       0.03       |             0.06             |               0.06                |
-|   whisper-base   |       0.04       |             0.06             |               0.06                |    
-|  whisper-small   |       0.08       |             0.08             |               0.08                | 
-|  whisper-medium  |       0.13       |             0.10             |               0.10                |  
-| whisper-large-v2 |       0.19       |             0.12             |               0.12                |
+|                                   加速方式                                    |  tiny  |  base  | small  | medium  | large-v2 | large-v3 |
+|:-------------------------------------------------------------------------:|:------:|:------:|:------:|:-------:|:--------:|:--------:|
+|                  Transformers (`fp16` + `batch_size=16`)                  | 1.458s | 1.671s | 2.331s | 11.071s |  4.779s  | 12.826s  |    
+|            Transformers (`fp16` + `batch_size=16` + `Compile`)            | 1.477s | 1.675s | 2.357s | 11.003s |  4.799s  | 12.643s  |    
+|       Transformers (`fp16` + `batch_size=16` + `BetterTransformer`)       | 1.461s | 1.676s | 2.301s | 11.062s |  4.608s  | 12.505s  |    
+|       Transformers (`fp16` + `batch_size=16` + `Flash Attention 2`)       | 1.436s | 1.630s | 2.258s | 10.533s |  4.344s  | 11.651s  |    
+| Transformers (`fp16` + `batch_size=16` + `Compile` + `BetterTransformer`) | 1.442s | 1.686s | 2.277s | 11.000s |  4.543s  | 12.592s  |    
+| Transformers (`fp16` + `batch_size=16` + `Compile` + `Flash Attention 2`) | 1.409s | 1.643s | 2.220s | 10.390s |  4.377s  | 11.703s  |    
+|                 Faster Whisper (`fp16` + `beam_size=1` )                  | 2.179s | 1.492s | 2.327s | 3.752s  |  5.677s  | 31.541s  |    
+|                 Faster Whisper (`8-bit` + `beam_size=1` )                 | 2.609s | 1.728s | 2.744s | 4.688s  |  6.571s  | 29.307s  |    
 
 4. 经过处理的数据列表。
 
@@ -136,10 +139,9 @@ OpenAI在开源了号称其英文语音辨识能力已达到人类水准的Whisp
 **重要说明：**
 1. 在评估的时候移除模型输出的标点符号，并把繁体中文转成简体中文。
 2. `aishell_test`为AIShell的测试集，`test_net`和`test_meeting`为WenetSpeech的测试集。
-3. RTF= 所有音频总时间(单位秒) / ASR识别所有音频处理时间(单位秒)。
-4. 测试速度的音频为`dataset/test.wav`，时长为8秒。
-5. 训练数据使用的是带标点符号的数据，字错率高一点。
-6. 微调AiShell数据不带时间戳，微调WenetSpeech带时间戳。
+3. 测试速度的音频为`dataset/test_long.wav`，时长为3分钟整。
+4. 训练数据使用的是带标点符号的数据，字错率高一点。
+5. 微调AiShell数据不带时间戳，微调WenetSpeech带时间戳。
 
 <a name='安装环境'></a>
 
@@ -149,17 +151,17 @@ OpenAI在开源了号称其英文语音辨识能力已达到人类水准的Whisp
 
 1. 以下是使用Anaconda安装Pytorch环境，如果已经安装过了，请跳过。
 ```shell
-conda install pytorch==1.13.1 torchvision==0.14.1 torchaudio==0.13.1 pytorch-cuda=11.6 -c pytorch -c nvidia
+conda install pytorch==2.1.0 torchvision==0.16.0 torchaudio==2.1.0 pytorch-cuda=11.8 -c pytorch -c nvidia
 ```
 
 2. 以下是使用Docker镜像，拉取一个Pytorch环境的镜像。
 ```shell
-sudo docker pull pytorch/pytorch:1.13.1-cuda11.6-cudnn8-devel
+sudo docker pull pytorch/pytorch:2.1.0-cuda11.8-cudnn8-devel
 ```
 
 然后进入到镜像中，同时将当前路径挂载到容器的`/workspace`目录下。
 ```shell
-sudo nvidia-docker run --name pytorch -it -v $PWD:/workspace pytorch/pytorch:1.13.1-cuda11.6-cudnn8-devel /bin/bash
+sudo nvidia-docker run --name pytorch -it -v $PWD:/workspace pytorch/pytorch:2.1.0-cuda11.8-cudnn8-devel /bin/bash
 ```
 
 - 安装所需的依赖库。
@@ -306,44 +308,14 @@ python evaluation.py --model_path=models/whisper-tiny-finetune --metric=cer
 python infer.py --audio_path=dataset/test.wav --model_path=models/whisper-tiny-finetune
 ```
 
-<a name='加速预测'></a>
-
-## 加速预测
-
-众所周知，直接使用Whisper模型推理是比较慢的，所以这里提供了一个加速的方式，主要是使用了CTranslate2进行加速，首先要转换模型，把合并后的模型转换为CTranslate2模型。如下命令，`--model`参数指定的是合并后的模型路径，同时也支持直接使用Whisper原模型，例如直接指定`openai/whisper-large-v2`。`--output_dir`参数指定的是转换后的CTranslate2模型路径，`--quantization`参数指定的是量化模型大小，不希望量化模型的可以直接去掉这个参数。
-```shell
-ct2-transformers-converter --model models/whisper-tiny-finetune --output_dir models/whisper-tiny-finetune-ct2 --copy_files tokenizer.json preprocessor_config.json --quantization float16
-```
-
-执行以下程序进行加速语音识别，`--audio_path`参数指定的是要预测的音频路径。`--model_path`指定的是转换后的CTranslate2模型。其他更多的参数请查看这个程序。
-```shell
-python infer_ct2.py --audio_path=dataset/test.wav --model_path=models/whisper-tiny-finetune-ct2
-```
-
-输出结果如下：
-```shell
------------  Configuration Arguments -----------
-audio_path: dataset/test.wav
-model_path: models/whisper-tiny-finetune-ct2
-language: zh
-use_gpu: True
-use_int8: False
-beam_size: 10
-num_workers: 1
-vad_filter: False
-local_files_only: True
-------------------------------------------------
-[0.0 - 8.0]：近几年,不但我用书给女儿压碎,也全说亲朋不要给女儿压碎钱,而改送压碎书。
-```
-
 <a name='GUI界面预测'></a>
 
 ## GUI界面预测
 
-这里同样是使用了CTranslate2进行加速，转换模型方式看上面文档。`--model_path`指定的是转换后的CTranslate2模型。其他更多的参数请查看这个程序。
+`--model_path`指定Transformers模型。其他更多的参数请查看这个程序。
 
 ```shell
-python infer_gui.py --model_path=models/whisper-tiny-finetune-ct2
+python infer_gui.py --model_path=models/whisper-tiny-finetune
 ```
 
 启动后界面如下：
@@ -356,15 +328,15 @@ python infer_gui.py --model_path=models/whisper-tiny-finetune-ct2
 
 ## Web部署
 
-Web部署同样是使用了CTranslate2进行加速，转换模型方式看上面文档。`--host`指定服务启动的地址，这里设置为`0.0.0.0`，即任何地址都可以访问。`--port`指定使用的端口号。`--model_path`指定的是转换后的CTranslate2模型。`--num_workers`指定是使用多少个线程并发推理，这在Web部署上很重要，当有多个并发访问是可以同时推理。其他更多的参数请查看这个程序。
+`--host`指定服务启动的地址，这里设置为`0.0.0.0`，即任何地址都可以访问。`--port`指定使用的端口号。`--model_path`指定的Transformers模型。`--num_workers`指定是使用多少个线程并发推理，这在Web部署上很重要，当有多个并发访问是可以同时推理。其他更多的参数请查看这个程序。
 
 ```shell
-python infer_server.py --host=0.0.0.0 --port=5000 --model_path=models/whisper-tiny-finetune-ct2 --num_workers=2
+python infer_server.py --host=0.0.0.0 --port=5000 --model_path=models/whisper-tiny-finetune --num_workers=2
 ```
 
 ### 接口文档
 
-目前提供两个接口，普通的识别接口`/recognition`和流式返回结果`/recognition_stream`，注意这个流式是指流式返回识别结果，同样是上传完整的音频，然后流式返回识别结果，这种方式针对长语音识别体验非常好。他们的文档接口是完全一致的，接口参数如下。
+目前提供识别接口`/recognition`，接口参数如下。
 
 |     字段     | 是否必须 |   类型   |    默认值     |              说明               |
 |:----------:|:----:|:------:|:----------:|:-----------------------------:|
@@ -409,24 +381,6 @@ response = requests.post(url="http://127.0.0.1:5000/recognition",
 print(response.text)
 ```
 
-下面的是`/recognition_stream`的调用方式。
-```python
-import json
-import requests
-
-response = requests.post(url="http://127.0.0.1:5000/recognition_stream",
-                         files=[("audio", ("test.wav", open("dataset/test_long.wav", 'rb'), 'audio/wav'))],
-                         json={"to_simple": 1, "remove_pun": 0, "language": "zh", "task": "transcribe"}, stream=True, timeout=20)
-for chunk in response.iter_lines(decode_unicode=False, delimiter=b"\0"):
-    if chunk:
-        result = json.loads(chunk.decode())
-        text = result["result"]
-        start = result["start"]
-        end = result["end"]
-        print(f"[{start} - {end}]：{text}")
-```
-
-
 提供的测试页面如下：
 
 首页`http://127.0.0.1:5000/` 的页面如下：
@@ -437,9 +391,36 @@ for chunk in response.iter_lines(decode_unicode=False, delimiter=b"\0"):
 
 文档页面`http://127.0.0.1:5000/docs` 的页面如下：
 
-<div align="center">
-<img src="./docs/images/api.jpg" alt="文档页面" width="600"/>
-</div>
+
+<a name='使用Ctranslate2格式模型预测'></a>
+
+## 使用Ctranslate2格式模型预测
+
+这里提供了一个CTranslate2加速的方式，尽管使用Transformers的pipeline推理速度已经很快了，首先要转换模型，把合并后的模型转换为CTranslate2模型。如下命令，`--model`参数指定的是合并后的模型路径，同时也支持直接使用Whisper原模型，例如直接指定`openai/whisper-large-v2`。`--output_dir`参数指定的是转换后的CTranslate2模型路径，`--quantization`参数指定的是量化模型大小，不希望量化模型的可以直接去掉这个参数。
+```shell
+ct2-transformers-converter --model models/whisper-tiny-finetune --output_dir models/whisper-tiny-finetune-ct2 --copy_files tokenizer.json preprocessor_config.json --quantization float16
+```
+
+执行以下程序进行语音识别，`--audio_path`参数指定的是要预测的音频路径。`--model_path`指定的是转换后的CTranslate2模型。其他更多的参数请查看这个程序。
+```shell
+python infer_ct2.py --audio_path=dataset/test.wav --model_path=models/whisper-tiny-finetune-ct2
+```
+
+输出结果如下：
+```shell
+-----------  Configuration Arguments -----------
+audio_path: dataset/test.wav
+model_path: models/whisper-tiny-finetune-ct2
+language: zh
+use_gpu: True
+use_int8: False
+beam_size: 10
+num_workers: 1
+vad_filter: False
+local_files_only: True
+------------------------------------------------
+[0.0 - 8.0]：近几年,不但我用书给女儿压碎,也全说亲朋不要给女儿压碎钱,而改送压碎书。
+```
 
 
 <a name='Android部署'></a>

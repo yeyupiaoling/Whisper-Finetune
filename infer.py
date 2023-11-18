@@ -13,14 +13,14 @@ add_arg("audio_path",  type=str,  default="dataset/test.wav", help="预测的音
 add_arg("model_path",  type=str,  default="models/whisper-tiny-finetune/", help="合并模型的路径，或者是huggingface上模型的名称")
 add_arg("use_gpu",     type=bool, default=True,      help="是否使用gpu进行预测")
 add_arg("language",    type=str,  default="chinese", help="设置语言，如果为None则预测的是多语言")
-add_arg("num_beams",   type=int,  default=10,        help="解码搜索大小")
-add_arg("batch_size",  type=int,  default=1,         help="预测batch_size大小")
+add_arg("num_beams",   type=int,  default=1,         help="解码搜索大小")
+add_arg("batch_size",  type=int,  default=16,        help="预测batch_size大小")
 add_arg("use_compile", type=bool, default=False,     help="是否使用Pytorch2.0的编译器")
 add_arg("task",        type=str,  default="transcribe", choices=['transcribe', 'translate'], help="模型的任务")
 add_arg("assistant_model_path",  type=str,  default=None,  help="助手模型，可以提高推理速度，例如openai/whisper-tiny")
 add_arg("local_files_only",      type=bool, default=True,  help="是否只在本地加载模型，不尝试下载")
 add_arg("use_flash_attention_2", type=bool, default=False, help="是否使用FlashAttention2加速")
-add_arg("to_bettertransformer",  type=bool, default=False, help="是否使用BetterTransformer加速")
+add_arg("use_bettertransformer", type=bool, default=False, help="是否使用BetterTransformer加速")
 args = parser.parse_args()
 print_arguments(args)
 
@@ -36,7 +36,7 @@ model = AutoModelForSpeechSeq2Seq.from_pretrained(
     args.model_path, torch_dtype=torch_dtype, low_cpu_mem_usage=True, use_safetensors=True,
     use_flash_attention_2=args.use_flash_attention_2
 )
-if args.to_bettertransformer and not args.use_flash_attention_2:
+if args.use_bettertransformer and not args.use_flash_attention_2:
     model = model.to_bettertransformer()
 # 使用Pytorch2.0的编译器
 if args.use_compile:
