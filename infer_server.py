@@ -67,7 +67,7 @@ infer_pipe = pipeline("automatic-speech-recognition",
                       feature_extractor=processor.feature_extractor,
                       max_new_tokens=128,
                       chunk_length_s=30,
-                      batch_size=2,
+                      batch_size=args.batch_size,
                       torch_dtype=torch_dtype,
                       generate_kwargs=generate_kwargs_pipeline,
                       device=device)
@@ -99,7 +99,7 @@ def recognition(file: File, to_simple: int, remove_pun: int, language: str = Non
             text = convert(text, 'zh-cn')
         if remove_pun == 1:
             text = remove_punctuation(text)
-        ret = {"result": text, "start": chunk['timestamp'][0], "end": chunk['timestamp'][1]}
+        ret = {"text": text, "start": chunk['timestamp'][0], "end": chunk['timestamp'][1]}
         results.append(ret)
     return results
 
