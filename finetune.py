@@ -1,12 +1,11 @@
 import argparse
 import functools
 import os
-import platform
 
-import torch
 from peft import LoraConfig, get_peft_model, AdaLoraConfig, PeftModel, prepare_model_for_kbit_training
 from transformers import Seq2SeqTrainer, Seq2SeqTrainingArguments, WhisperForConditionalGeneration, WhisperProcessor
 
+from utils.callback import SavePeftModelCallback
 from utils.data_utils import DataCollatorSpeechSeq2SeqWithPadding
 from utils.model_utils import load_from_checkpoint
 from utils.reader import CustomDataset
@@ -123,6 +122,7 @@ training_args = \
                              report_to=["tensorboard"],  # 指定使用tensorboard保存log
                              save_steps=args.save_steps,  # 指定保存检查点的步数
                              eval_steps=args.eval_steps,  # 指定评估模型的步数
+                             torch_compile=args.use_compile, # 使用Pytorch2.0的编译器
                              save_total_limit=5,  # 只保存最新检查点的数量
                              optim='adamw_torch',  # 指定优化方法
                              ddp_find_unused_parameters=False if ddp else None,  # 分布式训练设置
@@ -136,18 +136,14 @@ if training_args.local_rank == 0 or training_args.local_rank == -1:
     model.print_trainable_parameters()
     print('=' * 90)
 
-if args.use_compile:
-    # 使用Pytorch2.0的编译器
-    if torch.__version__ >= "2" and platform.system().lower() != 'windows':
-        model = torch.compile(model)
-
 # 定义训练器
 trainer = Seq2SeqTrainer(args=training_args,
                          model=model,
                          train_dataset=train_dataset,
                          eval_dataset=test_dataset,
                          data_collator=data_collator,
-                         tokenizer=processor.feature_extractor)
+                         tokenizer=processor.feature_extractor,
+                         callbacks=[SavePeftModelCallback])
 model.config.use_cache = False
 trainer._load_from_checkpoint = load_from_checkpoint
 
