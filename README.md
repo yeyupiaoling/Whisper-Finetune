@@ -107,7 +107,7 @@ OpenAI在开源了号称其英文语音辨识能力已达到人类水准的Whisp
 |  whisper-small   |  Chinese  | [AIShell](https://openslr.magicdatatech.com/resources/33/) |   0.05452    | 0.19831  |   0.24229    |   N/A   | 加入知识星球获取 |
 |  whisper-medium  |  Chinese  | [AIShell](https://openslr.magicdatatech.com/resources/33/) |   0.03681    | 0.13073  |   0.16939    |   N/A   | 加入知识星球获取 |
 | whisper-large-v2 |  Chinese  | [AIShell](https://openslr.magicdatatech.com/resources/33/) |   0.03139    | 0.12201  |   0.15776    |   N/A   | 加入知识星球获取 |
-| whisper-large-v3 |  Chinese  | [AIShell](https://openslr.magicdatatech.com/resources/33/) |   0.03004    | 0.11034  |   0.14348    | 0.28673 | 加入知识星球获取 |
+| whisper-large-v3 |  Chinese  | [AIShell](https://openslr.magicdatatech.com/resources/33/) |   0.03660    | 0.09835  |   0.13706    | 0.20060 | 加入知识星球获取 |
 | whisper-large-v3 | Cantonese |                           粤语数据集                            |   0.06857    | 0.11369  |   0.17452    | 0.03524 | 加入知识星球获取 |
 |   whisper-tiny   |  Chinese  |     [WenetSpeech](./tools/create_wenetspeech_data.py)      |   0.17711    | 0.24783  |   0.39226    |   N/A   | 加入知识星球获取 |
 |   whisper-base   |  Chinese  |     [WenetSpeech](./tools/create_wenetspeech_data.py)      |   0.14548    | 0.17747  |   0.30590    |   N/A   | 加入知识星球获取 |
