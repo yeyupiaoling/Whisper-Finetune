@@ -89,7 +89,7 @@
                     break;
                 case 'ok':
                     console.log(e.target.responseText)
-                    document.getElementById('result_p').innerHTML = e.target.responseText
+                    textarea.value = e.target.responseText
                     break;
                 case 'error':
                     alert("上传失败");
@@ -120,7 +120,7 @@
                         break;
                     case 'ok':
                         console.log(e.target.responseText)
-                        textarea.innerText = e.target.responseText
+                        textarea.value = e.target.responseText
                         break;
                     case 'error':
                         alert("上传失败");
