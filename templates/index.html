@@ -20,6 +20,7 @@
     <div id="result">
         <label for="result_p"></label><textarea id="result_p"></textarea>
     </div>
+    上传进度：<progress id="progress1" value="0" max="100"></progress>&nbsp;<text id="progress_text"></text>
 </div>
 <script>
     let is_recording = false;
@@ -28,6 +29,8 @@
     let recorder;
     let audio = document.querySelector('audio');
     let textarea = document.getElementById('result_p')
+    let progress1 = document.getElementById('progress1')
+    let progress_text = document.getElementById('progress_text')
 
 
     function record() {
@@ -84,8 +87,11 @@
         recorder.upload(host + "/recognition", function (state, e) {
             switch (state) {
                 case 'uploading':
-                    const percentComplete = Math.round(e.loaded * 100 / e.total) + '%';
-                    console.log(percentComplete);
+                    const percentComplete = Math.round(e.loaded * 100 / e.total);
+                    console.log(percentComplete + '%');
+                    // 弹出进度条
+                    progress1.value = percentComplete
+                    progress_text.innerText = percentComplete + '%'
                     break;
                 case 'ok':
                     console.log(e.target.responseText)
@@ -115,8 +121,11 @@
             upload_file(host + "/recognition", file, function (state, e) {
                 switch (state) {
                     case 'uploading':
-                        const percentComplete = Math.round(e.loaded * 100 / e.total) + '%';
-                        console.log(percentComplete);
+                        const percentComplete = Math.round(e.loaded * 100 / e.total);
+                        console.log(percentComplete + '%');
+                        // 弹出进度条
+                        progress1.value = percentComplete
+                        progress_text.innerText = percentComplete + '%'
                         break;
                     case 'ok':
                         console.log(e.target.responseText)
