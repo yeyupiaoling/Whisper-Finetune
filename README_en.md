@@ -99,7 +99,7 @@ OpenAI open-sourced project Whisper, which claims to have human-level speech rec
 |  whisper-small   | Chinese  |     [WenetSpeech](./tools/create_wenetspeech_data.py)      |   0.08484    | 0.11801  |   0.23471    |
 |  whisper-medium  | Chinese  |     [WenetSpeech](./tools/create_wenetspeech_data.py)      |   0.05861    | 0.08794  |   0.19486    | 
 | whisper-large-v2 | Chinese  |     [WenetSpeech](./tools/create_wenetspeech_data.py)      |   0.05443    | 0.08367  |   0.19087    | 
-| whisper-large-v3 | Chinese  |     [WenetSpeech](./tools/create_wenetspeech_data.py)      |              |          |              | 
+| whisper-large-v3 | Chinese  |     [WenetSpeech](./tools/create_wenetspeech_data.py)      |   0.04947    | 0.10711  |   0.17429    |
 
 3. inference speed test table, using the GPU GTX3090 (24G), The audio is' test long.wav 'and is 3 minutes long. Test in `'tools/run_compute.sh`.
 
