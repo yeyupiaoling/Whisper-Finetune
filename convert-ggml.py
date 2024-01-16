@@ -13,7 +13,6 @@ from utils.utils import add_arguments, print_arguments
 parser = argparse.ArgumentParser(description=__doc__)
 add_arg = functools.partial(add_arguments, argparser=parser)
 add_arg("model_dir",   type=str,  default="models/whisper-tiny-finetune", help="需要转换的模型路径")
-add_arg("whisper_dir", type=str,  default="whisper/",              help="whisper项目的路径")
 add_arg("output_path", type=str,  default="models/ggml-model.bin", help="转换保存模型的路径")
 add_arg("use_f16",     type=bool, default=True,                    help="是否量化为半精度")
 args = parser.parse_args()
@@ -66,7 +65,7 @@ if "max_length" not in hparams.keys():
 model = WhisperForConditionalGeneration.from_pretrained(args.model_dir)
 
 n_mels = hparams["num_mel_bins"]
-with np.load(f"{args.whisper_dir}/whisper/assets/mel_filters.npz") as f:
+with np.load(f"tools/mel_filters.npz") as f:
     filters = torch.from_numpy(f[f"mel_{n_mels}"])
 
 tokens = json.load(open(f"{args.model_dir}/vocab.json", "r", encoding="utf8"))

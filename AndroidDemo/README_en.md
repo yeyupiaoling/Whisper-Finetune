@@ -7,17 +7,12 @@
 
 ## Convert model
 
-1. To start by cloning the Whisper native source code, as we need some of its files, run the following command from the root of the `whisper-finetune` project.
-```shell
-git clone https://github.com/openai/whisper.git
-```
-
-2. To convert your models, run `convert-ggml.py` from the root of your `Whisper-Finetune` project to convert your models to ggml format for your Android project. The models you need to convert can be original Transformers. It can also be a fine-tuned model.
+1. To convert your models, run `convert-ggml.py` from the root of your `Whisper-Finetune` project to convert your models to ggml format for your Android project. The models you need to convert can be original Transformers. It can also be a fine-tuned model.
 ```shell
 python convert-ggml.py --model_dir=models/whisper-tiny-finetune/ --whisper_dir=whisper/ --output_path=models/ggml-model.bin
 ```
 
-3. Put the model in the Android project `app/SRC/main/assets/models` directory, and then you can use the Android open Studio project.
+2. Put the model in the Android project `app/SRC/main/assets/models` directory, and then you can use the Android open Studio project.
 
 
 ## Build notes
