@@ -45,8 +45,6 @@ def create_annotation_text(data_dir, annotation_path):
         line = line.strip()
         if line == '': continue
         audio_id, text = line.split(' ', 1)
-        # remove space
-        text = ''.join(text.split())
         if args.add_pun:
             text = inference_pipline(text_in=text)['text']
         transcript_dict[audio_id] = text
