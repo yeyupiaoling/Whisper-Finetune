@@ -107,9 +107,9 @@ def prepare_dataset(url, md5sum, target_dir, annotation_path, filepath=None):
         unpack(filepath, target_dir)
         # unpack all audio tar files
         audio_dir = os.path.join(data_dir, 'wav')
-        for subfolder, _, filelist in sorted(os.walk(audio_dir)):
-            for ftar in filelist:
-                unpack(os.path.join(subfolder, ftar), subfolder, True)
+        # for subfolder, _, filelist in sorted(os.walk(audio_dir)):
+        #     for ftar in filelist:
+        #         unpack(os.path.join(subfolder, ftar), subfolder, True)
         os.remove(filepath)
     else:
         print("Skip downloading and unpacking. Aishell data already exists in %s." % target_dir)
