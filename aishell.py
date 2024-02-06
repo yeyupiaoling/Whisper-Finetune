@@ -37,6 +37,7 @@ def create_annotation_text(data_dir, annotation_path):
         os.makedirs(annotation_path)
     f_train = open(os.path.join(annotation_path, 'train.json'), 'w', encoding='utf-8')
     f_test = open(os.path.join(annotation_path, 'test.json'), 'w', encoding='utf-8')
+    f_dev = open(os.path.join(annotation_path, 'dev.json'), 'w', encoding='utf-8')
     transcript_path = os.path.join(data_dir, 'transcript', 'aishell_transcript_v0.8.txt')
     transcript_dict = {}
     with open(transcript_path, 'r', encoding='utf-8') as f:
@@ -49,7 +50,7 @@ def create_annotation_text(data_dir, annotation_path):
             text = inference_pipline(text_in=text)['text']
         transcript_dict[audio_id] = text
     # 训练集
-    data_types = ['train', 'dev']
+    data_types = ['train']
     lines = []
     for type in data_types:
         audio_dir = os.path.join(data_dir, 'wav', type)
@@ -94,6 +95,31 @@ def create_annotation_text(data_dir, annotation_path):
         lines[i]["sentences"] = [{"start": 0, "end": duration, "text": lines[i]["sentence"]}]
     for line in lines:
         f_test.write(json.dumps(line,  ensure_ascii=False)+"\n")
+        
+    # Cross Validation Data
+    audio_dir = os.path.join(data_dir, 'wav', 'dev')
+    lines = []
+    for subfolder, _, filelist in sorted(os.walk(audio_dir)):
+        for fname in filelist:
+            audio_path = os.path.join(subfolder, fname)
+            audio_id = fname[:-4]
+            # if no transcription for audio then skipped
+            if audio_id not in transcript_dict:
+                continue
+            text = transcript_dict[audio_id]
+            line = {"audio": {"path": audio_path}, "sentence": text}
+            lines.append(line)
+    # 添加音频时长
+    for i in tqdm(range(len(lines))):
+        audio_path = lines[i]['audio']['path']
+        sample, sr = soundfile.read(audio_path)
+        duration = round(sample.shape[-1] / float(sr), 2)
+        lines[i]["duration"] = duration
+        lines[i]["sentences"] = [{"start": 0, "end": duration, "text": lines[i]["sentence"]}]
+    for line in lines:
+        f_dev.write(json.dumps(line,  ensure_ascii=False)+"\n")
+
+    f_dev.close()
     f_test.close()
     f_train.close()
 
