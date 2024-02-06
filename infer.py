@@ -3,7 +3,7 @@ import functools
 import platform
 
 import torch
-from transformers import AutoModelForSpeechSeq2Seq, AutoProcessor, pipeline, AutoModelForCausalLM
+from transformers import AutoModelForSpeechSeq2Seq, AutoProcessor, pipeline, AutoModelForCausalLM, AutomaticSpeechRecognitionPipeline
 
 from utils.utils import print_arguments, add_arguments
 
@@ -36,6 +36,9 @@ model = AutoModelForSpeechSeq2Seq.from_pretrained(
     args.model_path, torch_dtype=torch_dtype, low_cpu_mem_usage=True, use_safetensors=True,
     use_flash_attention_2=args.use_flash_attention_2
 )
+model.generation_config.task = args.task
+model.generation_config.lang = args.language
+
 if args.use_bettertransformer and not args.use_flash_attention_2:
     model = model.to_bettertransformer()
 # 使用Pytorch2.0的编译器
@@ -54,23 +57,35 @@ if args.assistant_model_path is not None:
     generate_kwargs_pipeline = {"assistant_model": assistant_model}
 
 # 获取管道
-infer_pipe = pipeline("automatic-speech-recognition",
-                      model=model,
-                      tokenizer=processor.tokenizer,
-                      feature_extractor=processor.feature_extractor,
-                      max_new_tokens=128,
-                      chunk_length_s=30,
-                      batch_size=args.batch_size,
-                      torch_dtype=torch_dtype,
-                      generate_kwargs=generate_kwargs_pipeline,
-                      device=device)
+# infer_pipe = pipeline("automatic-speech-recognition",
+#                       model=model,
+#                       tokenizer=processor.tokenizer,
+#                       feature_extractor=processor.feature_extractor,
+#                       max_new_tokens=128,
+#                       chunk_length_s=30,
+#                       batch_size=args.batch_size,
+#                       torch_dtype=torch_dtype,
+#                       generate_kwargs=generate_kwargs_pipeline,
+#                       device=device)
 
-# 推理参数
-generate_kwargs = {"task": args.task, "num_beams": args.num_beams}
-if args.language is not None:
-    generate_kwargs["language"] = args.language
-# 推理
-result = infer_pipe(args.audio_path, return_timestamps=True, generate_kwargs=generate_kwargs)
+infer_pipe = AutomaticSpeechRecognitionPipeline(
+    model=model,
+    tokenizer=processor.tokenizer,
+    feature_extractor=processor.feature_extractor,
+    max_new_tokens=128,
+    chunk_length_s=30,
+    batch_size=args.batch_size,
+    torch_dtype=torch_dtype,
+    device=device
+)
 
-for chunk in result["chunks"]:
-    print(f"[{chunk['timestamp'][0]}-{chunk['timestamp'][1]}s] {chunk['text']}")
+# # 推理参数
+# generate_kwargs = {"task": args.task, "num_beams": args.num_beams}
+# if args.language is not None:
+#     generate_kwargs["language"] = args.language
+# # 推理
+result = infer_pipe(args.audio_path, return_timestamps=False)
+print(result)
+
+# for chunk in result["chunks"]:
+#     print(f"[{chunk['timestamp'][0]}-{chunk['timestamp'][1]}s] {chunk['text']}")
