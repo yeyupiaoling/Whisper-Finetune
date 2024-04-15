@@ -35,62 +35,68 @@ print_arguments(args)
 # 判断模型路径是否合法
 assert 'openai' == os.path.dirname(args.model_path) or os.path.exists(args.model_path), \
     f"模型文件{args.model_path}不存在，请检查是否已经成功合并模型，或者是否为huggingface存在模型"
-# 获取Whisper的数据处理器，这个包含了特征提取器、tokenizer
-processor = WhisperProcessor.from_pretrained(args.model_path,
-                                             language=args.language,
-                                             task=args.task,
-                                             no_timestamps=not args.timestamps,
-                                             local_files_only=args.local_files_only)
-forced_decoder_ids = processor.get_decoder_prompt_ids()
-# 获取模型
-model = WhisperForConditionalGeneration.from_pretrained(args.model_path,
-                                                        device_map="auto",
-                                                        local_files_only=args.local_files_only)
-model.eval()
 
-# 获取测试数据
-test_dataset = CustomDataset(data_list_path=args.test_data,
-                             processor=processor,
-                             timestamps=args.timestamps,
-                             min_duration=args.min_audio_len,
-                             max_duration=args.max_audio_len)
-print(f"测试数据：{len(test_dataset)}")
 
-# 数据padding器
-data_collator = DataCollatorSpeechSeq2SeqWithPadding(processor=processor)
-eval_dataloader = DataLoader(test_dataset, batch_size=args.batch_size,
-                             num_workers=args.num_workers, collate_fn=data_collator)
+def main():
+    # 获取Whisper的数据处理器，这个包含了特征提取器、tokenizer
+    processor = WhisperProcessor.from_pretrained(args.model_path,
+                                                 language=args.language,
+                                                 task=args.task,
+                                                 no_timestamps=not args.timestamps,
+                                                 local_files_only=args.local_files_only)
+    # 获取模型
+    model = WhisperForConditionalGeneration.from_pretrained(args.model_path,
+                                                            device_map="auto",
+                                                            local_files_only=args.local_files_only)
+    model.generation_config.language = args.language.lower()
+    model.eval()
 
-# 获取评估方法
-metric = evaluate.load(f'metrics/{args.metric}.py')
+    # 获取测试数据
+    test_dataset = CustomDataset(data_list_path=args.test_data,
+                                 processor=processor,
+                                 timestamps=args.timestamps,
+                                 min_duration=args.min_audio_len,
+                                 max_duration=args.max_audio_len)
+    print(f"测试数据：{len(test_dataset)}")
 
-# 开始评估
-for step, batch in enumerate(tqdm(eval_dataloader)):
-    with torch.cuda.amp.autocast():
-        with torch.no_grad():
-            generated_tokens = (
-                model.generate(
-                    input_features=batch["input_features"].cuda(),
-                    decoder_input_ids=batch["labels"][:, :4].cuda(),
-                    forced_decoder_ids=forced_decoder_ids,
-                    max_new_tokens=255).cpu().numpy())
-            labels = batch["labels"].cpu().numpy()
-            labels = np.where(labels != -100, labels, processor.tokenizer.pad_token_id)
-            # 将预测和实际的token转换为文本
-            decoded_preds = processor.tokenizer.batch_decode(generated_tokens, skip_special_tokens=True)
-            decoded_labels = processor.tokenizer.batch_decode(labels, skip_special_tokens=True)
-            # 删除标点符号
-            if args.remove_pun:
-                decoded_preds = remove_punctuation(decoded_preds)
-                decoded_labels = remove_punctuation(decoded_labels)
-            # 将繁体中文总成简体中文
-            if args.to_simple:
-                decoded_preds = to_simple(decoded_preds)
-                decoded_labels = to_simple(decoded_labels)
-            metric.add_batch(predictions=decoded_preds, references=decoded_labels)
-    # 删除计算的记录
-    del generated_tokens, labels, batch
-    gc.collect()
-# 计算评估结果
-m = metric.compute()
-print(f"评估结果：{args.metric}={round(m, 5)}")
+    # 数据padding器
+    data_collator = DataCollatorSpeechSeq2SeqWithPadding(processor=processor)
+    eval_dataloader = DataLoader(test_dataset, batch_size=args.batch_size,
+                                 num_workers=args.num_workers, collate_fn=data_collator)
+
+    # 获取评估方法
+    metric = evaluate.load(f'metrics/{args.metric}.py')
+
+    # 开始评估
+    for step, batch in enumerate(tqdm(eval_dataloader)):
+        with torch.cuda.amp.autocast():
+            with torch.no_grad():
+                generated_tokens = (
+                    model.generate(
+                        input_features=batch["input_features"].cuda(),
+                        decoder_input_ids=batch["labels"][:, :4].cuda(),
+                        max_new_tokens=255).cpu().numpy())
+                labels = batch["labels"].cpu().numpy()
+                labels = np.where(labels != -100, labels, processor.tokenizer.pad_token_id)
+                # 将预测和实际的token转换为文本
+                decoded_preds = processor.tokenizer.batch_decode(generated_tokens, skip_special_tokens=True)
+                decoded_labels = processor.tokenizer.batch_decode(labels, skip_special_tokens=True)
+                # 删除标点符号
+                if args.remove_pun:
+                    decoded_preds = remove_punctuation(decoded_preds)
+                    decoded_labels = remove_punctuation(decoded_labels)
+                # 将繁体中文总成简体中文
+                if args.to_simple:
+                    decoded_preds = to_simple(decoded_preds)
+                    decoded_labels = to_simple(decoded_labels)
+                metric.add_batch(predictions=decoded_preds, references=decoded_labels)
+        # 删除计算的记录
+        del generated_tokens, labels, batch
+        gc.collect()
+    # 计算评估结果
+    m = metric.compute()
+    print(f"评估结果：{args.metric}={round(m, 5)}")
+
+
+if __name__ == '__main__':
+    main()

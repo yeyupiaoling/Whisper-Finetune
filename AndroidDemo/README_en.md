@@ -9,7 +9,7 @@
 
 1. To convert your models, run `convert-ggml.py` from the root of your `Whisper-Finetune` project to convert your models to ggml format for your Android project. The models you need to convert can be original Transformers. It can also be a fine-tuned model.
 ```shell
-python convert-ggml.py --model_dir=models/whisper-tiny-finetune/ --whisper_dir=whisper/ --output_path=models/ggml-model.bin
+python convert-ggml.py --model_dir=models/whisper-tiny-finetune/ --output_path=models/ggml-model.bin
 ```
 
 2. Put the model in the Android project `app/SRC/main/assets/models` directory, and then you can use the Android open Studio project.

@@ -8,7 +8,7 @@
 
 1. 然后开始转换模型，请在`Whisper-Finetune`项目根目录下执行`convert-ggml.py`程序，把模型转换为Android项目所需的ggml格式的模型，需要转换的模型可以是原始的Transformers模型，也可以是微调的模型。
 ```shell
-python convert-ggml.py --model_dir=models/whisper-tiny-finetune/ --whisper_dir=whisper/ --output_path=models/whisper-tiny-finetune-ggml.bin
+python convert-ggml.py --model_dir=models/whisper-tiny-finetune/ --output_path=models/whisper-tiny-finetune-ggml.bin
 ```
 
 
