@@ -24,7 +24,7 @@ add_arg("save_steps",    type=int, default=1000,    help="多少步数保存模�
 add_arg("num_workers",   type=int, default=8,       help="读取数据的线程数量")
 add_arg("learning_rate", type=float, default=1e-3,  help="学习率大小")
 add_arg("min_audio_len", type=float, default=0.5,   help="最小的音频长度，单位秒")
-add_arg("max_audio_len", type=float, default=30,    help="最大的音频长度，单位秒")
+add_arg("max_audio_len", type=float, default=30,    help="最大的音频长度，单位秒，不能大于30秒")
 add_arg("use_adalora",   type=bool,  default=True,  help="是否使用AdaLora而不是Lora")
 add_arg("fp16",          type=bool,  default=True,  help="是否使用fp16训练模型")
 add_arg("use_8bit",      type=bool,  default=False, help="是否将模型量化为8位")
@@ -32,15 +32,15 @@ add_arg("timestamps",    type=bool,  default=False, help="训练时是否使用�
 add_arg("use_compile",   type=bool, default=False, help="是否使用Pytorch2.0的编译器")
 add_arg("local_files_only", type=bool, default=False, help="是否只在本地加载模型，不尝试下载")
 add_arg("num_train_epochs", type=int, default=3,      help="训练的轮数")
-add_arg("language",      type=str, default="Chinese", help="设置语言，可全称也可简写，如果为None则训练的是多语言")
+add_arg("language", type=str, default="Chinese", help="设置语言，可全称也可简写，如果为None则训练的是多语言")
 add_arg("task",     type=str, default="transcribe", choices=['transcribe', 'translate'], help="模型的任务")
 add_arg("augment_config_path",         type=str, default=None, help="数据增强配置文件路径")
 add_arg("resume_from_checkpoint",      type=str, default=None, help="恢复训练的检查点路径")
 add_arg("per_device_train_batch_size", type=int, default=8,    help="训练的batch size")
 add_arg("per_device_eval_batch_size",  type=int, default=8,    help="评估的batch size")
 add_arg("gradient_accumulation_steps", type=int, default=1,    help="梯度累积步数")
-add_arg("push_to_hub", type=bool, default=True, help="Whether to push the model weights to the Hugging Face Hub")
-add_arg("hub_model_id", type=str, default=None, help="Repo id of the model name on the Hugging Face Hub")
+add_arg("push_to_hub",                 type=bool, default=False, help="是否将模型权重推到HuggingFace Hub")
+add_arg("hub_model_id",                type=str,  default=None,  help="HuggingFace Hub上的模型仓库ID")
 args = parser.parse_args()
 print_arguments(args)
 
@@ -157,11 +157,11 @@ def main():
 
     # 保存最后的模型
     trainer.save_state()
-    # re-enable cache for faster inference
+    # 重新启用缓存以更快地推断
     model.config.use_cache = True
     if training_args.local_rank == 0 or training_args.local_rank == -1:
         model.save_pretrained(os.path.join(output_dir, "checkpoint-final"))
-
+    # 是否把模型参数文件推送到huggingface
     if training_args.push_to_hub:
         hub_model_id = args.hub_model_id if args.hub_model_id is not None else output_dir
         model.push_to_hub(hub_model_id)
