@@ -39,6 +39,8 @@ add_arg("resume_from_checkpoint",      type=str, default=None, help="恢复训�
 add_arg("per_device_train_batch_size", type=int, default=8,    help="训练的batch size")
 add_arg("per_device_eval_batch_size",  type=int, default=8,    help="评估的batch size")
 add_arg("gradient_accumulation_steps", type=int, default=1,    help="梯度累积步数")
+add_arg("push_to_hub", type=bool, default=True, help="Whether to push the model weights to the Hugging Face Hub")
+add_arg("hub_model_id", type=str, default=None, help="Repo id of the model name on the Hugging Face Hub")
 args = parser.parse_args()
 print_arguments(args)
 
@@ -130,7 +132,9 @@ def main():
                                  dataloader_num_workers=args.num_workers,  # 设置读取数据的线程数量
                                  logging_steps=args.logging_steps,  # 指定打印log的步数
                                  remove_unused_columns=False,  # 删除模型不需要的数据列
-                                 label_names=["labels"])  # 与标签对应的输入字典中的键列表
+                                 label_names=["labels"],  # 与标签对应的输入字典中的键列表
+                                 push_to_hub=args.push_to_hub,
+                                 )
 
     if training_args.local_rank == 0 or training_args.local_rank == -1:
         print('=' * 90)
@@ -153,8 +157,14 @@ def main():
 
     # 保存最后的模型
     trainer.save_state()
+    # re-enable cache for faster inference
+    model.config.use_cache = True
     if training_args.local_rank == 0 or training_args.local_rank == -1:
         model.save_pretrained(os.path.join(output_dir, "checkpoint-final"))
+
+    if training_args.push_to_hub:
+        hub_model_id = args.hub_model_id if args.hub_model_id is not None else output_dir
+        model.push_to_hub(hub_model_id)
 
 
 if __name__ == '__main__':

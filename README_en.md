@@ -449,7 +449,8 @@ The program is in the [WhisperDesktop](./WhisperDesktop) directory, and the docu
 
 ## Reference
 
-1. https://github.com/huggingface/peft
-2. https://github.com/guillaumekln/faster-whisper
-3. https://github.com/ggerganov/whisper.cpp
-4. https://github.com/Const-me/Whisper
+1. https://huggingface.co/blog/fine-tune-whisper
+2. https://github.com/huggingface/peft
+3. https://github.com/guillaumekln/faster-whisper
+4. https://github.com/ggerganov/whisper.cpp
+5. https://github.com/Const-me/Whisper
