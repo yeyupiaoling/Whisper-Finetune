@@ -5,6 +5,9 @@ import os.path
 import click
 import soundfile
 from tqdm import tqdm
+from transformers import PreTrainedTokenizerFast
+
+tokenizer = PreTrainedTokenizerFast.from_pretrained("openai/whisper-base")
 
 
 @click.command()
@@ -20,6 +23,8 @@ def prepare_dataset(folder):
     for row in rows:
         file_name = row[0]
         text = row[1]
+        if len(tokenizer.encode(text)) > 448:
+            continue
         line = {"audio": {"path": os.path.join(folder, file_name).replace("\\", "/")}, "sentence": text}
         if file_name.startswith("test/") or file_name.startswith("test\\"):
             test_lines.append(line)

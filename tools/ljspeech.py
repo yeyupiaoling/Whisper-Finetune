@@ -17,7 +17,7 @@ def deal_rows(rows, folder, output_file):
         if "|" not in row:
             continue
         file_name, text = row.split("|")
-        if len(tokenizer.encode(text)) > 400:
+        if len(tokenizer.encode(text)) > 448:
             continue
         line = {"audio": {"path": os.path.join(folder, "wavs", file_name.replace(".wav", "") + ".wav")},
                 "sentence": text}
