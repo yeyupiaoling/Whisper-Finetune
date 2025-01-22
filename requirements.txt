@@ -18,3 +18,4 @@ uvicorn>=0.21.1
 fastapi>=0.95.1
 starlette>=0.26.1
 tensorboardX>=2.2
+click~=8.1.8
