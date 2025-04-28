@@ -19,8 +19,8 @@ add_arg("base_model",    type=str, default="openai/whisper-tiny",      help="Whi
 add_arg("output_dir",    type=str, default="output/",                  help="训练保存模型的路径")
 add_arg("warmup_steps",  type=int, default=50,      help="训练预热步数")
 add_arg("logging_steps", type=int, default=100,     help="打印日志步数")
-add_arg("eval_steps",    type=int, default=1000,    help="多少步数评估一次")
-add_arg("save_steps",    type=int, default=1000,    help="多少步数保存模型一次")
+add_arg("eval_steps",    type=int, default=100,    help="多少步数评估一次")
+add_arg("save_steps",    type=int, default=100,    help="多少步数保存模型一次")
 add_arg("num_workers",   type=int, default=8,       help="读取数据的线程数量")
 add_arg("learning_rate", type=float, default=1e-3,  help="学习率大小")
 add_arg("min_audio_len", type=float, default=0.5,   help="最小的音频长度，单位秒")
@@ -31,7 +31,7 @@ add_arg("use_8bit",      type=bool,  default=False, help="是否将模型量化�
 add_arg("timestamps",    type=bool,  default=False, help="训练时是否使用时间戳数据")
 add_arg("use_compile",   type=bool, default=False, help="是否使用Pytorch2.0的编译器")
 add_arg("local_files_only", type=bool, default=False, help="是否只在本地加载模型，不尝试下载")
-add_arg("num_train_epochs", type=int, default=3,      help="训练的轮数")
+add_arg("num_train_epochs", type=int, default=0.1,      help="训练的轮数")
 add_arg("language", type=str, default="Chinese", help="设置语言，可全称也可简写，如果为None则训练的是多语言")
 add_arg("task",     type=str, default="transcribe", choices=['transcribe', 'translate'], help="模型的任务")
 add_arg("augment_config_path",         type=str, default=None, help="数据增强配置文件路径")
@@ -101,15 +101,17 @@ def main():
         target_modules = ["k_proj", "q_proj", "v_proj", "out_proj", "fc1", "fc2"]
         print(target_modules)
         if args.use_adalora:
+            total_step = args.num_train_epochs * len(train_dataset)
             config = AdaLoraConfig(init_r=12, target_r=4, beta1=0.85, beta2=0.85, tinit=200, tfinal=1000, deltaT=10,
-                                   lora_alpha=32, lora_dropout=0.1, orth_reg_weight=0.5, target_modules=target_modules)
+                                   lora_alpha=32, lora_dropout=0.1, orth_reg_weight=0.5, target_modules=target_modules,
+                                   total_step=total_step)
         else:
             config = LoraConfig(r=32, lora_alpha=64, target_modules=target_modules, lora_dropout=0.05, bias="none")
         model = get_peft_model(model, config)
 
     if args.base_model.endswith("/"):
         args.base_model = args.base_model[:-1]
-    output_dir = os.path.join(args.output_dir, os.path.basename(args.base_model))
+    output_dir = str(os.path.join(args.output_dir, os.path.basename(args.base_model)))
     # 定义训练参数
     training_args = \
         Seq2SeqTrainingArguments(output_dir=output_dir,  # 保存检查点和意志的目录
@@ -120,7 +122,7 @@ def main():
                                  warmup_steps=args.warmup_steps,  # 预热步数
                                  num_train_epochs=args.num_train_epochs,  # 微调训练轮数
                                  save_strategy="steps",  # 指定按照步数保存检查点
-                                 evaluation_strategy="steps",  # 指定按照步数评估模型
+                                 eval_strategy="steps",  # 指定按照步数评估模型
                                  load_best_model_at_end=True,  # 指定是否在结束时加载最优模型
                                  fp16=args.fp16,  # 是否使用半精度训练
                                  report_to=["tensorboard"],  # 指定使用tensorboard保存log
@@ -134,7 +136,7 @@ def main():
                                  logging_steps=args.logging_steps,  # 指定打印log的步数
                                  remove_unused_columns=False,  # 删除模型不需要的数据列
                                  label_names=["labels"],  # 与标签对应的输入字典中的键列表
-                                 push_to_hub=args.push_to_hub,
+                                 push_to_hub=args.push_to_hub, # 是否将模型权重推到HuggingFace Hub
                                  )
 
     if training_args.local_rank == 0 or training_args.local_rank == -1:
@@ -148,7 +150,7 @@ def main():
                              train_dataset=train_dataset,
                              eval_dataset=test_dataset,
                              data_collator=data_collator,
-                             tokenizer=processor.feature_extractor,
+                             processing_class=processor.feature_extractor,
                              callbacks=[SavePeftModelCallback])
     model.config.use_cache = False
     trainer._load_from_checkpoint = load_from_checkpoint

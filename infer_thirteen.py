@@ -11,11 +11,9 @@ import speech_recognition as sr
 import wave
 import os
 
-
 parser = argparse.ArgumentParser(description=__doc__)
 add_arg = functools.partial(add_arguments, argparser=parser)
-# add_arg("audio_path",  type=str,  default="dataset/test.wav", help="预测的音频路径")
-add_arg("audio_path",  type=str,  default=False, help="预测的音频路径")
+add_arg("audio_path",  type=str,  default="dataset/test.wav", help="预测的音频路径")
 add_arg("model_path",  type=str,  default="models/tiny-finetune/", help="合并模型的路径，或者是huggingface上模型的名称")
 add_arg("use_gpu",     type=bool, default=True,      help="是否使用gpu进行预测")
 add_arg("language",    type=str,  default="chinese", help="设置语言，如果为None则预测的是多语言")
@@ -29,6 +27,7 @@ add_arg("use_flash_attention_2", type=bool, default=False, help="是否使用Fla
 add_arg("use_bettertransformer", type=bool, default=False, help="是否使用BetterTransformer加速")
 args = parser.parse_args()
 print_arguments(args)
+
 
 def save_as_wav(audio, output_file_path):
     with wave.open(output_file_path, 'wb') as wav_file:
@@ -46,6 +45,7 @@ def input_audio():
         audio = r.listen(source)
         args.audio_path = "dataset/temp_file.wav"
         save_as_wav(audio, args.audio_path)
+
 
 # 设置设备
 device = "cuda:0" if torch.cuda.is_available() and args.use_gpu else "cpu"
@@ -99,16 +99,14 @@ if args.audio_path is False:
 
     result = infer_pipe(args.audio_path, return_timestamps=True, generate_kwargs=generate_kwargs)
     os.remove(args.audio_path)
-
 else:
     # 推理
     result = infer_pipe(args.audio_path, return_timestamps=True, generate_kwargs=generate_kwargs)
 
-
-temp = ''
+results = ''
 for chunk in result["chunks"]:
-    temp = temp + chunk['text']
+    results = results + chunk['text']
     print(f"[{chunk['timestamp'][0]}-{chunk['timestamp'][1]}s] {chunk['text']}")
 
 print('---------------')
-print(temp)
+print(results)

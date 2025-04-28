@@ -36,6 +36,7 @@ model = AutoModelForSpeechSeq2Seq.from_pretrained(
     args.model_path, torch_dtype=torch_dtype, low_cpu_mem_usage=True, use_safetensors=True,
     use_flash_attention_2=args.use_flash_attention_2
 )
+model.generation_config.forced_decoder_ids = None
 if args.use_bettertransformer and not args.use_flash_attention_2:
     model = model.to_bettertransformer()
 # 使用Pytorch2.0的编译器
@@ -45,7 +46,7 @@ if args.use_compile:
 model.to(device)
 
 # 获取助手模型
-generate_kwargs_pipeline = None
+generate_kwargs_pipeline = {"max_new_tokens": 128}
 if args.assistant_model_path is not None:
     assistant_model = AutoModelForCausalLM.from_pretrained(
         args.assistant_model_path, torch_dtype=torch_dtype, low_cpu_mem_usage=True, use_safetensors=True
@@ -58,7 +59,6 @@ infer_pipe = pipeline("automatic-speech-recognition",
                       model=model,
                       tokenizer=processor.tokenizer,
                       feature_extractor=processor.feature_extractor,
-                      max_new_tokens=128,
                       chunk_length_s=30,
                       batch_size=args.batch_size,
                       torch_dtype=torch_dtype,

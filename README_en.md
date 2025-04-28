@@ -28,8 +28,8 @@ OpenAI open-sourced project Whisper, which claims to have human-level speech rec
 **Environment：**
 
 - Anaconda 3
-- Python 3.8
-- Pytorch 1.13.1
+- Python 3.11
+- Pytorch 2.4.0
 - Ubuntu 18.04
 - GPU A100-PCIE-40GB*1
 
@@ -132,19 +132,19 @@ OpenAI open-sourced project Whisper, which claims to have human-level speech rec
 1. Here's how to install Pytorch using Anaconda. If you already have it, please skip it.
 
 ```shell
-conda install pytorch==2.1.0 torchvision==0.16.0 torchaudio==2.1.0 pytorch-cuda=11.8 -c pytorch -c nvidia
+conda install pytorch==2.4.0 torchvision==0.19.0 torchaudio==2.4.0  pytorch-cuda=11.8 -c pytorch -c nvidia
 ```
 
 2. Here's how to pull an image of a Pytorch environment using a Docker image.
 
 ```shell
-sudo docker pull pytorch/pytorch:2.1.0-cuda11.8-cudnn8-devel
+sudo docker pull pytorch/pytorch:2.4.0-cuda11.8-cudnn9-devel
 ```
 
 It then moves into the image and mounts the current path to the container's '/workspace' directory.
 
 ```shell
-sudo nvidia-docker run --name pytorch -it -v $PWD:/workspace pytorch/pytorch:1.13.1-cuda11.6-cudnn8-devel /bin/bash
+sudo nvidia-docker run --name pytorch -it -v $PWD:/workspace pytorch/pytorch:2.4.0-cuda11.8-cudnn9-devel /bin/bash
 ```
 
 - Install the required libraries.
