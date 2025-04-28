@@ -31,7 +31,7 @@ add_arg("use_8bit",      type=bool,  default=False, help="是否将模型量化�
 add_arg("timestamps",    type=bool,  default=False, help="训练时是否使用时间戳数据")
 add_arg("use_compile",   type=bool, default=False, help="是否使用Pytorch2.0的编译器")
 add_arg("local_files_only", type=bool, default=False, help="是否只在本地加载模型，不尝试下载")
-add_arg("num_train_epochs", type=int, default=0.1,      help="训练的轮数")
+add_arg("num_train_epochs", type=int, default=3,      help="训练的轮数")
 add_arg("language", type=str, default="Chinese", help="设置语言，可全称也可简写，如果为None则训练的是多语言")
 add_arg("task",     type=str, default="transcribe", choices=['transcribe', 'translate'], help="模型的任务")
 add_arg("augment_config_path",         type=str, default=None, help="数据增强配置文件路径")
