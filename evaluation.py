@@ -75,7 +75,7 @@ def main():
 
     # 开始评估
     for step, batch in enumerate(tqdm(eval_dataloader)):
-        with torch.cuda.amp.autocast():
+        with torch.autocast(device_type="cuda"):
             with torch.no_grad():
                 generated_tokens = (
                     model.generate(
