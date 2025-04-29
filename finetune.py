@@ -1,6 +1,7 @@
 import argparse
 import functools
 import os
+import platform
 
 from peft import LoraConfig, get_peft_model, AdaLoraConfig, PeftModel, prepare_model_for_kbit_training
 from transformers import Seq2SeqTrainer, Seq2SeqTrainingArguments, WhisperForConditionalGeneration, WhisperProcessor
@@ -44,6 +45,10 @@ add_arg("hub_model_id",                type=str,  default=None,  help="HuggingFa
 add_arg("save_total_limit",            type=int,  default=10,  help="只保存最新检查点的数量")
 args = parser.parse_args()
 print_arguments(args)
+
+# 如果是Windows，num_workers设置为0
+if platform.system() == "Windows":
+    args.num_workers = 0
 
 
 def main():

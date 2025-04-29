@@ -2,6 +2,7 @@ import argparse
 import functools
 import gc
 import os
+import platform
 
 import evaluate
 import numpy as np
@@ -36,6 +37,10 @@ print_arguments(args)
 assert 'openai' == os.path.dirname(args.model_path) or os.path.exists(args.model_path), \
     f"模型文件{args.model_path}不存在，请检查是否已经成功合并模型，或者是否为huggingface存在模型"
 
+# 如果是Windows，num_workers设置为0
+if platform.system() == "Windows":
+    args.num_workers = 0
+
 
 def main():
     # 获取Whisper的数据处理器，这个包含了特征提取器、tokenizer
@@ -49,6 +54,7 @@ def main():
                                                             device_map="auto",
                                                             local_files_only=args.local_files_only)
     model.generation_config.language = args.language.lower()
+    model.generation_config.forced_decoder_ids = None
     model.eval()
 
     # 获取测试数据
