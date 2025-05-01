@@ -52,7 +52,7 @@ if args.use_compile:
 model.to(device)
 
 # 获取助手模型
-generate_kwargs_pipeline = None
+generate_kwargs_pipeline = {"max_new_tokens": 128}
 if args.assistant_model_path is not None:
     assistant_model = AutoModelForCausalLM.from_pretrained(
         args.assistant_model_path, torch_dtype=torch_dtype, low_cpu_mem_usage=True, use_safetensors=True
@@ -65,7 +65,6 @@ infer_pipe = pipeline("automatic-speech-recognition",
                       model=model,
                       tokenizer=processor.tokenizer,
                       feature_extractor=processor.feature_extractor,
-                      max_new_tokens=128,
                       chunk_length_s=30,
                       batch_size=args.batch_size,
                       torch_dtype=torch_dtype,
@@ -78,11 +77,6 @@ _ = infer_pipe("dataset/test.wav")
 app = FastAPI(title="夜雨飘零语音识别")
 app.mount('/static', StaticFiles(directory='static'), name='static')
 templates = Jinja2Templates(directory="templates")
-model_semaphore = None
-
-
-def release_model_semaphore():
-    model_semaphore.release()
 
 
 def recognition(file: File, to_simple: int, remove_pun: int, language: str = None, task: str = "transcribe"):
