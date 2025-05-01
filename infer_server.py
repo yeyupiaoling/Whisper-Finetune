@@ -43,6 +43,7 @@ model = AutoModelForSpeechSeq2Seq.from_pretrained(
     args.model_path, torch_dtype=torch_dtype, low_cpu_mem_usage=True, use_safetensors=True,
     use_flash_attention_2=args.use_flash_attention_2
 )
+model.generation_config.forced_decoder_ids = None
 if args.use_bettertransformer and not args.use_flash_attention_2:
     model = model.to_bettertransformer()
 # 使用Pytorch2.0的编译器
