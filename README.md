@@ -25,6 +25,7 @@ OpenAI在开源了号称其英文语音辨识能力已达到人类水准的Whisp
  - openai/whisper-large
  - openai/whisper-large-v2
  - openai/whisper-large-v3
+ - openai/whisper-large-v3-turbo
 
 **欢迎大家扫码入知识星球（左）或者QQ群（右）讨论，知识星球里面提供项目的模型文件和博主其他相关项目的模型文件，也包括其他一些资源。**
 

@@ -24,6 +24,8 @@ OpenAI open-sourced project Whisper, which claims to have human-level speech rec
 - openai/whisper-medium
 - openai/whisper-large
 - openai/whisper-large-v2
+- openai/whisper-large-v3
+- openai/whisper-large-v3-turbo
 
 **Environment：**
 
