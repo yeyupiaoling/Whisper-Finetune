@@ -100,8 +100,15 @@ class CustomDataset(Dataset):
                 if self.max_duration != -1 and line["duration"] > self.max_duration:
                     continue
                 # 跳过超出句子字数限制的音频
-                if len(line["sentences"]) < self.min_sentence or len(line["sentences"]) > self.max_sentence:
-                    continue
+                if 'sentence' in line.keys():
+                    if len(line["sentence"]) < self.min_sentence or len(line["sentence"]) > self.max_sentence:
+                        continue
+                else:
+                    sentence_len = 0
+                    for s in line["sentences"]:
+                        sentence_len += len(s['text'])
+                    if sentence_len < self.min_sentence or sentence_len > self.max_sentence:
+                        continue
                 self.data_list.append(dict(line))
 
     # 从数据列表里面获取音频数据、采样率和文本
