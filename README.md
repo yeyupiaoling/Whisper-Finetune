@@ -16,6 +16,13 @@ OpenAI在开源了号称其英文语音辨识能力已达到人类水准的Whisp
 
 使用whisper-small微调后的模型：[在线演示](https://tools.yeyupiaoling.cn/speech/whisper)
 
+<div align="center">
+  <img src="https://tools.yeyupiaoling.cn/static/wechat-qr/whisper.jpg" alt="微信小程序" width="200"><br/>
+  微信小程序(whisper-small微调后的模型)
+</div>
+
+
+
 ## 支持模型
 
  - openai/whisper-tiny

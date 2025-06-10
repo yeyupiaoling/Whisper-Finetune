@@ -31,8 +31,8 @@ def create_annotation_text(data_dir, annotation_path):
         logger = get_logger(log_level=logging.CRITICAL)
         logger.setLevel(logging.CRITICAL)
         inference_pipline = pipeline(task=Tasks.punctuation,
-                                     model='damo/punc_ct-transformer_cn-en-common-vocab471067-large',
-                                     model_revision="v1.0.0")
+                                     model='iic/punc_ct-transformer_cn-en-common-vocab471067-large',
+                                     model_revision="v2.0.4")
     if not os.path.exists(annotation_path):
         os.makedirs(annotation_path)
     f_train = open(os.path.join(annotation_path, 'train.json'), 'w', encoding='utf-8')
