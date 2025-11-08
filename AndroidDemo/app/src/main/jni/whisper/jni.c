@@ -180,8 +180,8 @@ Java_com_yeyupiaoling_whisper_WhisperLib_00024Companion_fullTranscribe(
     params.print_progress = false;
     params.print_timestamps = true;
     params.print_special = false;
-    params.translate = false;
-    params.language = "en";
+    params.translate = false;  // 确保设置为 false，进行转录而不是翻译
+    params.language = "auto";  // 自动检测语言，而不是硬编码为 "en"
     params.n_threads = num_threads;
     params.offset_ms = 0;
     params.no_context = true;
