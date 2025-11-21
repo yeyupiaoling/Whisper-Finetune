@@ -1,0 +1,29 @@
+[project]
+name = "whisper-finetune"
+version = "0.1.0"
+description = "support fine-tuning and inference of OpenAI Whisper models"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "accelerate>=1.6.0",
+    "bitsandbytes>=0.45.5",
+    "click~=8.1.8",
+    "ctranslate2>=4.6.0",
+    "dataclasses>=0.6",
+    "datasets>=3.5.0",
+    "evaluate>=0.4.3",
+    "fastapi>=0.95.1",
+    "faster-whisper>=1.1.1",
+    "jiwer>=3.1.0",
+    "librosa>=0.10.0",
+    "numpy>=1.26.4",
+    "peft>=0.15.2",
+    "soundcard>=0.4.2",
+    "soundfile>=0.12.1",
+    "starlette>=0.26.1",
+    "tensorboardx>=2.6.2.2",
+    "tqdm>=4.62.1",
+    "transformers>=4.51.3",
+    "uvicorn>=0.21.1",
+    "zhconv>=1.4.2",
+]

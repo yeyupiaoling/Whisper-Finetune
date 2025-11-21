@@ -11,10 +11,10 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-""" Word Error Ratio (WER) metric. """
+"""Word Error Ratio (WER) metric."""
 
 import datasets
-from jiwer import compute_measures
+from jiwer import wer
 
 import evaluate
 
@@ -95,12 +95,25 @@ class WER(evaluate.Metric):
 
     def _compute(self, predictions=None, references=None, concatenate_texts=False):
         if concatenate_texts:
-            return compute_measures(references, predictions)["wer"]
-        else:
-            incorrect = 0
-            total = 0
-            for prediction, reference in zip(predictions, references):
-                measures = compute_measures(reference, prediction)
-                incorrect += measures["substitutions"] + measures["deletions"] + measures["insertions"]
-                total += measures["substitutions"] + measures["deletions"] + measures["hits"]
-            return incorrect / total
+            # 1. 用" ".join拼接成字符串（字符级处理需要）
+            ref_str = " ".join(references)
+            hyp_str = " ".join(predictions)
+            # 2. 直接返回整体词错误率（WER）
+            return wer(ref_str, hyp_str)
+
+        # 3. 逐句处理（核心改造点！）
+        total_edit_distance = 0.0  # 总编辑距离 = 替换+删除+插入
+        total_ref_words = 0  # 总参考词数
+
+        for ref, hyp in zip(references, predictions):
+            # 关键：用wer计算当前句错误率
+            error_rate = wer(ref, hyp)
+            # 计算当前句的参考词数（关键！）
+            ref_words = len(ref.split())  # 词级处理
+
+            # 编辑距离 = 错误率 × 参考词数
+            total_edit_distance += error_rate * ref_words
+            total_ref_words += ref_words
+
+        # 4. 避免除零错误（新版本必须加）
+        return total_edit_distance / total_ref_words if total_ref_words else 0.0

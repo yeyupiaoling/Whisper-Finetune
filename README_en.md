@@ -14,7 +14,7 @@
 
 OpenAI open-sourced project Whisper, which claims to have human-level speech recognition in English, and it also supports automatic speech recognition in 98 other languages. Whisper provides automatic speech recognition and translation tasks. They can turn speech into text in various languages and translate that text into English. The main purpose of this project is to fine-tune the Whisper model using Lora. It supports training on non-timestamped data, with timestamped data, and without speech data. Currently open source for several models, specific can be [openai](https://huggingface.co/openai) to view, the following is a list of commonly used several models. In addition, the project also supports CTranslate2 accelerated reasoning and GGML accelerated reasoning. As a hint, accelerated reasoning supports direct use of Whisper original model transformation, and does not necessarily need to be fine-tuned. Supports Windows desktop applications, Android applications, and server deployments.
 
-### please :star: 
+### please :star:
 
 ## Supporting models
 
@@ -33,7 +33,7 @@ OpenAI open-sourced project Whisper, which claims to have human-level speech rec
 - Python 3.11
 - Pytorch 2.4.0
 - Ubuntu 18.04
-- GPU A100-PCIE-40GB*1
+- GPU A100-PCIE-40GB\*1
 
 ## Catalogue
 
@@ -42,14 +42,13 @@ OpenAI open-sourced project Whisper, which claims to have human-level speech rec
 - [Install](#安装环境)
 - [Prepare data](#准备数据)
 - [Fine-tuning](#微调模型)
-    - [Single-GPU](#单卡训练)
-    - [Multi-GPU](#多卡训练)
+  - [Single-GPU](#单卡训练)
+  - [Multi-GPU](#多卡训练)
 - [Merge model](#合并模型)
 - [Evaluation](#评估模型)
 - [Inference](#预测)
 - [GUI inference](#GUI界面预测)
-- [Web deploy](#Web部署)
-      - [API docs](#接口文档)
+- [Web deploy](#Web部署) - [API docs](#接口文档)
 - [Ctranslate2 inference](#使用Ctranslate2格式模型预测)
 - [Android](#Android部署)
 - [Windows Desktop](#Windows桌面应用)
@@ -77,7 +76,7 @@ OpenAI open-sourced project Whisper, which claims to have human-level speech rec
 1. Test table for cer of the original model.
 
 |      Model       | Language | aishell_test | test_net | test_meeting |
-|:----------------:|:--------:|:------------:|:--------:|:------------:|
+| :--------------: | :------: | :----------: | :------: | :----------: |
 |   whisper-tiny   | Chinese  |   0.31898    | 0.40482  |   0.75332    |
 |   whisper-base   | Chinese  |   0.22196    | 0.30404  |   0.50378    |
 |  whisper-small   | Chinese  |   0.13897    | 0.18417  |   0.31154    |
@@ -88,34 +87,33 @@ OpenAI open-sourced project Whisper, which claims to have human-level speech rec
 
 2. Cer test table after fine-tuning the dataset.
 
-|      Model       | Language |                          Dataset                           | aishell_test | test_net | test_meeting |                            
-|:----------------:|:--------:|:----------------------------------------------------------:|:------------:|:--------:|:------------:|
-|   whisper-tiny   | Chinese  | [AIShell](https://openslr.magicdatatech.com/resources/33/) |   0.13043    |  0.4463  |   0.57728    | 
-|   whisper-base   | Chinese  | [AIShell](https://openslr.magicdatatech.com/resources/33/) |   0.08999    | 0.33089  |   0.40713    | 
-|  whisper-small   | Chinese  | [AIShell](https://openslr.magicdatatech.com/resources/33/) |   0.05452    | 0.19831  |   0.24229    | 
-|  whisper-medium  | Chinese  | [AIShell](https://openslr.magicdatatech.com/resources/33/) |   0.03681    | 0.13073  |   0.16939    | 
+|      Model       | Language |                          Dataset                           | aishell_test | test_net | test_meeting |
+| :--------------: | :------: | :--------------------------------------------------------: | :----------: | :------: | :----------: |
+|   whisper-tiny   | Chinese  | [AIShell](https://openslr.magicdatatech.com/resources/33/) |   0.13043    |  0.4463  |   0.57728    |
+|   whisper-base   | Chinese  | [AIShell](https://openslr.magicdatatech.com/resources/33/) |   0.08999    | 0.33089  |   0.40713    |
+|  whisper-small   | Chinese  | [AIShell](https://openslr.magicdatatech.com/resources/33/) |   0.05452    | 0.19831  |   0.24229    |
+|  whisper-medium  | Chinese  | [AIShell](https://openslr.magicdatatech.com/resources/33/) |   0.03681    | 0.13073  |   0.16939    |
 | whisper-large-v2 | Chinese  | [AIShell](https://openslr.magicdatatech.com/resources/33/) |   0.03139    | 0.12201  |   0.15776    |
 | whisper-large-v2 | Chinese  | [AIShell](https://openslr.magicdatatech.com/resources/33/) |   0.03660    | 0.09835  |   0.13706    |
-|   whisper-tiny   | Chinese  |     [WenetSpeech](./tools/create_wenetspeech_data.py)      |   0.21009    | 0.29352  |   0.41506    | 
+|   whisper-tiny   | Chinese  |     [WenetSpeech](./tools/create_wenetspeech_data.py)      |   0.21009    | 0.29352  |   0.41506    |
 |   whisper-base   | Chinese  |     [WenetSpeech](./tools/create_wenetspeech_data.py)      |   0.14548    | 0.17747  |   0.30590    |
 |  whisper-small   | Chinese  |     [WenetSpeech](./tools/create_wenetspeech_data.py)      |   0.08484    | 0.11801  |   0.23471    |
-|  whisper-medium  | Chinese  |     [WenetSpeech](./tools/create_wenetspeech_data.py)      |   0.05861    | 0.08794  |   0.19486    | 
-| whisper-large-v2 | Chinese  |     [WenetSpeech](./tools/create_wenetspeech_data.py)      |   0.05443    | 0.08367  |   0.19087    | 
+|  whisper-medium  | Chinese  |     [WenetSpeech](./tools/create_wenetspeech_data.py)      |   0.05861    | 0.08794  |   0.19486    |
+| whisper-large-v2 | Chinese  |     [WenetSpeech](./tools/create_wenetspeech_data.py)      |   0.05443    | 0.08367  |   0.19087    |
 | whisper-large-v3 | Chinese  |     [WenetSpeech](./tools/create_wenetspeech_data.py)      |   0.04947    | 0.10711  |   0.17429    |
 
 3. inference speed test table, using the GPU GTX3090 (24G), The audio is' test long.wav 'and is 3 minutes long. Test in `'tools/run_compute.sh`.
 
 |                           Mode of acceleration                            |  tiny  |  base  | small  | medium  | large-v2 | large-v3 |
-|:-------------------------------------------------------------------------:|:------:|:------:|:------:|:-------:|:--------:|:--------:|
-|                  Transformers (`fp16` + `batch_size=16`)                  | 1.458s | 1.671s | 2.331s | 11.071s |  4.779s  | 12.826s  |    
-|            Transformers (`fp16` + `batch_size=16` + `Compile`)            | 1.477s | 1.675s | 2.357s | 11.003s |  4.799s  | 12.643s  |    
-|       Transformers (`fp16` + `batch_size=16` + `BetterTransformer`)       | 1.461s | 1.676s | 2.301s | 11.062s |  4.608s  | 12.505s  |    
-|       Transformers (`fp16` + `batch_size=16` + `Flash Attention 2`)       | 1.436s | 1.630s | 2.258s | 10.533s |  4.344s  | 11.651s  |    
-| Transformers (`fp16` + `batch_size=16` + `Compile` + `BetterTransformer`) | 1.442s | 1.686s | 2.277s | 11.000s |  4.543s  | 12.592s  |    
-| Transformers (`fp16` + `batch_size=16` + `Compile` + `Flash Attention 2`) | 1.409s | 1.643s | 2.220s | 10.390s |  4.377s  | 11.703s  |    
-|                 Faster Whisper (`fp16` + `beam_size=1` )                  | 2.179s | 1.492s | 2.327s | 3.752s  |  5.677s  | 31.541s  |    
-|                 Faster Whisper (`8-bit` + `beam_size=1` )                 | 2.609s | 1.728s | 2.744s | 4.688s  |  6.571s  | 29.307s  |    
-
+| :-----------------------------------------------------------------------: | :----: | :----: | :----: | :-----: | :------: | :------: |
+|                  Transformers (`fp16` + `batch_size=16`)                  | 1.458s | 1.671s | 2.331s | 11.071s |  4.779s  | 12.826s  |
+|            Transformers (`fp16` + `batch_size=16` + `Compile`)            | 1.477s | 1.675s | 2.357s | 11.003s |  4.799s  | 12.643s  |
+|       Transformers (`fp16` + `batch_size=16` + `BetterTransformer`)       | 1.461s | 1.676s | 2.301s | 11.062s |  4.608s  | 12.505s  |
+|       Transformers (`fp16` + `batch_size=16` + `Flash Attention 2`)       | 1.436s | 1.630s | 2.258s | 10.533s |  4.344s  | 11.651s  |
+| Transformers (`fp16` + `batch_size=16` + `Compile` + `BetterTransformer`) | 1.442s | 1.686s | 2.277s | 11.000s |  4.543s  | 12.592s  |
+| Transformers (`fp16` + `batch_size=16` + `Compile` + `Flash Attention 2`) | 1.409s | 1.643s | 2.220s | 10.390s |  4.377s  | 11.703s  |
+|                 Faster Whisper (`fp16` + `beam_size=1` )                  | 2.179s | 1.492s | 2.327s | 3.752s  |  5.677s  | 31.541s  |
+|                 Faster Whisper (`8-bit` + `beam_size=1` )                 | 2.609s | 1.728s | 2.744s | 4.688s  |  6.571s  | 29.307s  |
 
 **Important explanation**:
 
@@ -140,13 +138,13 @@ conda install pytorch==2.4.0 torchvision==0.19.0 torchaudio==2.4.0  pytorch-cuda
 2. Here's how to pull an image of a Pytorch environment using a Docker image.
 
 ```shell
-sudo docker pull pytorch/pytorch:2.4.0-cuda11.8-cudnn9-devel
+sudo docker pull pytorch/pytorch:2.7.1-cuda12.8-cudnn9-devel
 ```
 
 It then moves into the image and mounts the current path to the container's '/workspace' directory.
 
 ```shell
-sudo nvidia-docker run --name pytorch -it -v $PWD:/workspace pytorch/pytorch:2.4.0-cuda11.8-cudnn9-devel /bin/bash
+sudo docker run --gpus all --cpus=8 --memory=128g --memory-swap=128g --shm-size=64g -p 5000:5000 --name pytorch  -it -v $PWD:/workspace pytorch/pytorch:2.7.1-cuda12.8-cudnn9-devel /bin/bash
 ```
 
 - Install the required libraries.
@@ -155,8 +153,8 @@ sudo nvidia-docker run --name pytorch -it -v $PWD:/workspace pytorch/pytorch:2.4
 python -m pip install -r requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/simple
 ```
 
-
 - Windows requires a separate installation of bitsandbytes.
+
 ```shell
 python -m pip install https://github.com/jllllll/bitsandbytes-windows-webui/releases/download/wheels/bitsandbytes-0.41.2.post2-py3-none-win_amd64.whl
 ```
@@ -165,7 +163,7 @@ python -m pip install https://github.com/jllllll/bitsandbytes-windows-webui/rele
 
 ## Prepare the data
 
-The training dataset is a list of jsonlines, meaning that each line is a JSON data in the following format: This project provides a program to make the AIShell dataset, 'aishell.py'. Executing this program will automatically download and generate the training and test sets in the following format. This program can skip the download process by specifying the compressed file of AIShell. If the direct download would be very slow, you can use some downloader such as thunderbolt to download the dataset and then specify the compressed filepath through the '--filepath' parameter. Like `/home/test/data_aishell.tgz`.
+The training dataset is a list of jsonlines(also known as '.jsonl' data format), meaning that each line is a JSON data in the following format: This project provides a program to make the AIShell dataset, 'aishell.py'. Executing this program will automatically download and generate the training and test sets in the following format. This program can skip the download process by specifying the compressed file of AIShell. If the direct download would be very slow, you can use some downloader such as thunderbolt to download the dataset and then specify the compressed filepath through the '--filepath' parameter. Like `/home/test/data_aishell.tgz`.
 
 **Note:**
 
@@ -174,7 +172,7 @@ The training dataset is a list of jsonlines, meaning that each line is a JSON da
 3. If training empty speech data, the `sentences` field should be `[]`, the `sentence` field should be `""`, and the language field can be absent.
 4. Data may exclude punctuation marks, but the fine-tuned model may lose the ability to add punctuation marks.
 
-```json
+```jsonl
 {
   "audio": {
     "path": "dataset/0.wav"
@@ -221,6 +219,8 @@ torchrun and accelerate are two different methods for multi-card training, which
 
 1. To start multi-card training with torchrun, use `--nproc_per_node` to specify the number of graphics cards to use.
 
+Please check the executed .py file and specify additional configurations yourself.
+
 ```shell
 torchrun --nproc_per_node=2 finetune.py --base_model=openai/whisper-tiny --output_dir=output/
 ```
@@ -244,7 +244,7 @@ How many different machines will you use (use more than 1 for multi-node trainin
 Do you wish to optimize your script with torch dynamo?[yes/NO]:
 Do you want to use DeepSpeed? [yes/NO]:
 Do you want to use FullyShardedDataParallel? [yes/NO]:
-Do you want to use Megatron-LM ? [yes/NO]: 
+Do you want to use Megatron-LM ? [yes/NO]:
 How many GPU(s) should be used for distributed training? [1]:2
 What GPU(s) (by id) should be used for training on this machine as a comma-seperated list? [all]:
 --------------------------------------------------------------------Do you wish to use FP16 or BF16 (mixed precision)?
@@ -267,10 +267,10 @@ accelerate launch finetune.py --base_model=openai/whisper-tiny --output_dir=outp
 log:
 
 ```shell
-{'loss': 0.9098, 'learning_rate': 0.000999046843662503, 'epoch': 0.01}                                                     
-{'loss': 0.5898, 'learning_rate': 0.0009970611012927184, 'epoch': 0.01}                                                    
-{'loss': 0.5583, 'learning_rate': 0.0009950753589229333, 'epoch': 0.02}                                                  
-{'loss': 0.5469, 'learning_rate': 0.0009930896165531485, 'epoch': 0.02}                                          
+{'loss': 0.9098, 'learning_rate': 0.000999046843662503, 'epoch': 0.01}
+{'loss': 0.5898, 'learning_rate': 0.0009970611012927184, 'epoch': 0.01}
+{'loss': 0.5583, 'learning_rate': 0.0009950753589229333, 'epoch': 0.02}
+{'loss': 0.5469, 'learning_rate': 0.0009930896165531485, 'epoch': 0.02}
 {'loss': 0.5959, 'learning_rate': 0.0009911038741833634, 'epoch': 0.03}
 ```
 
@@ -324,10 +324,10 @@ After startup, the screen is as follows:
 
 ## Web deploy
 
-`--host` specifies the address where the service will be started, here `0.0.0.0`, which means any address will be accessible. `--port`specifies the port number to use. `--model_path` specifies Transformers model. `--num_workers` specifies how many threads to use for concurrent inference, which is important in Web deployments where multiple concurrent accesses can be inferred at the same time. See this program for more parameters.
+`--host` specifies the address where the service will be started, here `0.0.0.0`, which means any address will be accessible. `--port`specifies the port number to use. `--model_path` specifies Transformers model. ~~`--num_workers` specifies how many threads to use for concurrent inference, which is important in Web deployments where multiple concurrent accesses can be inferred at the same time. See this program for more parameters.~~
 
 ```shell
-python infer_server.py --host=0.0.0.0 --port=5000 --model_path=models/whisper-tiny-finetune-ct2 --num_workers=2
+python infer_server.py --host=0.0.0.0 --port=5000 --model_path=models/whisper-tiny-finetune-ct2
 ```
 
 ### API docs
@@ -335,7 +335,7 @@ python infer_server.py --host=0.0.0.0 --port=5000 --model_path=models/whisper-ti
 At present recognition interface `/recognition`, and the interface parameters are as follows.
 
 |   Field    | Need |  type  |  Default   |                                  Explain                                  |
-|:----------:|:----:|:------:|:----------:|:-------------------------------------------------------------------------:|
+| :--------: | :--: | :----: | :--------: | :-----------------------------------------------------------------------: |
 |   audio    | Yes  |  File  |            |                                Audio File                                 |
 | to_simple  |  No  |  int   |     1      |                 Traditional Chinese to Simplified Chinese                 |
 | remove_pun |  No  |  int   |     0      |                       Whether to remove punctuation                       |
@@ -345,7 +345,7 @@ At present recognition interface `/recognition`, and the interface parameters ar
 Return result:
 
 |  Field  | type |                       Explain                       |
-|:-------:|:----:|:---------------------------------------------------:|
+| :-----: | :--: | :-------------------------------------------------: |
 | results | list | Recognition results separated into individual parts |
 | +result | str  |   Text recognition result for each separated part   |
 | +start  | int  |    Start time in seconds for each separated part    |
@@ -388,7 +388,6 @@ The home page `http://127.0.0.1:5000/` looks like this:
 
 Document page `http://127.0.0.1:5000/docs` page is as follows:
 
-
 <a name='使用Ctranslate2格式模型预测'></a>
 
 ## Ctranslate2 inference
@@ -422,20 +421,19 @@ local_files_only: True
 [0.0 - 8.0]：近几年,不但我用书给女儿压碎,也全说亲朋不要给女儿压碎钱,而改送压碎书。
 ```
 
-
 <a name='Android部署'></a>
 
 ## Android
 
 The source code for the installation and deployment can be found in [AndroidDemo](./AndroidDemo) and the documentation can be found in [README.md](AndroidDemo/README.md).
 <br/>
+
 <div align="center">
 <img src="./docs/images/android2.jpg" alt="Android效果图" width="200">
 <img src="./docs/images/android1.jpg" alt="Android效果图" width="200">
 <img src="./docs/images/android3.jpg" alt="Android效果图" width="200">
 <img src="./docs/images/android4.jpg" alt="Android效果图" width="200">
 </div>
-
 
 <a name='Windows桌面应用'></a>
 
@@ -447,7 +445,6 @@ The program is in the [WhisperDesktop](./WhisperDesktop) directory, and the docu
 <div align="center">
 <img src="./docs/images/desktop1.jpg" alt="Windows桌面应用效果图">
 </div>
-
 
 ## Reference
 
