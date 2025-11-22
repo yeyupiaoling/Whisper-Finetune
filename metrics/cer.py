@@ -141,24 +141,12 @@ class CER(evaluate.Metric):
         如果 concatenate_texts=True，则把所有文本拼接为一个整体再算 CER，
         否则让 cer() 自动对列表进行平均处理。
         """
-
-        # 若需拼接，则把列表合并成一个字符串
         if concatenate_texts:
             references = " ".join(references)
             predictions = " ".join(predictions)
-
-        # cer() 兼容字符串或序列，因此无需 if/else 两套逻辑
         return cer(
             references,
             predictions,
             reference_transform=cer_transform,
             hypothesis_transform=cer_transform,
         )
-
-# if __name__ == "__main__":
-#     # 测试
-#     cer_metric = CER()
-#     predictions = ["this is the prediction", "there is an other sample"]
-#     references = ["this is the reference", "there is another one"]
-#     cer_score = cer_metric.compute(predictions=predictions, references=references)
-#     print(cer_score)

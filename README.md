@@ -197,7 +197,7 @@ python -m pip install https://github.com/jllllll/bitsandbytes-windows-webui/rele
 3. 如果训练空语音数据，`sentences`字段为`[]`，`sentence`字段为`""`，`language`字段可以不存在。
 4. 数据可以不包含标点符号，但微调的模型会损失添加符号能力。
 
-```jsonl
+```json
 {
    "audio": {
       "path": "dataset/0.wav"

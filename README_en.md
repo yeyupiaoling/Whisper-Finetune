@@ -174,7 +174,7 @@ The training dataset is a list of jsonlines(also known as '.jsonl' data format),
 3. If training empty speech data, the `sentences` field should be `[]`, the `sentence` field should be `""`, and the language field can be absent.
 4. Data may exclude punctuation marks, but the fine-tuned model may lose the ability to add punctuation marks.
 
-```jsonl
+```json
 {
   "audio": {
     "path": "dataset/0.wav"

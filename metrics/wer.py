@@ -95,18 +95,6 @@ class WER(evaluate.Metric):
 
     def _compute(self, predictions=None, references=None, concatenate_texts=False):
         if concatenate_texts:
-            # 1. 用" ".join拼接成字符串（字符级处理需要）
             ref_str = " ".join(references)
             hyp_str = " ".join(predictions)
-            # 2. 直接返回整体词错误率（WER）
         return wer(ref_str, hyp_str)
-
-# if __name__ == "__main__":
-#     # 测试代码
-#     predictions = ["this is the prediction", "there is an other sample"]
-#     references = ["this is the reference", "there is another one"]
-#     wer_metric = WER()
-#     wer_score = wer_metric.compute(
-#         predictions=predictions, references=references, concatenate_texts=True
-#     )
-#     print("WER:", wer_score)
