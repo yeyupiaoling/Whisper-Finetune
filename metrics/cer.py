@@ -16,7 +16,7 @@
 from typing import List
 
 import datasets
-import jiwer
+from jiwer import cer
 import jiwer.transforms as tr
 from datasets.config import PY_VERSION
 from packaging import version
@@ -136,24 +136,29 @@ class CER(evaluate.Metric):
         )
 
     def _compute(self, predictions, references, concatenate_texts=False):
+        """
+        计算 CER（字符级错误率）。
+        如果 concatenate_texts=True，则把所有文本拼接为一个整体再算 CER，
+        否则让 cer() 自动对列表进行平均处理。
+        """
+
+        # 若需拼接，则把列表合并成一个字符串
         if concatenate_texts:
-            return jiwer.compute_measures(
-                references,
-                predictions,
-                truth_transform=cer_transform,
-                hypothesis_transform=cer_transform,
-            )["wer"]
+            references = " ".join(references)
+            predictions = " ".join(predictions)
 
-        incorrect = 0
-        total = 0
-        for prediction, reference in zip(predictions, references):
-            measures = jiwer.compute_measures(
-                reference,
-                prediction,
-                truth_transform=cer_transform,
-                hypothesis_transform=cer_transform,
-            )
-            incorrect += measures["substitutions"] + measures["deletions"] + measures["insertions"]
-            total += measures["substitutions"] + measures["deletions"] + measures["hits"]
+        # cer() 兼容字符串或序列，因此无需 if/else 两套逻辑
+        return cer(
+            references,
+            predictions,
+            reference_transform=cer_transform,
+            hypothesis_transform=cer_transform,
+        )
 
-        return incorrect / total
+# if __name__ == "__main__":
+#     # 测试
+#     cer_metric = CER()
+#     predictions = ["this is the prediction", "there is an other sample"]
+#     references = ["this is the reference", "there is another one"]
+#     cer_score = cer_metric.compute(predictions=predictions, references=references)
+#     print(cer_score)

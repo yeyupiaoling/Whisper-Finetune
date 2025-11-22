@@ -75,12 +75,20 @@ def main():
 
     # 开始评估
     for step, batch in enumerate(tqdm(eval_dataloader)):
+        # 先准备好 device 和 inputs，避免在 GPU 上出现无效的 token id（如 -100）
+        device = "cuda" if torch.cuda.is_available() else "cpu"
+        # 将输入移到设备
+        input_features = batch["input_features"].to(device)
+        # 处理 decoder_input_ids：用 pad_token_id 替换 -100，然后移动到设备
+        decoder_input_ids = batch["labels"][:, :4].clone()
+        decoder_input_ids[decoder_input_ids == -100] = processor.tokenizer.pad_token_id
+        decoder_input_ids = decoder_input_ids.to(device)
         with torch.autocast(device_type="cuda"):
             with torch.no_grad():
                 generated_tokens = (
                     model.generate(
-                        input_features=batch["input_features"].cuda(),
-                        decoder_input_ids=batch["labels"][:, :4].cuda(),
+                        input_features=input_features,
+                        decoder_input_ids=decoder_input_ids,
                         max_new_tokens=255).cpu().numpy())
                 labels = batch["labels"].cpu().numpy()
                 labels = np.where(labels != -100, labels, processor.tokenizer.pad_token_id)
