@@ -144,36 +144,30 @@ class CER(evaluate.Metric):
 
     # 新版
     def _compute(self, predictions, references, concatenate_texts=False):
-        # 新版本：cer_transform 说明要用字符级错误率，所以用cer()函数
+        """
+        计算 CER（字符级错误率）。
+        如果 concatenate_texts=True，则把所有文本拼接为一个整体再算 CER，
+        否则让 cer() 自动对列表进行平均处理。
+        """
+
+        # 若需拼接，则把列表合并成一个字符串
         if concatenate_texts:
-            # 连接所有文本成单个字符串（字符级处理）
-            ref_str = " ".join(references)
-            hyp_str = " ".join(predictions)
-            return cer(
-                ref_str,
-                hyp_str,
-                reference_transform=cer_transform,
-                hypothesis_transform=cer_transform,
-            )
+            references = " ".join(references)
+            predictions = " ".join(predictions)
 
-        # 重点改造：不再需要measures，直接用cer计算+累积
-        total_edit_distance = 0  # 总编辑距离（错误字符数）
-        total_ref_chars = 0  # 总参考字符数
+        # cer() 兼容字符串或序列，因此无需 if/else 两套逻辑
+        return cer(
+            references,
+            predictions,
+            reference_transform=cer_transform,
+            hypothesis_transform=cer_transform,
+        )
 
-        for reference, prediction in zip(references, predictions):
-            # 关键：用cer()直接计算当前句子的错误率
-            error_rate = cer(
-                reference,
-                prediction,
-                reference_transform=cer_transform,
-                hypothesis_transform=cer_transform,
-            )
 
-            # 重要：通过错误率 * 参考字符数 = 编辑距离
-            # （因为 CER = 编辑距离 / 参考字符数）
-            edit_distance = error_rate * len(reference)
-            total_edit_distance += edit_distance
-            total_ref_chars += len(reference)
-
-        # 保护除零错误（新版本必须加）
-        return total_edit_distance / total_ref_chars if total_ref_chars else 0.0
+if __name__ == "__main__":
+    # 测试
+    cer_metric = CER()
+    predictions = ["this is the prediction", "there is an other sample"]
+    references = ["this is the reference", "there is another one"]
+    cer_score = cer_metric.compute(predictions=predictions, references=references)
+    print(cer_score)

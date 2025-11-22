@@ -98,22 +98,17 @@ class WER(evaluate.Metric):
             # 1. 用" ".join拼接成字符串（字符级处理需要）
             ref_str = " ".join(references)
             hyp_str = " ".join(predictions)
-            # 2. 直接返回整体词错误率（WER）
-            return wer(ref_str, hyp_str)
 
-        # 3. 逐句处理（核心改造点！）
-        total_edit_distance = 0.0  # 总编辑距离 = 替换+删除+插入
-        total_ref_words = 0  # 总参考词数
+        # 2. 直接返回整体词错误率（WER）
+        return wer(ref_str, hyp_str)
 
-        for ref, hyp in zip(references, predictions):
-            # 关键：用wer计算当前句错误率
-            error_rate = wer(ref, hyp)
-            # 计算当前句的参考词数（关键！）
-            ref_words = len(ref.split())  # 词级处理
 
-            # 编辑距离 = 错误率 × 参考词数
-            total_edit_distance += error_rate * ref_words
-            total_ref_words += ref_words
-
-        # 4. 避免除零错误（新版本必须加）
-        return total_edit_distance / total_ref_words if total_ref_words else 0.0
+if __name__ == "__main__":
+    # 测试代码
+    predictions = ["this is the prediction", "there is an other sample"]
+    references = ["this is the reference", "there is another one"]
+    wer_metric = WER()
+    wer_score = wer_metric.compute(
+        predictions=predictions, references=references, concatenate_texts=True
+    )
+    print("WER:", wer_score)
