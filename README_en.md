@@ -146,7 +146,7 @@ sudo docker pull pytorch/pytorch:2.4.0-cuda11.8-cudnn9-devel
 It then moves into the image and mounts the current path to the container's '/workspace' directory.
 
 ```shell
-sudo docker run --gpus all --cpus=8 --memory=128g --memory-swap=128g --shm-size=64g -p 5000:5000 --name pytorch -it -v $PWD:/workspace pytorch/pytorch:2.4.0-cuda11.8-cudnn9-devel /bin/bash
+sudo nvidia-docker run --name pytorch -it -v $PWD:/workspace pytorch/pytorch:2.4.0-cuda11.8-cudnn9-devel /bin/bash
 ```
 
 - Install the required libraries.
@@ -324,7 +324,7 @@ After startup, the screen is as follows:
 
 ## Web deploy
 
-`--host` specifies the address where the service will be started, here `0.0.0.0`, which means any address will be accessible. `--port`specifies the port number to use. `--model_path` specifies Transformers model. ~~`--num_workers` specifies how many threads to use for concurrent inference, which is important in Web deployments where multiple concurrent accesses can be inferred at the same time. See this program for more parameters.~~
+`--host` specifies the address where the service will be started, here `0.0.0.0`, which means any address will be accessible. `--port`specifies the port number to use. `--model_path` specifies Transformers model.
 
 ```shell
 python infer_server.py --host=0.0.0.0 --port=5000 --model_path=models/whisper-tiny-finetune-ct2

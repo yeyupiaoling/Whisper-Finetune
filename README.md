@@ -171,7 +171,7 @@ sudo docker pull pytorch/pytorch:2.4.0-cuda11.8-cudnn9-devel
 
 然后进入到镜像中，同时将当前路径挂载到容器的`/workspace`目录下。
 ```shell
-sudo docker run --gpus all --cpus=8 --memory=128g --memory-swap=128g --shm-size=64g -p 5000:5000 --name pytorch -it -v $PWD:/workspace pytorch/pytorch:2.4.0-cuda11.8-cudnn9-devel /bin/bash
+sudo nvidia-docker run --name pytorch -it -v $PWD:/workspace pytorch/pytorch:2.4.0-cuda11.8-cudnn9-devel /bin/bash
 ```
 
 - 安装所需的依赖库。
@@ -338,7 +338,7 @@ python infer_gui.py --model_path=models/whisper-tiny-finetune
 
 ## Web部署
 
-`--host`指定服务启动的地址，这里设置为`0.0.0.0`，即任何地址都可以访问。`--port`指定使用的端口号。`--model_path`指定的Transformers模型。~~`--num_workers`指定是使用多少个线程并发推理，这在Web部署上很重要，当有多个并发访问是可以同时推理。其他更多的参数请查看这个程序。~~
+`--host`指定服务启动的地址，这里设置为`0.0.0.0`，即任何地址都可以访问。`--port`指定使用的端口号。`--model_path`指定的Transformers模型。
 
 ```shell
 python infer_server.py --host=0.0.0.0 --port=5000 --model_path=models/whisper-tiny-finetune
