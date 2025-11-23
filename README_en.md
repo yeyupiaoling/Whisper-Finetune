@@ -146,7 +146,7 @@ sudo docker pull pytorch/pytorch:2.4.0-cuda11.8-cudnn9-devel
 It then moves into the image and mounts the current path to the container's '/workspace' directory.
 
 ```shell
-sudo nvidia-docker run --name pytorch -it -v $PWD:/workspace pytorch/pytorch:2.4.0-cuda11.8-cudnn9-devel /bin/bash
+sudo docker run --gpus all --cpus=8 --memory=128g --memory-swap=128g --shm-size=64g -p 5000:5000 --name pytorch -it -v $PWD:/workspace pytorch/pytorch:2.4.0-cuda11.8-cudnn9-devel /bin/bash
 ```
 
 - Install the required libraries.
@@ -165,7 +165,7 @@ python -m pip install https://github.com/jllllll/bitsandbytes-windows-webui/rele
 
 ## Prepare the data
 
-The training dataset is a list of jsonlines, meaning that each line is a JSON data in the following format: This project provides a program to make the AIShell dataset, 'aishell.py'. Executing this program will automatically download and generate the training and test sets in the following format. This program can skip the download process by specifying the compressed file of AIShell. If the direct download would be very slow, you can use some downloader such as thunderbolt to download the dataset and then specify the compressed filepath through the '--filepath' parameter. Like `/home/test/data_aishell.tgz`.
+The training dataset is a list of jsonlines(also known as '.jsonl' data format), meaning that each line is a JSON data in the following format: This project provides a program to make the AIShell dataset, 'aishell.py'. Executing this program will automatically download and generate the training and test sets in the following format. This program can skip the download process by specifying the compressed file of AIShell. If the direct download would be very slow, you can use some downloader such as thunderbolt to download the dataset and then specify the compressed filepath through the '--filepath' parameter. Like `/home/test/data_aishell.tgz`.
 
 **Note:**
 
@@ -324,10 +324,10 @@ After startup, the screen is as follows:
 
 ## Web deploy
 
-`--host` specifies the address where the service will be started, here `0.0.0.0`, which means any address will be accessible. `--port`specifies the port number to use. `--model_path` specifies Transformers model. `--num_workers` specifies how many threads to use for concurrent inference, which is important in Web deployments where multiple concurrent accesses can be inferred at the same time. See this program for more parameters.
+`--host` specifies the address where the service will be started, here `0.0.0.0`, which means any address will be accessible. `--port`specifies the port number to use. `--model_path` specifies Transformers model. ~~`--num_workers` specifies how many threads to use for concurrent inference, which is important in Web deployments where multiple concurrent accesses can be inferred at the same time. See this program for more parameters.~~
 
 ```shell
-python infer_server.py --host=0.0.0.0 --port=5000 --model_path=models/whisper-tiny-finetune-ct2 --num_workers=2
+python infer_server.py --host=0.0.0.0 --port=5000 --model_path=models/whisper-tiny-finetune-ct2
 ```
 
 ### API docs

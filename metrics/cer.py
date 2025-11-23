@@ -16,7 +16,7 @@
 from typing import List
 
 import datasets
-import jiwer
+from jiwer import cer
 import jiwer.transforms as tr
 from datasets.config import PY_VERSION
 from packaging import version
@@ -136,24 +136,17 @@ class CER(evaluate.Metric):
         )
 
     def _compute(self, predictions, references, concatenate_texts=False):
+        """
+        计算 CER（字符级错误率）。
+        如果 concatenate_texts=True，则把所有文本拼接为一个整体再算 CER，
+        否则让 cer() 自动对列表进行平均处理。
+        """
         if concatenate_texts:
-            return jiwer.compute_measures(
-                references,
-                predictions,
-                truth_transform=cer_transform,
-                hypothesis_transform=cer_transform,
-            )["wer"]
-
-        incorrect = 0
-        total = 0
-        for prediction, reference in zip(predictions, references):
-            measures = jiwer.compute_measures(
-                reference,
-                prediction,
-                truth_transform=cer_transform,
-                hypothesis_transform=cer_transform,
-            )
-            incorrect += measures["substitutions"] + measures["deletions"] + measures["insertions"]
-            total += measures["substitutions"] + measures["deletions"] + measures["hits"]
-
-        return incorrect / total
+            references = " ".join(references)
+            predictions = " ".join(predictions)
+        return cer(
+            references,
+            predictions,
+            reference_transform=cer_transform,
+            hypothesis_transform=cer_transform,
+        )

@@ -171,7 +171,7 @@ sudo docker pull pytorch/pytorch:2.4.0-cuda11.8-cudnn9-devel
 
 然后进入到镜像中，同时将当前路径挂载到容器的`/workspace`目录下。
 ```shell
-sudo nvidia-docker run --name pytorch -it -v $PWD:/workspace pytorch/pytorch:2.4.0-cuda11.8-cudnn9-devel /bin/bash
+sudo docker run --gpus all --cpus=8 --memory=128g --memory-swap=128g --shm-size=64g -p 5000:5000 --name pytorch -it -v $PWD:/workspace pytorch/pytorch:2.4.0-cuda11.8-cudnn9-devel /bin/bash
 ```
 
 - 安装所需的依赖库。
@@ -189,7 +189,7 @@ python -m pip install https://github.com/jllllll/bitsandbytes-windows-webui/rele
 
 ## 准备数据
 
-训练的数据集如下，是一个jsonlines的数据列表，也就是每一行都是一个JSON数据，数据格式如下。本项目提供了一个制作AIShell数据集的程序`aishell.py`，执行这个程序可以自动下载并生成如下列格式的训练集和测试集，**注意：** 这个程序可以通过指定AIShell的压缩文件来跳过下载过程的，如果直接下载会非常慢，可以使用一些如迅雷等下载器下载该数据集，然后通过参数`--filepath`指定下载的压缩文件路径，如`/home/test/data_aishell.tgz`。
+训练的数据集如下，是一个 jsonlines 的数据列表（简称.jsonl 数据格式），也就是每一行都是一个 JSON 数据，数据格式如下。本项目提供了一个制作 AIShell 数据集的程序`aishell.py`，执行这个程序可以自动下载并生成如下列格式的训练集和测试集，**注意：** 这个程序可以通过指定 AIShell 的压缩文件来跳过下载过程的，如果直接下载会非常慢，可以使用一些如迅雷等下载器下载该数据集，然后通过参数`--filepath`指定下载的压缩文件路径，如`/home/test/data_aishell.tgz`。
 
 **小提示：**
 1. 如果不使用时间戳训练，可以不包含`sentences`字段的数据。
@@ -338,10 +338,10 @@ python infer_gui.py --model_path=models/whisper-tiny-finetune
 
 ## Web部署
 
-`--host`指定服务启动的地址，这里设置为`0.0.0.0`，即任何地址都可以访问。`--port`指定使用的端口号。`--model_path`指定的Transformers模型。`--num_workers`指定是使用多少个线程并发推理，这在Web部署上很重要，当有多个并发访问是可以同时推理。其他更多的参数请查看这个程序。
+`--host`指定服务启动的地址，这里设置为`0.0.0.0`，即任何地址都可以访问。`--port`指定使用的端口号。`--model_path`指定的Transformers模型。~~`--num_workers`指定是使用多少个线程并发推理，这在Web部署上很重要，当有多个并发访问是可以同时推理。其他更多的参数请查看这个程序。~~
 
 ```shell
-python infer_server.py --host=0.0.0.0 --port=5000 --model_path=models/whisper-tiny-finetune --num_workers=2
+python infer_server.py --host=0.0.0.0 --port=5000 --model_path=models/whisper-tiny-finetune
 ```
 
 ### 接口文档
