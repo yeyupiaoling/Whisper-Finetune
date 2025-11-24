@@ -106,13 +106,13 @@ OpenAI open-sourced project Whisper, which claims to have human-level speech rec
 
 3. Test table for character error rate after fine-tuning other language datasets.
 
-|       Model       |  Language   |             Dataset              | Test |
-|:----------------:|:-------:|:----------------------------:|:-------:|
-|   whisper-tiny   | Chinese | CommonVoice-Uyghur + THUYG20 | 0.06798 |
-|   whisper-base   | Chinese | CommonVoice-Uyghur + THUYG20 | 0.04690 |
-|  whisper-small   | Chinese | CommonVoice-Uyghur + THUYG20 |         |
-|  whisper-medium  | Chinese | CommonVoice-Uyghur + THUYG20 |         |
-| whisper-large-v2 | Chinese | CommonVoice-Uyghur + THUYG20 |         |
+|      Model       | Actual language | Use language |           Dataset            |  Test   |
+|:----------------:|:---------------:|:------------:|:----------------------------:|:-------:|
+|   whisper-tiny   |     Uyghur      |   Chinese    | CommonVoice-Uyghur + THUYG20 | 0.06798 |
+|   whisper-base   |     Uyghur      |   Chinese    | CommonVoice-Uyghur + THUYG20 | 0.04690 |
+|  whisper-small   |     Uyghur      |   Chinese    | CommonVoice-Uyghur + THUYG20 |         |
+|  whisper-medium  |     Uyghur      |   Chinese    | CommonVoice-Uyghur + THUYG20 |         |
+| whisper-large-v2 |     Uyghur      |   Chinese    | CommonVoice-Uyghur + THUYG20 |         |
 
 **Important explanation**:
 1. The character error rates of the tiny model when trained with the specified voices as `Chinese` and `uzbek` were 0.06798 and 0.0685 respectively. The difference between them is not significant. Therefore, in the above cases, the specified language was always `Chinese`.

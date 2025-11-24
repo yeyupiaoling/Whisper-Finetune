@@ -129,13 +129,13 @@ OpenAI在开源了号称其英文语音辨识能力已达到人类水准的Whisp
 
 3. 微调其他语言数据集后字错率测试表。
 
-|       使用模型       |  指定语言   |             数据集              | 测试集 |   模型获取   |  
-|:----------------:|:-------:|:----------------------------:|:-------:|:--------:|
-|   whisper-tiny   | Chinese | CommonVoice-Uyghur + THUYG20 | 0.06798 | 加入知识星球获取 |
-|   whisper-base   | Chinese | CommonVoice-Uyghur + THUYG20 | 0.04690 | 加入知识星球获取 |
-|  whisper-small   | Chinese | CommonVoice-Uyghur + THUYG20 |         | 加入知识星球获取 |
-|  whisper-medium  | Chinese | CommonVoice-Uyghur + THUYG20 |         | 加入知识星球获取 |
-| whisper-large-v2 | Chinese | CommonVoice-Uyghur + THUYG20 |         | 加入知识星球获取 |
+|       使用模型       | 实际语言 |  指定语言   |             数据集              |   测试集   |   模型获取   |  
+|:----------------:|:----:|:-------:|:----------------------------:|:-------:|:--------:|
+|   whisper-tiny   | 维吾尔语 | Chinese | CommonVoice-Uyghur + THUYG20 | 0.06798 | 加入知识星球获取 |
+|   whisper-base   | 维吾尔语 | Chinese | CommonVoice-Uyghur + THUYG20 | 0.04690 | 加入知识星球获取 |
+|  whisper-small   | 维吾尔语 | Chinese | CommonVoice-Uyghur + THUYG20 |         | 加入知识星球获取 |
+|  whisper-medium  | 维吾尔语 | Chinese | CommonVoice-Uyghur + THUYG20 |         | 加入知识星球获取 |
+| whisper-large-v2 | 维吾尔语 | Chinese | CommonVoice-Uyghur + THUYG20 |         | 加入知识星球获取 |
 
 **说明：**
 1. 测试过指定语音为`Chinese`和`uzbek`，训练tiny模型的字错率分别是：0.06798和0.0685，它们差距不大，所上面使用都都是指定语言为`Chinese`。
