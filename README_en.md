@@ -103,7 +103,23 @@ OpenAI open-sourced project Whisper, which claims to have human-level speech rec
 | whisper-large-v2 | Chinese  |     [WenetSpeech](./tools/create_wenetspeech_data.py)      |   0.05443    | 0.08367  |   0.19087    | 
 | whisper-large-v3 | Chinese  |     [WenetSpeech](./tools/create_wenetspeech_data.py)      |   0.04947    | 0.10711  |   0.17429    |
 
-3. inference speed test table, using the GPU GTX3090 (24G), The audio is' test long.wav 'and is 3 minutes long. Test in `'tools/run_compute.sh`.
+
+3. Test table for character error rate after fine-tuning other language datasets.
+
+|       Model       |  Language   |             Dataset              | Test |
+|:----------------:|:-------:|:----------------------------:|:-------:|
+|   whisper-tiny   | Chinese | CommonVoice-Uyghur + THUYG20 | 0.06798 |
+|   whisper-base   | Chinese | CommonVoice-Uyghur + THUYG20 |         |
+|  whisper-small   | Chinese | CommonVoice-Uyghur + THUYG20 |         |
+|  whisper-medium  | Chinese | CommonVoice-Uyghur + THUYG20 |         |
+| whisper-large-v2 | Chinese | CommonVoice-Uyghur + THUYG20 |         |
+
+**Important explanation**:
+1. The character error rates of the tiny model when trained with the specified voices as `Chinese` and `uzbek` were 0.06798 and 0.0685 respectively. The difference between them is not significant. Therefore, in the above cases, the specified language was always `Chinese`.
+2. Use the test set of `CommonVoice-Uyghur` as the test set for this project, while the rest (including THUYG20) are all used as the training set.
+
+
+4. inference speed test table, using the GPU GTX3090 (24G), The audio is' test long.wav 'and is 3 minutes long. Test in `'tools/run_compute.sh`.
 
 |                           Mode of acceleration                            |  tiny  |  base  | small  | medium  | large-v2 | large-v3 |
 |:-------------------------------------------------------------------------:|:------:|:------:|:------:|:-------:|:--------:|:--------:|
@@ -165,7 +181,7 @@ python -m pip install https://github.com/jllllll/bitsandbytes-windows-webui/rele
 
 ## Prepare the data
 
-The training dataset is a list of jsonlines(also known as '.jsonl' data format), meaning that each line is a JSON data in the following format: This project provides a program to make the AIShell dataset, 'aishell.py'. Executing this program will automatically download and generate the training and test sets in the following format. This program can skip the download process by specifying the compressed file of AIShell. If the direct download would be very slow, you can use some downloader such as thunderbolt to download the dataset and then specify the compressed filepath through the '--filepath' parameter. Like `/home/test/data_aishell.tgz`.
+The training dataset is a list of jsonlines, meaning that each line is a JSON data in the following format: This project provides a program to make the AIShell dataset, 'aishell.py'. Executing this program will automatically download and generate the training and test sets in the following format. This program can skip the download process by specifying the compressed file of AIShell. If the direct download would be very slow, you can use some downloader such as thunderbolt to download the dataset and then specify the compressed filepath through the '--filepath' parameter. Like `/home/test/data_aishell.tgz`.
 
 **Note:**
 
@@ -324,10 +340,10 @@ After startup, the screen is as follows:
 
 ## Web deploy
 
-`--host` specifies the address where the service will be started, here `0.0.0.0`, which means any address will be accessible. `--port`specifies the port number to use. `--model_path` specifies Transformers model.
+`--host` specifies the address where the service will be started, here `0.0.0.0`, which means any address will be accessible. `--port`specifies the port number to use. `--model_path` specifies Transformers model. `--num_workers` specifies how many threads to use for concurrent inference, which is important in Web deployments where multiple concurrent accesses can be inferred at the same time. See this program for more parameters.
 
 ```shell
-python infer_server.py --host=0.0.0.0 --port=5000 --model_path=models/whisper-tiny-finetune-ct2
+python infer_server.py --host=0.0.0.0 --port=5000 --model_path=models/whisper-tiny-finetune-ct2 --num_workers=2
 ```
 
 ### API docs
