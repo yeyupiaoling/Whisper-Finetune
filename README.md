@@ -126,7 +126,23 @@ OpenAI在开源了号称其英文语音辨识能力已达到人类水准的Whisp
 | whisper-large-v2 |  Chinese  |     [WenetSpeech](./tools/create_wenetspeech_data.py)      |   0.05443    | 0.08367  |   0.19087    |   N/A   | 加入知识星球获取 |
 | whisper-large-v3 |  Chinese  |     [WenetSpeech](./tools/create_wenetspeech_data.py)      |   0.04947    | 0.10711  |   0.17429    | 0.47431 | 加入知识星球获取 |
 
-3. 推理速度测试表，使用GPU为GTX3090（24G），音频为`test_long.wav`，时长为3分钟整，测试程序在`tools/run_compute.sh`。
+
+3. 微调其他语言数据集后字错率测试表。
+
+|       使用模型       |  指定语言   |             数据集              | 测试集 |   模型获取   |  
+|:----------------:|:-------:|:----------------------------:|:-------:|:--------:|
+|   whisper-tiny   | Chinese | CommonVoice-Uyghur + THUYG20 | 0.06798 | 加入知识星球获取 |
+|   whisper-base   | Chinese | CommonVoice-Uyghur + THUYG20 |         | 加入知识星球获取 |
+|  whisper-small   | Chinese | CommonVoice-Uyghur + THUYG20 |         | 加入知识星球获取 |
+|  whisper-medium  | Chinese | CommonVoice-Uyghur + THUYG20 |         | 加入知识星球获取 |
+| whisper-large-v2 | Chinese | CommonVoice-Uyghur + THUYG20 |         | 加入知识星球获取 |
+
+**说明：**
+1. 测试过指定语音为`Chinese`和`uzbek`，训练tiny模型的字错率分别是：0.06798和0.0685，它们差距不大，所上面使用都都是指定语言为`Chinese`。
+2. 使用`CommonVoice-Uyghur`的测试集作为本项目测试集，其余的和THUYG20全部作为训练集。
+
+
+4. 推理速度测试表，使用GPU为GTX3090（24G），音频为`test_long.wav`，时长为3分钟整，测试程序在`tools/run_compute.sh`。
 
 |                                   加速方式                                    |  tiny  |  base  | small  | medium  | large-v2 | large-v3 |
 |:-------------------------------------------------------------------------:|:------:|:------:|:------:|:-------:|:--------:|:--------:|
@@ -139,7 +155,7 @@ OpenAI在开源了号称其英文语音辨识能力已达到人类水准的Whisp
 |                 Faster Whisper (`fp16` + `beam_size=1` )                  | 2.179s | 1.492s | 2.327s | 3.752s  |  5.677s  | 31.541s  |    
 |                 Faster Whisper (`8-bit` + `beam_size=1` )                 | 2.609s | 1.728s | 2.744s | 4.688s  |  6.571s  | 29.307s  |    
 
-4. 经过处理的数据列表。
+5. 经过处理的数据列表。
 
 |  数据列表处理方式  | AiShell  | WenetSpeech | 
 |:----------:|:--------:|:-----------:|
@@ -189,7 +205,7 @@ python -m pip install https://github.com/jllllll/bitsandbytes-windows-webui/rele
 
 ## 准备数据
 
-训练的数据集如下，是一个 jsonlines 的数据列表（简称.jsonl 数据格式），也就是每一行都是一个 JSON 数据，数据格式如下。本项目提供了一个制作 AIShell 数据集的程序`aishell.py`，执行这个程序可以自动下载并生成如下列格式的训练集和测试集，**注意：** 这个程序可以通过指定 AIShell 的压缩文件来跳过下载过程的，如果直接下载会非常慢，可以使用一些如迅雷等下载器下载该数据集，然后通过参数`--filepath`指定下载的压缩文件路径，如`/home/test/data_aishell.tgz`。
+训练的数据集如下，是一个jsonlines的数据列表，也就是每一行都是一个JSON数据，数据格式如下。本项目提供了一个制作AIShell数据集的程序`aishell.py`，执行这个程序可以自动下载并生成如下列格式的训练集和测试集，**注意：** 这个程序可以通过指定AIShell的压缩文件来跳过下载过程的，如果直接下载会非常慢，可以使用一些如迅雷等下载器下载该数据集，然后通过参数`--filepath`指定下载的压缩文件路径，如`/home/test/data_aishell.tgz`。
 
 **小提示：**
 1. 如果不使用时间戳训练，可以不包含`sentences`字段的数据。
@@ -338,10 +354,10 @@ python infer_gui.py --model_path=models/whisper-tiny-finetune
 
 ## Web部署
 
-`--host`指定服务启动的地址，这里设置为`0.0.0.0`，即任何地址都可以访问。`--port`指定使用的端口号。`--model_path`指定的Transformers模型。
+`--host`指定服务启动的地址，这里设置为`0.0.0.0`，即任何地址都可以访问。`--port`指定使用的端口号。`--model_path`指定的Transformers模型。`--num_workers`指定是使用多少个线程并发推理，这在Web部署上很重要，当有多个并发访问是可以同时推理。其他更多的参数请查看这个程序。
 
 ```shell
-python infer_server.py --host=0.0.0.0 --port=5000 --model_path=models/whisper-tiny-finetune
+python infer_server.py --host=0.0.0.0 --port=5000 --model_path=models/whisper-tiny-finetune --num_workers=2
 ```
 
 ### 接口文档
