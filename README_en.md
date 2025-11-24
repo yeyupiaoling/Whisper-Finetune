@@ -109,7 +109,7 @@ OpenAI open-sourced project Whisper, which claims to have human-level speech rec
 |       Model       |  Language   |             Dataset              | Test |
 |:----------------:|:-------:|:----------------------------:|:-------:|
 |   whisper-tiny   | Chinese | CommonVoice-Uyghur + THUYG20 | 0.06798 |
-|   whisper-base   | Chinese | CommonVoice-Uyghur + THUYG20 |         |
+|   whisper-base   | Chinese | CommonVoice-Uyghur + THUYG20 | 0.04690 |
 |  whisper-small   | Chinese | CommonVoice-Uyghur + THUYG20 |         |
 |  whisper-medium  | Chinese | CommonVoice-Uyghur + THUYG20 |         |
 | whisper-large-v2 | Chinese | CommonVoice-Uyghur + THUYG20 |         |
