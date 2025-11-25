@@ -76,34 +76,36 @@ OpenAI open-sourced project Whisper, which claims to have human-level speech rec
 
 1. Test table for cer of the original model.
 
-|         Model          | Language | aishell_test | test_net | test_meeting |
-|:----------------------:|:--------:|:------------:|:--------:|:------------:|
-|      whisper-tiny      | Chinese  |   0.31898    | 0.40482  |   0.75332    |
-|      whisper-base      | Chinese  |   0.22196    | 0.30404  |   0.50378    |
-|     whisper-small      | Chinese  |   0.13897    | 0.18417  |   0.31154    |
-|     whisper-medium     | Chinese  |   0.09538    | 0.13591  |   0.26669    |
-|     whisper-large      | Chinese  |   0.08969    | 0.12933  |   0.23439    |
-|    whisper-large-v2    | Chinese  |   0.08817    | 0.12332  |   0.26547    |
-|    whisper-large-v3    | Chinese  |   0.08086    | 0.11452  |   0.19878    |
-| whisper-large-v3-turbo | Chinese  |   0.08647    | 0.21225  |   0.20390    |
+|         Model          | Language | aishell_test | test_net | test_meeting | Cantonese |
+|:----------------------:|:--------:|:------------:|:--------:|:------------:|:---------:|
+|      whisper-tiny      | Chinese  |   0.31898    | 0.40482  |   0.75332    |    N/A    |
+|      whisper-base      | Chinese  |   0.22196    | 0.30404  |   0.50378    |    N/A    |
+|     whisper-small      | Chinese  |   0.13897    | 0.18417  |   0.31154    |    N/A    |
+|     whisper-medium     | Chinese  |   0.09538    | 0.13591  |   0.26669    |    N/A    |
+|     whisper-large      | Chinese  |   0.08969    | 0.12933  |   0.23439    |    N/A    |
+|    whisper-large-v2    | Chinese  |   0.08817    | 0.12332  |   0.26547    |    N/A    |
+|    whisper-large-v3    | Chinese  |   0.08086    | 0.11452  |   0.19878    |           |
+| whisper-large-v3-turbo | Chinese  |   0.08647    | 0.21225  |   0.20390    |  0.38069  |
 
 2. Cer test table after fine-tuning the dataset.
 
-|         Model          | Language |                          Dataset                           | aishell_test | test_net | test_meeting |                            
-|:----------------------:|:--------:|:----------------------------------------------------------:|:------------:|:--------:|:------------:|
-|      whisper-tiny      | Chinese  | [AIShell](https://openslr.magicdatatech.com/resources/33/) |   0.13043    |  0.4463  |   0.57728    | 
-|      whisper-base      | Chinese  | [AIShell](https://openslr.magicdatatech.com/resources/33/) |   0.08999    | 0.33089  |   0.40713    | 
-|     whisper-small      | Chinese  | [AIShell](https://openslr.magicdatatech.com/resources/33/) |   0.05452    | 0.19831  |   0.24229    | 
-|     whisper-medium     | Chinese  | [AIShell](https://openslr.magicdatatech.com/resources/33/) |   0.03681    | 0.13073  |   0.16939    | 
-|    whisper-large-v2    | Chinese  | [AIShell](https://openslr.magicdatatech.com/resources/33/) |   0.03139    | 0.12201  |   0.15776    |
-|    whisper-large-v3    | Chinese  | [AIShell](https://openslr.magicdatatech.com/resources/33/) |   0.03660    | 0.09835  |   0.13706    |
-| whisper-large-v3-turbo | Chinese  | [AIShell](https://openslr.magicdatatech.com/resources/33/) |              |          |              |         |
-|      whisper-tiny      | Chinese  |     [WenetSpeech](./tools/create_wenetspeech_data.py)      |   0.21009    | 0.29352  |   0.41506    | 
-|      whisper-base      | Chinese  |     [WenetSpeech](./tools/create_wenetspeech_data.py)      |   0.14548    | 0.17747  |   0.30590    |
-|     whisper-small      | Chinese  |     [WenetSpeech](./tools/create_wenetspeech_data.py)      |   0.08484    | 0.11801  |   0.23471    |
-|     whisper-medium     | Chinese  |     [WenetSpeech](./tools/create_wenetspeech_data.py)      |   0.05861    | 0.08794  |   0.19486    | 
-|    whisper-large-v2    | Chinese  |     [WenetSpeech](./tools/create_wenetspeech_data.py)      |   0.05443    | 0.08367  |   0.19087    | 
-|    whisper-large-v3    | Chinese  |     [WenetSpeech](./tools/create_wenetspeech_data.py)      |   0.04947    | 0.10711  |   0.17429    |
+|         Model          | Language  |                          Dataset                           | aishell_test | test_net | test_meeting | Cantonese |
+|:----------------------:|:---------:|:----------------------------------------------------------:|:------------:|:--------:|:------------:|:---------:|
+|      whisper-tiny      |  Chinese  | [AIShell](https://openslr.magicdatatech.com/resources/33/) |   0.13043    |  0.4463  |   0.57728    |    N/A    |
+|      whisper-base      |  Chinese  | [AIShell](https://openslr.magicdatatech.com/resources/33/) |   0.08999    | 0.33089  |   0.40713    |    N/A    |
+|     whisper-small      |  Chinese  | [AIShell](https://openslr.magicdatatech.com/resources/33/) |   0.05452    | 0.19831  |   0.24229    |    N/A    |
+|     whisper-medium     |  Chinese  | [AIShell](https://openslr.magicdatatech.com/resources/33/) |   0.03681    | 0.13073  |   0.16939    |    N/A    |
+|    whisper-large-v2    |  Chinese  | [AIShell](https://openslr.magicdatatech.com/resources/33/) |   0.03139    | 0.12201  |   0.15776    |    N/A    |
+|    whisper-large-v3    |  Chinese  | [AIShell](https://openslr.magicdatatech.com/resources/33/) |   0.03660    | 0.09835  |   0.13706    |           |
+| whisper-large-v3-turbo |  Chinese  | [AIShell](https://openslr.magicdatatech.com/resources/33/) |              |          |              |           |
+|    whisper-large-v3    | Cantonese |                         Cantonese                          |              |          |              |           |
+| whisper-large-v3-turbo | Cantonese |                         Cantonese                          |              |          |              |           |
+|      whisper-tiny      |  Chinese  |     [WenetSpeech](./tools/create_wenetspeech_data.py)      |   0.21009    | 0.29352  |   0.41506    |    N/A    |
+|      whisper-base      |  Chinese  |     [WenetSpeech](./tools/create_wenetspeech_data.py)      |   0.14548    | 0.17747  |   0.30590    |    N/A    |
+|     whisper-small      |  Chinese  |     [WenetSpeech](./tools/create_wenetspeech_data.py)      |   0.08484    | 0.11801  |   0.23471    |    N/A    |
+|     whisper-medium     |  Chinese  |     [WenetSpeech](./tools/create_wenetspeech_data.py)      |   0.05861    | 0.08794  |   0.19486    |    N/A    |
+|    whisper-large-v2    |  Chinese  |     [WenetSpeech](./tools/create_wenetspeech_data.py)      |   0.05443    | 0.08367  |   0.19087    |    N/A    |
+|    whisper-large-v3    |  Chinese  |     [WenetSpeech](./tools/create_wenetspeech_data.py)      |   0.04947    | 0.10711  |   0.17429    |           |
 
 
 3. Test table for character error rate after fine-tuning other language datasets.

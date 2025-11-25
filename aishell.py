@@ -57,7 +57,7 @@ def create_annotation_text(data_dir, annotation_path):
         audio_dir = os.path.join(data_dir, 'wav', type)
         for subfolder, _, filelist in sorted(os.walk(audio_dir)):
             for fname in filelist:
-                audio_path = os.path.join(subfolder, fname)
+                audio_path = os.path.join(subfolder, fname).replace('\\', '/')
                 audio_id = fname[:-4]
                 # if no transcription for audio then skipped
                 if audio_id not in transcript_dict:
@@ -79,7 +79,7 @@ def create_annotation_text(data_dir, annotation_path):
     lines = []
     for subfolder, _, filelist in sorted(os.walk(audio_dir)):
         for fname in filelist:
-            audio_path = os.path.join(subfolder, fname)
+            audio_path = os.path.join(subfolder, fname).replace('\\', '/')
             audio_id = fname[:-4]
             # if no transcription for audio then skipped
             if audio_id not in transcript_dict:
