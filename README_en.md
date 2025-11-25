@@ -76,32 +76,34 @@ OpenAI open-sourced project Whisper, which claims to have human-level speech rec
 
 1. Test table for cer of the original model.
 
-|      Model       | Language | aishell_test | test_net | test_meeting |
-|:----------------:|:--------:|:------------:|:--------:|:------------:|
-|   whisper-tiny   | Chinese  |   0.31898    | 0.40482  |   0.75332    |
-|   whisper-base   | Chinese  |   0.22196    | 0.30404  |   0.50378    |
-|  whisper-small   | Chinese  |   0.13897    | 0.18417  |   0.31154    |
-|  whisper-medium  | Chinese  |   0.09538    | 0.13591  |   0.26669    |
-|  whisper-large   | Chinese  |   0.08969    | 0.12933  |   0.23439    |
-| whisper-large-v2 | Chinese  |   0.08817    | 0.12332  |   0.26547    |
-| whisper-large-v3 | Chinese  |   0.08086    | 0.11452  |   0.19878    |
+|         Model          | Language | aishell_test | test_net | test_meeting |
+|:----------------------:|:--------:|:------------:|:--------:|:------------:|
+|      whisper-tiny      | Chinese  |   0.31898    | 0.40482  |   0.75332    |
+|      whisper-base      | Chinese  |   0.22196    | 0.30404  |   0.50378    |
+|     whisper-small      | Chinese  |   0.13897    | 0.18417  |   0.31154    |
+|     whisper-medium     | Chinese  |   0.09538    | 0.13591  |   0.26669    |
+|     whisper-large      | Chinese  |   0.08969    | 0.12933  |   0.23439    |
+|    whisper-large-v2    | Chinese  |   0.08817    | 0.12332  |   0.26547    |
+|    whisper-large-v3    | Chinese  |   0.08086    | 0.11452  |   0.19878    |
+| whisper-large-v3-turbo | Chinese  |   0.08647    | 0.21225  |   0.20390    |
 
 2. Cer test table after fine-tuning the dataset.
 
-|      Model       | Language |                          Dataset                           | aishell_test | test_net | test_meeting |                            
-|:----------------:|:--------:|:----------------------------------------------------------:|:------------:|:--------:|:------------:|
-|   whisper-tiny   | Chinese  | [AIShell](https://openslr.magicdatatech.com/resources/33/) |   0.13043    |  0.4463  |   0.57728    | 
-|   whisper-base   | Chinese  | [AIShell](https://openslr.magicdatatech.com/resources/33/) |   0.08999    | 0.33089  |   0.40713    | 
-|  whisper-small   | Chinese  | [AIShell](https://openslr.magicdatatech.com/resources/33/) |   0.05452    | 0.19831  |   0.24229    | 
-|  whisper-medium  | Chinese  | [AIShell](https://openslr.magicdatatech.com/resources/33/) |   0.03681    | 0.13073  |   0.16939    | 
-| whisper-large-v2 | Chinese  | [AIShell](https://openslr.magicdatatech.com/resources/33/) |   0.03139    | 0.12201  |   0.15776    |
-| whisper-large-v2 | Chinese  | [AIShell](https://openslr.magicdatatech.com/resources/33/) |   0.03660    | 0.09835  |   0.13706    |
-|   whisper-tiny   | Chinese  |     [WenetSpeech](./tools/create_wenetspeech_data.py)      |   0.21009    | 0.29352  |   0.41506    | 
-|   whisper-base   | Chinese  |     [WenetSpeech](./tools/create_wenetspeech_data.py)      |   0.14548    | 0.17747  |   0.30590    |
-|  whisper-small   | Chinese  |     [WenetSpeech](./tools/create_wenetspeech_data.py)      |   0.08484    | 0.11801  |   0.23471    |
-|  whisper-medium  | Chinese  |     [WenetSpeech](./tools/create_wenetspeech_data.py)      |   0.05861    | 0.08794  |   0.19486    | 
-| whisper-large-v2 | Chinese  |     [WenetSpeech](./tools/create_wenetspeech_data.py)      |   0.05443    | 0.08367  |   0.19087    | 
-| whisper-large-v3 | Chinese  |     [WenetSpeech](./tools/create_wenetspeech_data.py)      |   0.04947    | 0.10711  |   0.17429    |
+|         Model          | Language |                          Dataset                           | aishell_test | test_net | test_meeting |                            
+|:----------------------:|:--------:|:----------------------------------------------------------:|:------------:|:--------:|:------------:|
+|      whisper-tiny      | Chinese  | [AIShell](https://openslr.magicdatatech.com/resources/33/) |   0.13043    |  0.4463  |   0.57728    | 
+|      whisper-base      | Chinese  | [AIShell](https://openslr.magicdatatech.com/resources/33/) |   0.08999    | 0.33089  |   0.40713    | 
+|     whisper-small      | Chinese  | [AIShell](https://openslr.magicdatatech.com/resources/33/) |   0.05452    | 0.19831  |   0.24229    | 
+|     whisper-medium     | Chinese  | [AIShell](https://openslr.magicdatatech.com/resources/33/) |   0.03681    | 0.13073  |   0.16939    | 
+|    whisper-large-v2    | Chinese  | [AIShell](https://openslr.magicdatatech.com/resources/33/) |   0.03139    | 0.12201  |   0.15776    |
+|    whisper-large-v3    | Chinese  | [AIShell](https://openslr.magicdatatech.com/resources/33/) |   0.03660    | 0.09835  |   0.13706    |
+| whisper-large-v3-turbo | Chinese  | [AIShell](https://openslr.magicdatatech.com/resources/33/) |              |          |              |         |
+|      whisper-tiny      | Chinese  |     [WenetSpeech](./tools/create_wenetspeech_data.py)      |   0.21009    | 0.29352  |   0.41506    | 
+|      whisper-base      | Chinese  |     [WenetSpeech](./tools/create_wenetspeech_data.py)      |   0.14548    | 0.17747  |   0.30590    |
+|     whisper-small      | Chinese  |     [WenetSpeech](./tools/create_wenetspeech_data.py)      |   0.08484    | 0.11801  |   0.23471    |
+|     whisper-medium     | Chinese  |     [WenetSpeech](./tools/create_wenetspeech_data.py)      |   0.05861    | 0.08794  |   0.19486    | 
+|    whisper-large-v2    | Chinese  |     [WenetSpeech](./tools/create_wenetspeech_data.py)      |   0.05443    | 0.08367  |   0.19087    | 
+|    whisper-large-v3    | Chinese  |     [WenetSpeech](./tools/create_wenetspeech_data.py)      |   0.04947    | 0.10711  |   0.17429    |
 
 
 3. Test table for character error rate after fine-tuning other language datasets.
@@ -121,16 +123,16 @@ OpenAI open-sourced project Whisper, which claims to have human-level speech rec
 
 4. inference speed test table, using the GPU GTX3090 (24G), The audio is' test long.wav 'and is 3 minutes long. Test in `'tools/run_compute.sh`.
 
-|                           Mode of acceleration                            |  tiny  |  base  | small  | medium  | large-v2 | large-v3 |
-|:-------------------------------------------------------------------------:|:------:|:------:|:------:|:-------:|:--------:|:--------:|
-|                  Transformers (`fp16` + `batch_size=16`)                  | 1.458s | 1.671s | 2.331s | 11.071s |  4.779s  | 12.826s  |    
-|            Transformers (`fp16` + `batch_size=16` + `Compile`)            | 1.477s | 1.675s | 2.357s | 11.003s |  4.799s  | 12.643s  |    
-|       Transformers (`fp16` + `batch_size=16` + `BetterTransformer`)       | 1.461s | 1.676s | 2.301s | 11.062s |  4.608s  | 12.505s  |    
-|       Transformers (`fp16` + `batch_size=16` + `Flash Attention 2`)       | 1.436s | 1.630s | 2.258s | 10.533s |  4.344s  | 11.651s  |    
-| Transformers (`fp16` + `batch_size=16` + `Compile` + `BetterTransformer`) | 1.442s | 1.686s | 2.277s | 11.000s |  4.543s  | 12.592s  |    
-| Transformers (`fp16` + `batch_size=16` + `Compile` + `Flash Attention 2`) | 1.409s | 1.643s | 2.220s | 10.390s |  4.377s  | 11.703s  |    
-|                 Faster Whisper (`fp16` + `beam_size=1` )                  | 2.179s | 1.492s | 2.327s | 3.752s  |  5.677s  | 31.541s  |    
-|                 Faster Whisper (`8-bit` + `beam_size=1` )                 | 2.609s | 1.728s | 2.744s | 4.688s  |  6.571s  | 29.307s  |    
+|                           Mode of acceleration                            |  tiny  |  base  | small  | medium  | large-v2 | large-v3 | large-v3-turbo |
+|:-------------------------------------------------------------------------:|:------:|:------:|:------:|:-------:|:--------:|:--------:|:--------------:|
+|                  Transformers (`fp16` + `batch_size=16`)                  | 1.458s | 1.671s | 2.331s | 11.071s |  4.779s  | 12.826s  |     1.594s     |
+|            Transformers (`fp16` + `batch_size=16` + `Compile`)            | 1.477s | 1.675s | 2.357s | 11.003s |  4.799s  | 12.643s  |     1.581s     |
+|       Transformers (`fp16` + `batch_size=16` + `BetterTransformer`)       | 1.461s | 1.676s | 2.301s | 11.062s |  4.608s  | 12.505s  |     1.809s     |
+|       Transformers (`fp16` + `batch_size=16` + `Flash Attention 2`)       | 1.436s | 1.630s | 2.258s | 10.533s |  4.344s  | 11.651s  |     1.651s     |
+| Transformers (`fp16` + `batch_size=16` + `Compile` + `BetterTransformer`) | 1.442s | 1.686s | 2.277s | 11.000s |  4.543s  | 12.592s  |     1.816s     |
+| Transformers (`fp16` + `batch_size=16` + `Compile` + `Flash Attention 2`) | 1.409s | 1.643s | 2.220s | 10.390s |  4.377s  | 11.703s  |     1.657s     |
+|                 Faster Whisper (`fp16` + `beam_size=1` )                  | 2.179s | 1.492s | 2.327s | 3.752s  |  5.677s  | 31.541s  |       /        |
+|                 Faster Whisper (`8-bit` + `beam_size=1` )                 | 2.609s | 1.728s | 2.744s | 4.688s  |  6.571s  | 29.307s  |       /        |
 
 
 **Important explanation**:
@@ -145,36 +147,16 @@ OpenAI open-sourced project Whisper, which claims to have human-level speech rec
 
 ## 安装环境
 
-- The GPU version of Pytorch will be installed first. You can choose one of two ways to install Pytorch.
-
-1. Here's how to install Pytorch using Anaconda. If you already have it, please skip it.
+1. The GPU version of Pytorch will be installed first. If you already have it, please skip it.
 
 ```shell
-conda install pytorch==2.4.0 torchvision==0.19.0 torchaudio==2.4.0  pytorch-cuda=11.8 -c pytorch -c nvidia
+pip3 install torch torchvision --index-url https://download.pytorch.org/whl/cu128
 ```
 
-2. Here's how to pull an image of a Pytorch environment using a Docker image.
-
-```shell
-sudo docker pull pytorch/pytorch:2.4.0-cuda11.8-cudnn9-devel
-```
-
-It then moves into the image and mounts the current path to the container's '/workspace' directory.
-
-```shell
-sudo nvidia-docker run --name pytorch -it -v $PWD:/workspace pytorch/pytorch:2.4.0-cuda11.8-cudnn9-devel /bin/bash
-```
-
-- Install the required libraries.
+2. Install the required libraries.
 
 ```shell
 python -m pip install -r requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/simple
-```
-
-
-- Windows requires a separate installation of bitsandbytes.
-```shell
-python -m pip install https://github.com/jllllll/bitsandbytes-windows-webui/releases/download/wheels/bitsandbytes-0.41.2.post2-py3-none-win_amd64.whl
 ```
 
 <a name='准备数据'></a>

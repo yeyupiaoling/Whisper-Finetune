@@ -43,6 +43,13 @@ python compute_speed_tf.py --model_path=openai/whisper-large-v3 --use_flash_atte
 python compute_speed_tf.py --model_path=openai/whisper-large-v3 --use_compile=True --use_bettertransformer=True
 python compute_speed_tf.py --model_path=openai/whisper-large-v3 --use_compile=True --use_flash_attention_2=True
 
+python compute_speed_tf.py --model_path=openai/whisper-large-v3-turbo
+python compute_speed_tf.py --model_path=openai/whisper-large-v3-turbo --use_compile=True
+python compute_speed_tf.py --model_path=openai/whisper-large-v3-turbo --use_bettertransformer=True
+python compute_speed_tf.py --model_path=openai/whisper-large-v3-turbo --use_flash_attention_2=True
+python compute_speed_tf.py --model_path=openai/whisper-large-v3-turbo --use_compile=True --use_bettertransformer=True
+python compute_speed_tf.py --model_path=openai/whisper-large-v3-turbo --use_compile=True --use_flash_attention_2=True
+
 # Ctranslate2模型
 python compute_speed_ct2.py --model_path=../models/whisper-tiny-ct2/
 python compute_speed_ct2.py --model_path=../models/whisper-base-ct2/

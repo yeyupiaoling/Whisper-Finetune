@@ -3,6 +3,7 @@ __pycache__/
 models/
 base-model/
 output/
+openai/
 dataset/*
 !dataset/test.wav
 !dataset/test_long.wav
