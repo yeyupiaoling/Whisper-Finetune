@@ -84,7 +84,7 @@ OpenAI open-sourced project Whisper, which claims to have human-level speech rec
 |     whisper-medium     | Chinese  |   0.09538    | 0.13591  |   0.26669    |    N/A    |
 |     whisper-large      | Chinese  |   0.08969    | 0.12933  |   0.23439    |    N/A    |
 |    whisper-large-v2    | Chinese  |   0.08817    | 0.12332  |   0.26547    |    N/A    |
-|    whisper-large-v3    | Chinese  |   0.08086    | 0.11452  |   0.19878    |           |
+|    whisper-large-v3    | Chinese  |   0.08086    | 0.11452  |   0.19878    |  0.35301  |
 | whisper-large-v3-turbo | Chinese  |   0.08647    | 0.21225  |   0.20390    |  0.38069  |
 
 2. Cer test table after fine-tuning the dataset.
@@ -96,7 +96,7 @@ OpenAI open-sourced project Whisper, which claims to have human-level speech rec
 |     whisper-small      |  Chinese  | [AIShell](https://openslr.magicdatatech.com/resources/33/) |   0.05452    | 0.19831  |   0.24229    |    N/A    |
 |     whisper-medium     |  Chinese  | [AIShell](https://openslr.magicdatatech.com/resources/33/) |   0.03681    | 0.13073  |   0.16939    |    N/A    |
 |    whisper-large-v2    |  Chinese  | [AIShell](https://openslr.magicdatatech.com/resources/33/) |   0.03139    | 0.12201  |   0.15776    |    N/A    |
-|    whisper-large-v3    |  Chinese  | [AIShell](https://openslr.magicdatatech.com/resources/33/) |   0.03660    | 0.09835  |   0.13706    |           |
+|    whisper-large-v3    |  Chinese  | [AIShell](https://openslr.magicdatatech.com/resources/33/) |   0.03660    | 0.09835  |   0.13706    |  0.33464  |
 | whisper-large-v3-turbo |  Chinese  | [AIShell](https://openslr.magicdatatech.com/resources/33/) |              |          |              |           |
 |    whisper-large-v3    | Cantonese |                         Cantonese                          |              |          |              |           |
 | whisper-large-v3-turbo | Cantonese |                         Cantonese                          |              |          |              |           |
@@ -114,7 +114,7 @@ OpenAI open-sourced project Whisper, which claims to have human-level speech rec
 |:----------------:|:---------------:|:------------:|:----------------------------:|:-------:|
 |   whisper-tiny   |     Uyghur      |   Chinese    | CommonVoice-Uyghur + THUYG20 | 0.06798 |
 |   whisper-base   |     Uyghur      |   Chinese    | CommonVoice-Uyghur + THUYG20 | 0.04690 |
-|  whisper-small   |     Uyghur      |   Chinese    | CommonVoice-Uyghur + THUYG20 |         |
+|  whisper-small   |     Uyghur      |   Chinese    | CommonVoice-Uyghur + THUYG20 | 0.02594 |
 |  whisper-medium  |     Uyghur      |   Chinese    | CommonVoice-Uyghur + THUYG20 |         |
 | whisper-large-v2 |     Uyghur      |   Chinese    | CommonVoice-Uyghur + THUYG20 |         |
 
