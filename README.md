@@ -119,7 +119,7 @@ OpenAI在开源了号称其英文语音辨识能力已达到人类水准的Whisp
 |     whisper-medium     |  Chinese  | [AIShell](https://openslr.magicdatatech.com/resources/33/) |   0.03681    | 0.13073  |   0.16939    |   N/A   | 加入知识星球获取 |
 |    whisper-large-v2    |  Chinese  | [AIShell](https://openslr.magicdatatech.com/resources/33/) |   0.03139    | 0.12201  |   0.15776    |   N/A   | 加入知识星球获取 |
 |    whisper-large-v3    |  Chinese  | [AIShell](https://openslr.magicdatatech.com/resources/33/) |   0.03660    | 0.09835  |   0.13706    | 0.33464 | 加入知识星球获取 |
-| whisper-large-v3-turbo |  Chinese  | [AIShell](https://openslr.magicdatatech.com/resources/33/) |              |          |              |         | 加入知识星球获取 |
+| whisper-large-v3-turbo |  Chinese  | [AIShell](https://openslr.magicdatatech.com/resources/33/) |   0.03607    | 0.23038  |   0.35697    | 0.35697 | 加入知识星球获取 |
 |    whisper-large-v3    | Cantonese |                         粤语(含港式粤语)                          |              |          |              |         | 加入知识星球获取 |
 | whisper-large-v3-turbo | Cantonese |                         粤语(含港式粤语)                          |              |          |              |         | 加入知识星球获取 |
 |      whisper-tiny      |  Chinese  |     [WenetSpeech](./tools/create_wenetspeech_data.py)      |   0.17711    | 0.24783  |   0.39226    |   N/A   | 加入知识星球获取 |
@@ -127,7 +127,7 @@ OpenAI在开源了号称其英文语音辨识能力已达到人类水准的Whisp
 |     whisper-small      |  Chinese  |     [WenetSpeech](./tools/create_wenetspeech_data.py)      |   0.08484    | 0.11801  |   0.23471    |   N/A   | 加入知识星球获取 |
 |     whisper-medium     |  Chinese  |     [WenetSpeech](./tools/create_wenetspeech_data.py)      |   0.05861    | 0.08794  |   0.19486    |   N/A   | 加入知识星球获取 |
 |    whisper-large-v2    |  Chinese  |     [WenetSpeech](./tools/create_wenetspeech_data.py)      |   0.05443    | 0.08367  |   0.19087    |   N/A   | 加入知识星球获取 |
-|    whisper-large-v3    |  Chinese  |     [WenetSpeech](./tools/create_wenetspeech_data.py)      |   0.04947    | 0.10711  |   0.17429    |         | 加入知识星球获取 |
+|    whisper-large-v3    |  Chinese  |     [WenetSpeech](./tools/create_wenetspeech_data.py)      |   0.04947    | 0.10711  |   0.17429    | 0.60919 | 加入知识星球获取 |
 
 
 3. 微调其他语言数据集后字错率测试表。
@@ -137,7 +137,7 @@ OpenAI在开源了号称其英文语音辨识能力已达到人类水准的Whisp
 |   whisper-tiny   | 维吾尔语 | Chinese | CommonVoice-Uyghur + THUYG20 | 0.06798 | 加入知识星球获取 |
 |   whisper-base   | 维吾尔语 | Chinese | CommonVoice-Uyghur + THUYG20 | 0.04690 | 加入知识星球获取 |
 |  whisper-small   | 维吾尔语 | Chinese | CommonVoice-Uyghur + THUYG20 | 0.02594 | 加入知识星球获取 |
-|  whisper-medium  | 维吾尔语 | Chinese | CommonVoice-Uyghur + THUYG20 |         | 加入知识星球获取 |
+|  whisper-medium  | 维吾尔语 | Chinese | CommonVoice-Uyghur + THUYG20 | 0.01669 | 加入知识星球获取 |
 | whisper-large-v2 | 维吾尔语 | Chinese | CommonVoice-Uyghur + THUYG20 |         | 加入知识星球获取 |
 
 **说明：**

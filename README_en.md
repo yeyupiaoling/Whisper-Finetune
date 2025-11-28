@@ -97,7 +97,7 @@ OpenAI open-sourced project Whisper, which claims to have human-level speech rec
 |     whisper-medium     |  Chinese  | [AIShell](https://openslr.magicdatatech.com/resources/33/) |   0.03681    | 0.13073  |   0.16939    |    N/A    |
 |    whisper-large-v2    |  Chinese  | [AIShell](https://openslr.magicdatatech.com/resources/33/) |   0.03139    | 0.12201  |   0.15776    |    N/A    |
 |    whisper-large-v3    |  Chinese  | [AIShell](https://openslr.magicdatatech.com/resources/33/) |   0.03660    | 0.09835  |   0.13706    |  0.33464  |
-| whisper-large-v3-turbo |  Chinese  | [AIShell](https://openslr.magicdatatech.com/resources/33/) |              |          |              |           |
+| whisper-large-v3-turbo |  Chinese  | [AIShell](https://openslr.magicdatatech.com/resources/33/) |   0.03607    | 0.23038  |   0.35697    |  0.35697  |
 |    whisper-large-v3    | Cantonese |                         Cantonese                          |              |          |              |           |
 | whisper-large-v3-turbo | Cantonese |                         Cantonese                          |              |          |              |           |
 |      whisper-tiny      |  Chinese  |     [WenetSpeech](./tools/create_wenetspeech_data.py)      |   0.21009    | 0.29352  |   0.41506    |    N/A    |
@@ -115,7 +115,7 @@ OpenAI open-sourced project Whisper, which claims to have human-level speech rec
 |   whisper-tiny   |     Uyghur      |   Chinese    | CommonVoice-Uyghur + THUYG20 | 0.06798 |
 |   whisper-base   |     Uyghur      |   Chinese    | CommonVoice-Uyghur + THUYG20 | 0.04690 |
 |  whisper-small   |     Uyghur      |   Chinese    | CommonVoice-Uyghur + THUYG20 | 0.02594 |
-|  whisper-medium  |     Uyghur      |   Chinese    | CommonVoice-Uyghur + THUYG20 |         |
+|  whisper-medium  |     Uyghur      |   Chinese    | CommonVoice-Uyghur + THUYG20 | 0.01669 |
 | whisper-large-v2 |     Uyghur      |   Chinese    | CommonVoice-Uyghur + THUYG20 |         |
 
 **Important explanation**:
