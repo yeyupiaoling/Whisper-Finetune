@@ -99,7 +99,7 @@ OpenAI open-sourced project Whisper, which claims to have human-level speech rec
 |    whisper-large-v3    |  Chinese  | [AIShell](https://openslr.magicdatatech.com/resources/33/) |   0.03660    | 0.09835  |   0.13706    |  0.33464  |
 | whisper-large-v3-turbo |  Chinese  | [AIShell](https://openslr.magicdatatech.com/resources/33/) |   0.03607    | 0.23038  |   0.35697    |  0.35697  |
 |    whisper-large-v3    | Cantonese |                         Cantonese                          |              |          |              |           |
-| whisper-large-v3-turbo | Cantonese |                         Cantonese                          |              |          |              |           |
+| whisper-large-v3-turbo | Cantonese |                         Cantonese                          |   0.14028    | 0.34483  |   0.38682    |  0.03255  |
 |      whisper-tiny      |  Chinese  |     [WenetSpeech](./tools/create_wenetspeech_data.py)      |   0.21009    | 0.29352  |   0.41506    |    N/A    |
 |      whisper-base      |  Chinese  |     [WenetSpeech](./tools/create_wenetspeech_data.py)      |   0.14548    | 0.17747  |   0.30590    |    N/A    |
 |     whisper-small      |  Chinese  |     [WenetSpeech](./tools/create_wenetspeech_data.py)      |   0.08484    | 0.11801  |   0.23471    |    N/A    |
