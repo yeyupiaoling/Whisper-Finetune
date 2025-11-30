@@ -98,7 +98,7 @@ OpenAI open-sourced project Whisper, which claims to have human-level speech rec
 |    whisper-large-v2    |  Chinese  | [AIShell](https://openslr.magicdatatech.com/resources/33/) |   0.03139    | 0.12201  |   0.15776    |    N/A    |
 |    whisper-large-v3    |  Chinese  | [AIShell](https://openslr.magicdatatech.com/resources/33/) |   0.03660    | 0.09835  |   0.13706    |  0.33464  |
 | whisper-large-v3-turbo |  Chinese  | [AIShell](https://openslr.magicdatatech.com/resources/33/) |   0.03607    | 0.23038  |   0.35697    |  0.35697  |
-|    whisper-large-v3    | Cantonese |                         Cantonese                          |              |          |              |           |
+|    whisper-large-v3    | Cantonese |                         Cantonese                          |   0.12443    | 0.32365  |   0.35911    |  0.02106  |
 | whisper-large-v3-turbo | Cantonese |                         Cantonese                          |   0.14028    | 0.34483  |   0.38682    |  0.03255  |
 |      whisper-tiny      |  Chinese  |     [WenetSpeech](./tools/create_wenetspeech_data.py)      |   0.21009    | 0.29352  |   0.41506    |    N/A    |
 |      whisper-base      |  Chinese  |     [WenetSpeech](./tools/create_wenetspeech_data.py)      |   0.14548    | 0.17747  |   0.30590    |    N/A    |
@@ -110,13 +110,14 @@ OpenAI open-sourced project Whisper, which claims to have human-level speech rec
 
 3. Test table for character error rate after fine-tuning other language datasets.
 
-|      Model       | Actual language | Use language |           Dataset            |  Test   |
-|:----------------:|:---------------:|:------------:|:----------------------------:|:-------:|
-|   whisper-tiny   |     Uyghur      |   Chinese    | CommonVoice-Uyghur + THUYG20 | 0.06798 |
-|   whisper-base   |     Uyghur      |   Chinese    | CommonVoice-Uyghur + THUYG20 | 0.04690 |
-|  whisper-small   |     Uyghur      |   Chinese    | CommonVoice-Uyghur + THUYG20 | 0.02594 |
-|  whisper-medium  |     Uyghur      |   Chinese    | CommonVoice-Uyghur + THUYG20 | 0.01669 |
-| whisper-large-v2 |     Uyghur      |   Chinese    | CommonVoice-Uyghur + THUYG20 |         |
+|         Model          | Actual language | Use language |           Dataset            |  Test   |
+|:----------------------:|:---------------:|:------------:|:----------------------------:|:-------:|
+|      whisper-tiny      |     Uyghur      |   Chinese    | CommonVoice-Uyghur + THUYG20 | 0.06798 |
+|      whisper-base      |     Uyghur      |   Chinese    | CommonVoice-Uyghur + THUYG20 | 0.04690 |
+|     whisper-small      |     Uyghur      |   Chinese    | CommonVoice-Uyghur + THUYG20 | 0.02594 |
+|     whisper-medium     |     Uyghur      |   Chinese    | CommonVoice-Uyghur + THUYG20 | 0.01669 |
+|    whisper-large-v2    |     Uyghur      |   Chinese    | CommonVoice-Uyghur + THUYG20 |         |
+| whisper-large-v3-turbo |     Uyghur      |   Chinese    | CommonVoice-Uyghur + THUYG20 |         |
 
 **Important explanation**:
 1. The character error rates of the tiny model when trained with the specified voices as `Chinese` and `uzbek` were 0.06798 and 0.0685 respectively. The difference between them is not significant. Therefore, in the above cases, the specified language was always `Chinese`.

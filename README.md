@@ -120,7 +120,7 @@ OpenAI在开源了号称其英文语音辨识能力已达到人类水准的Whisp
 |    whisper-large-v2    |  Chinese  | [AIShell](https://openslr.magicdatatech.com/resources/33/) |   0.03139    | 0.12201  |   0.15776    |   N/A   | 加入知识星球获取 |
 |    whisper-large-v3    |  Chinese  | [AIShell](https://openslr.magicdatatech.com/resources/33/) |   0.03660    | 0.09835  |   0.13706    | 0.33464 | 加入知识星球获取 |
 | whisper-large-v3-turbo |  Chinese  | [AIShell](https://openslr.magicdatatech.com/resources/33/) |   0.03607    | 0.23038  |   0.35697    | 0.35697 | 加入知识星球获取 |
-|    whisper-large-v3    | Cantonese |                         粤语(含港式粤语)                          |              |          |              |         | 加入知识星球获取 |
+|    whisper-large-v3    | Cantonese |                         粤语(含港式粤语)                          |   0.12443    | 0.32365  |   0.35911    | 0.02106 | 加入知识星球获取 |
 | whisper-large-v3-turbo | Cantonese |                         粤语(含港式粤语)                          |   0.14028    | 0.34483  |   0.38682    | 0.03255 | 加入知识星球获取 |
 |      whisper-tiny      |  Chinese  |     [WenetSpeech](./tools/create_wenetspeech_data.py)      |   0.17711    | 0.24783  |   0.39226    |   N/A   | 加入知识星球获取 |
 |      whisper-base      |  Chinese  |     [WenetSpeech](./tools/create_wenetspeech_data.py)      |   0.14548    | 0.17747  |   0.30590    |   N/A   | 加入知识星球获取 |
@@ -132,13 +132,14 @@ OpenAI在开源了号称其英文语音辨识能力已达到人类水准的Whisp
 
 3. 微调其他语言数据集后字错率测试表。
 
-|       使用模型       | 实际语言 |  指定语言   |             数据集              |   测试集   |   模型获取   |  
-|:----------------:|:----:|:-------:|:----------------------------:|:-------:|:--------:|
-|   whisper-tiny   | 维吾尔语 | Chinese | CommonVoice-Uyghur + THUYG20 | 0.06798 | 加入知识星球获取 |
-|   whisper-base   | 维吾尔语 | Chinese | CommonVoice-Uyghur + THUYG20 | 0.04690 | 加入知识星球获取 |
-|  whisper-small   | 维吾尔语 | Chinese | CommonVoice-Uyghur + THUYG20 | 0.02594 | 加入知识星球获取 |
-|  whisper-medium  | 维吾尔语 | Chinese | CommonVoice-Uyghur + THUYG20 | 0.01669 | 加入知识星球获取 |
-| whisper-large-v2 | 维吾尔语 | Chinese | CommonVoice-Uyghur + THUYG20 |         | 加入知识星球获取 |
+|          使用模型          | 实际语言 |  指定语言   |             数据集              |   测试集   |   模型获取   |  
+|:----------------------:|:----:|:-------:|:----------------------------:|:-------:|:--------:|
+|      whisper-tiny      | 维吾尔语 | Chinese | CommonVoice-Uyghur + THUYG20 | 0.06798 | 加入知识星球获取 |
+|      whisper-base      | 维吾尔语 | Chinese | CommonVoice-Uyghur + THUYG20 | 0.04690 | 加入知识星球获取 |
+|     whisper-small      | 维吾尔语 | Chinese | CommonVoice-Uyghur + THUYG20 | 0.02855 | 加入知识星球获取 |
+|     whisper-medium     | 维吾尔语 | Chinese | CommonVoice-Uyghur + THUYG20 | 0.01669 | 加入知识星球获取 |
+|    whisper-large-v2    | 维吾尔语 | Chinese | CommonVoice-Uyghur + THUYG20 |         | 加入知识星球获取 |
+| whisper-large-v3-turbo | 维吾尔语 | Chinese | CommonVoice-Uyghur + THUYG20 |         | 加入知识星球获取 |
 
 **说明：**
 1. 测试过指定语音为`Chinese`和`uzbek`，训练tiny模型的字错率分别是：0.06798和0.0685，它们差距不大，所上面使用都是指定语言为`Chinese`。
