@@ -138,7 +138,7 @@ OpenAI在开源了号称其英文语音辨识能力已达到人类水准的Whisp
 |      whisper-base      | 维吾尔语 | Chinese | CommonVoice-Uyghur + THUYG20 | 0.04690 | 加入知识星球获取 |
 |     whisper-small      | 维吾尔语 | Chinese | CommonVoice-Uyghur + THUYG20 | 0.02855 | 加入知识星球获取 |
 |     whisper-medium     | 维吾尔语 | Chinese | CommonVoice-Uyghur + THUYG20 | 0.01669 | 加入知识星球获取 |
-|    whisper-large-v2    | 维吾尔语 | Chinese | CommonVoice-Uyghur + THUYG20 |         | 加入知识星球获取 |
+|    whisper-large-v2    | 维吾尔语 | Chinese | CommonVoice-Uyghur + THUYG20 | 0.01480 | 加入知识星球获取 |
 | whisper-large-v3-turbo | 维吾尔语 | Chinese | CommonVoice-Uyghur + THUYG20 |         | 加入知识星球获取 |
 
 **说明：**
