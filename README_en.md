@@ -117,7 +117,7 @@ OpenAI open-sourced project Whisper, which claims to have human-level speech rec
 |     whisper-small      |     Uyghur      |   Chinese    | CommonVoice-Uyghur + THUYG20 | 0.02594 |
 |     whisper-medium     |     Uyghur      |   Chinese    | CommonVoice-Uyghur + THUYG20 | 0.01669 |
 |    whisper-large-v2    |     Uyghur      |   Chinese    | CommonVoice-Uyghur + THUYG20 | 0.01480 |
-| whisper-large-v3-turbo |     Uyghur      |   Chinese    | CommonVoice-Uyghur + THUYG20 |         |
+| whisper-large-v3-turbo |     Uyghur      |   Chinese    | CommonVoice-Uyghur + THUYG20 | 0.01744 |
 
 **Important explanation**:
 1. The character error rates of the tiny model when trained with the specified voices as `Chinese` and `uzbek` were 0.06798 and 0.0685 respectively. The difference between them is not significant. Therefore, in the above cases, the specified language was always `Chinese`.

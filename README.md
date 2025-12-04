@@ -139,7 +139,7 @@ OpenAI在开源了号称其英文语音辨识能力已达到人类水准的Whisp
 |     whisper-small      | 维吾尔语 | Chinese | CommonVoice-Uyghur + THUYG20 | 0.02855 | 加入知识星球获取 |
 |     whisper-medium     | 维吾尔语 | Chinese | CommonVoice-Uyghur + THUYG20 | 0.01669 | 加入知识星球获取 |
 |    whisper-large-v2    | 维吾尔语 | Chinese | CommonVoice-Uyghur + THUYG20 | 0.01480 | 加入知识星球获取 |
-| whisper-large-v3-turbo | 维吾尔语 | Chinese | CommonVoice-Uyghur + THUYG20 |         | 加入知识星球获取 |
+| whisper-large-v3-turbo | 维吾尔语 | Chinese | CommonVoice-Uyghur + THUYG20 | 0.01744 | 加入知识星球获取 |
 
 **说明：**
 1. 测试过指定语音为`Chinese`和`uzbek`，训练tiny模型的字错率分别是：0.06798和0.0685，它们差距不大，所上面使用都是指定语言为`Chinese`。
