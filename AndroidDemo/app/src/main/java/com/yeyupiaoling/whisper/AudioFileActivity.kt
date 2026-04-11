@@ -4,6 +4,7 @@ import android.Manifest
 import android.annotation.SuppressLint
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.provider.MediaStore
@@ -19,7 +20,6 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import java.io.File
 
 class AudioFileActivity : AppCompatActivity() {
     private var whisperContext: WhisperContext? = null
@@ -74,28 +74,70 @@ class AudioFileActivity : AppCompatActivity() {
     @Deprecated("Deprecated in Java")
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-        if (resultCode == RESULT_OK && data != null) {
-            val audioFilePath = getPathFromURI(this, data.data!!)
-            val file = File(audioFilePath!!)
+        if (requestCode == 1 && resultCode == RESULT_OK && data?.data != null) {
+            transcribeLargeWav(data.data!!)
+        }
+    }
+
+    @SuppressLint("SetTextI18n")
+    private fun transcribeLargeWav(uri: Uri) {
+        lifecycleScope.launch {
+            selectAudioBtn!!.isEnabled = false
+            val startTime = System.currentTimeMillis()
+
             try {
-                selectAudioBtn!!.isEnabled = false
-                val startTime = System.currentTimeMillis()
-                resultTextView!!.text = "正在识别中..."
-                val audioData = decodeWaveFile(file)
-                lifecycleScope.launch {
-                    val text = whisperContext?.transcribeData(audioData)
-                    val endTime = System.currentTimeMillis()
-                    withContext(Dispatchers.Main) {
-                        val showText = "识别结果：${text.toString()}\n" +
-                                "音频时间：${audioData.size / (16000 / 1000)} ms\n" +
-                                "识别时间：${endTime - startTime} ms\n"
-                        resultTextView!!.text = showText
-                        Log.d(TAG, showText)
-                        selectAudioBtn!!.isEnabled = true
+                val allText = withContext(Dispatchers.IO) {
+                    val tempFile = copyUriToTempFile(this@AudioFileActivity, uri)
+                    try {
+                        val wav = readWavInfo(tempFile)
+
+                        val chunkSec = 30
+                        val overlapSec = 1
+                        val chunkFrames = wav.sampleRate * chunkSec
+                        val hopFrames = wav.sampleRate * (chunkSec - overlapSec)
+
+                        val sb = StringBuilder()
+                        var startFrame = 0L
+                        var index = 0
+                        val total = ((wav.totalFrames + hopFrames - 1) / hopFrames).toInt().coerceAtLeast(1)
+
+                        while (startFrame < wav.totalFrames) {
+                            val chunk = readWavChunkAs16kMonoFloat(
+                                file = tempFile,
+                                wav = wav,
+                                startFrame = startFrame,
+                                framesToRead = chunkFrames
+                            )
+                            if (chunk.isEmpty()) break
+
+                            val text = whisperContext?.transcribeData(chunk).orEmpty()
+                            if (text.isNotBlank()) {
+                                sb.append(text.trim()).append('\n')
+                            }
+
+                            index++
+                            val progress = index * 100 / total
+                            withContext(Dispatchers.Main) {
+                                resultTextView!!.text = "正在识别中... $index/$total ($progress%)"
+                            }
+
+                            startFrame += hopFrames
+                        }
+
+                        sb.toString().trim()
+                    } finally {
+                        tempFile.delete()
                     }
                 }
+
+                val endTime = System.currentTimeMillis()
+                val showText = "识别结果：$allText\n识别时间：${endTime - startTime} ms\n"
+                resultTextView!!.text = showText
+                Log.d(TAG, showText)
             } catch (e: Exception) {
                 e.printStackTrace()
+                resultTextView!!.text = "识别失败：${e.message}\n当前仅支持 PCM16 WAV"
+            } finally {
                 selectAudioBtn!!.isEnabled = true
             }
         }
