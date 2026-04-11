@@ -25,9 +25,6 @@ class TestActivity : AppCompatActivity() {
 
     companion object {
         private val TAG = AudioFileActivity::class.java.name
-
-        // assets里面的模型路径
-        private const val modelPath = "models/ggml-model.bin"
         private const val wavPath = "samples/test.wav"
     }
 
@@ -35,7 +32,6 @@ class TestActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_test)
 
-        // 复制音频文件
         samplePath = File(application.filesDir, "samples")
         assets.open(wavPath).use { input ->
             samplePath!!.outputStream().use { output ->
@@ -46,26 +42,26 @@ class TestActivity : AppCompatActivity() {
         resultTextView = findViewById(R.id.result_text)
         resultTextView!!.movementMethod = ScrollingMovementMethod.getInstance()
         startBtn = findViewById(R.id.start_button)
-        startBtn!!.setOnClickListener { v: View? ->
-            start()
-        }
+        startBtn!!.setOnClickListener { _: View? -> start() }
         startBtn!!.isEnabled = false
-        // 启动协程
-        lifecycleScope.launch {
-            loadModel()
-        }
+        lifecycleScope.launch { loadModel() }
     }
 
     @SuppressLint("SetTextI18n")
     private suspend fun loadModel() = withContext(Dispatchers.IO) {
-        val showText = "正在加载模型：${modelPath} ...\n"
-        // 在 UI 线程中更新 UI
-        withContext(Dispatchers.Main) {
-            resultTextView!!.text = showText
+        val modelFile = ModelManager.getSelectedModelFile(applicationContext)
+        if (modelFile == null) {
+            withContext(Dispatchers.Main) {
+                resultTextView!!.text = "未找到模型，请先返回首页导入或下载模型"
+                Toast.makeText(this@TestActivity, "请先配置模型", Toast.LENGTH_SHORT).show()
+                finish()
+            }
+            return@withContext
         }
-        whisperContext =
-            WhisperContext.createContextFromAsset(application.assets, modelPath)
-        // 在 UI 线程中更新 UI
+
+        val showText = "正在加载模型：${modelFile.absolutePath} ...\n"
+        withContext(Dispatchers.Main) { resultTextView!!.text = showText }
+        whisperContext = WhisperContext.createContextFromFile(modelFile.absolutePath)
         withContext(Dispatchers.Main) {
             startBtn!!.isEnabled = true
             resultTextView!!.text = showText + "模型加载成功"
@@ -73,7 +69,6 @@ class TestActivity : AppCompatActivity() {
         }
     }
 
-    // 开始测试
     private fun start() {
         resultTextView!!.text = ""
         startBtn!!.isEnabled = false
@@ -85,16 +80,12 @@ class TestActivity : AppCompatActivity() {
         Log.d(TAG, showText)
         val num = numEdit!!.text.toString().toInt()
         var runNum = 0f
-        // 启动协程
         lifecycleScope.launch {
             val startTime = System.currentTimeMillis()
             for (i in 0 until num) {
                 val startTime1 = System.currentTimeMillis()
-                // 在协程中调用suspend函数
                 val text = whisperContext?.transcribeData(audioData)
-                // 在 UI 线程中更新 UI
                 withContext(Dispatchers.Main) {
-                    // 把结果显示在 TextView 中
                     showText = "${showText}\n识别结果：${text.toString()}\n" +
                             "识别时间：${System.currentTimeMillis() - startTime1} ms\n"
                     resultTextView!!.text = showText
@@ -115,9 +106,6 @@ class TestActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
-        lifecycleScope.launch {
-            whisperContext!!.release()
-        }
+        lifecycleScope.launch { whisperContext?.release() }
     }
-
 }

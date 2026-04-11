@@ -1,28 +1,52 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
+    android:padding="12dp"
     tools:context=".MainActivity">
 
+    <TextView
+        android:id="@+id/model_status_text"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="8dp"
+        android:text="当前未配置模型"
+        android:textSize="14sp" />
+
     <Button
-        android:text="录音识别"
+        android:id="@+id/import_model_btn"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="导入本地模型" />
+
+    <Button
+        android:id="@+id/download_model_btn"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="下载预置模型" />
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="10dp" />
+
+    <Button
         android:id="@+id/start_record_activity_btn"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"/>
+        android:layout_height="wrap_content"
+        android:text="录音识别" />
 
     <Button
-        android:text="文件识别"
         android:id="@+id/start_file_activity_btn"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"/>
+        android:layout_height="wrap_content"
+        android:text="文件识别" />
 
     <Button
-        android:text="测试页面"
         android:id="@+id/start_test_activity_btn"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"/>
+        android:layout_height="wrap_content"
+        android:text="测试页面" />
 
 </LinearLayout>
