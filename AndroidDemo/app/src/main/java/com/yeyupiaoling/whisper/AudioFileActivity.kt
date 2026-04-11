@@ -11,6 +11,7 @@ import android.provider.MediaStore
 import android.util.Log
 import android.view.View
 import android.widget.Button
+import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -25,6 +26,8 @@ class AudioFileActivity : AppCompatActivity() {
     private var whisperContext: WhisperContext? = null
     private var resultTextView: TextView? = null
     private var selectAudioBtn: Button? = null
+    private var progressBar: ProgressBar? = null
+    private var progressTextView: TextView? = null
 
     companion object {
         private val TAG = AudioFileActivity::class.java.name
@@ -39,6 +42,9 @@ class AudioFileActivity : AppCompatActivity() {
         }
         resultTextView = findViewById(R.id.result_text)
         selectAudioBtn = findViewById(R.id.select_audio_btn)
+        progressBar = findViewById(R.id.progress_bar)
+        progressTextView = findViewById(R.id.progress_text)
+
         selectAudioBtn!!.setOnClickListener { _: View? ->
             val intent = Intent(Intent.ACTION_GET_CONTENT, MediaStore.Audio.Media.EXTERNAL_CONTENT_URI)
             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
@@ -83,6 +89,8 @@ class AudioFileActivity : AppCompatActivity() {
     private fun transcribeLargeWav(uri: Uri) {
         lifecycleScope.launch {
             selectAudioBtn!!.isEnabled = false
+            resultTextView!!.text = ""
+            showPreparingUi()
             val startTime = System.currentTimeMillis()
 
             try {
@@ -101,6 +109,8 @@ class AudioFileActivity : AppCompatActivity() {
                         var index = 0
                         val total = ((wav.totalFrames + hopFrames - 1) / hopFrames).toInt().coerceAtLeast(1)
 
+                        withContext(Dispatchers.Main) { startRecognizingUi(total) }
+
                         while (startFrame < wav.totalFrames) {
                             val chunk = readWavChunkAs16kMonoFloat(
                                 file = audioFile,
@@ -116,14 +126,15 @@ class AudioFileActivity : AppCompatActivity() {
                             }
 
                             index++
-                            val progress = index * 100 / total
+                            val progress = 15 + (index * 80 / total)
                             withContext(Dispatchers.Main) {
-                                resultTextView!!.text = "正在识别中... $index/$total ($progress%)"
+                                updateRecognizingUi(index, total, progress)
                             }
 
                             startFrame += hopFrames
                         }
 
+                        withContext(Dispatchers.Main) { showFinalizingUi() }
                         sb.toString().trim()
                     } finally {
                         audioFile.delete()
@@ -133,14 +144,54 @@ class AudioFileActivity : AppCompatActivity() {
                 val endTime = System.currentTimeMillis()
                 val showText = "识别结果：$allText\n识别时间：${endTime - startTime} ms\n"
                 resultTextView!!.text = showText
+                showCompletedUi()
                 Log.d(TAG, showText)
             } catch (e: Exception) {
                 e.printStackTrace()
                 resultTextView!!.text = "识别失败：${e.message}"
+                showErrorUi(e.message ?: "未知错误")
             } finally {
                 selectAudioBtn!!.isEnabled = true
             }
         }
+    }
+
+    private fun showPreparingUi() {
+        progressBar?.visibility = View.VISIBLE
+        progressTextView?.visibility = View.VISIBLE
+        progressBar?.isIndeterminate = true
+        progressTextView?.text = "正在解码/转换音频..."
+    }
+
+    private fun startRecognizingUi(total: Int) {
+        progressBar?.isIndeterminate = false
+        progressBar?.max = 100
+        progressBar?.progress = 15
+        progressTextView?.text = "正在识别 0/$total 段... (15%)"
+    }
+
+    private fun updateRecognizingUi(index: Int, total: Int, progress: Int) {
+        progressBar?.isIndeterminate = false
+        progressBar?.progress = progress.coerceIn(0, 99)
+        progressTextView?.text = "正在识别 $index/$total 段... (${progress.coerceIn(0, 99)}%)"
+    }
+
+    private fun showFinalizingUi() {
+        progressBar?.isIndeterminate = false
+        progressBar?.progress = 100
+        progressTextView?.text = "正在整理结果... (100%)"
+    }
+
+    private fun showCompletedUi() {
+        progressBar?.isIndeterminate = false
+        progressBar?.progress = 100
+        progressTextView?.text = "识别完成"
+    }
+
+    private fun showErrorUi(message: String) {
+        progressBar?.isIndeterminate = false
+        progressBar?.progress = 0
+        progressTextView?.text = "识别失败：$message"
     }
 
     override fun onDestroy() {
