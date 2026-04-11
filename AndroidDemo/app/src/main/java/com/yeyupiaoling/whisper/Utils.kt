@@ -101,6 +101,16 @@ fun readWavInfo(file: File): WavInfo {
     }
 }
 
+/**
+ * Backward-compatible API used by RecordActivity/TestActivity.
+ * Reads the whole wav and converts to 16k mono float.
+ */
+fun decodeWaveFile(file: File): FloatArray {
+    val wav = readWavInfo(file)
+    require(wav.totalFrames <= Int.MAX_VALUE.toLong()) { "WAV too large to decode as single array" }
+    return readWavChunkAs16kMonoFloat(file, wav, startFrame = 0, framesToRead = wav.totalFrames.toInt())
+}
+
 fun readWavChunkAs16kMonoFloat(
     file: File,
     wav: WavInfo,
