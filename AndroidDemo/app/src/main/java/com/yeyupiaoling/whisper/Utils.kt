@@ -3,38 +3,178 @@ package com.yeyupiaoling.whisper
 import android.content.Context
 import android.database.Cursor
 import android.net.Uri
-import android.provider.MediaStore
 import android.provider.OpenableColumns
-import java.io.ByteArrayOutputStream
 import java.io.File
-import java.io.FileInputStream
 import java.io.FileOutputStream
 import java.io.IOException
 import java.io.InputStream
-import java.nio.ByteBuffer
-import java.nio.ByteOrder
+import java.io.RandomAccessFile
+import kotlin.math.floor
+import kotlin.math.min
 
-// 读取音频数据用于输入预测
-fun decodeWaveFile(file: File): FloatArray {
-    val baos = ByteArrayOutputStream()
-    file.inputStream().use { it.copyTo(baos) }
-    val buffer = ByteBuffer.wrap(baos.toByteArray())
-    buffer.order(ByteOrder.LITTLE_ENDIAN)
-    val channel = buffer.getShort(22).toInt()
-    buffer.position(44)
-    val shortBuffer = buffer.asShortBuffer()
-    val shortArray = ShortArray(shortBuffer.limit())
-    shortBuffer.get(shortArray)
-    return FloatArray(shortArray.size / channel) { index ->
-        when (channel) {
-            1 -> (shortArray[index] / 32767.0f).coerceIn(-1f..1f)
-            else -> ((shortArray[2 * index] + shortArray[2 * index + 1]) / 32767.0f / 2.0f).coerceIn(
-                -1f..1f
-            )
+data class WavInfo(
+    val sampleRate: Int,
+    val channels: Int,
+    val bitsPerSample: Int,
+    val dataStart: Long,
+    val dataSize: Long
+) {
+    val bytesPerSample: Int get() = bitsPerSample / 8
+    val bytesPerFrame: Int get() = bytesPerSample * channels
+    val totalFrames: Long get() = dataSize / bytesPerFrame
+}
+
+fun copyUriToTempFile(context: Context, uri: Uri): File {
+    val outFile = File(context.cacheDir, "audio_${System.currentTimeMillis()}.tmp")
+    context.contentResolver.openInputStream(uri).use { input ->
+        requireNotNull(input) { "Cannot open input stream for uri: $uri" }
+        FileOutputStream(outFile).use { out ->
+            val buffer = ByteArray(16 * 1024)
+            while (true) {
+                val n = input.read(buffer)
+                if (n < 0) break
+                out.write(buffer, 0, n)
+            }
         }
+    }
+    return outFile
+}
+
+fun readWavInfo(file: File): WavInfo {
+    RandomAccessFile(file, "r").use { raf ->
+        val riff = ByteArray(4)
+        raf.readFully(riff)
+        require(String(riff, Charsets.US_ASCII) == "RIFF") { "Not RIFF file" }
+
+        raf.skipBytes(4) // file size
+
+        val wave = ByteArray(4)
+        raf.readFully(wave)
+        require(String(wave, Charsets.US_ASCII) == "WAVE") { "Not WAVE file" }
+
+        var sampleRate = 0
+        var channels = 0
+        var bitsPerSample = 0
+        var dataStart = -1L
+        var dataSize = -1L
+
+        while (raf.filePointer < raf.length()) {
+            val chunkIdBytes = ByteArray(4)
+            raf.readFully(chunkIdBytes)
+            val chunkId = String(chunkIdBytes, Charsets.US_ASCII)
+            val chunkSize = readIntLE(raf).toLong() and 0xffffffffL
+
+            when (chunkId) {
+                "fmt " -> {
+                    val audioFormat = readShortLE(raf).toInt() and 0xffff
+                    channels = readShortLE(raf).toInt() and 0xffff
+                    sampleRate = readIntLE(raf)
+                    raf.skipBytes(6) // byteRate + blockAlign
+                    bitsPerSample = readShortLE(raf).toInt() and 0xffff
+
+                    require(audioFormat == 1) { "Only PCM WAV supported (audioFormat=$audioFormat)" }
+
+                    val remain = chunkSize - 16
+                    if (remain > 0) raf.skipBytes(remain.toInt())
+                }
+
+                "data" -> {
+                    dataStart = raf.filePointer
+                    dataSize = chunkSize
+                    raf.seek(raf.filePointer + chunkSize)
+                }
+
+                else -> {
+                    raf.seek(raf.filePointer + chunkSize)
+                }
+            }
+
+            // word alignment
+            if (chunkSize % 2L == 1L) raf.skipBytes(1)
+        }
+
+        require(sampleRate > 0 && channels > 0 && bitsPerSample == 16 && dataStart >= 0 && dataSize > 0) {
+            "Invalid WAV or unsupported format. Need PCM16 WAV."
+        }
+
+        return WavInfo(sampleRate, channels, bitsPerSample, dataStart, dataSize)
     }
 }
 
+/**
+ * Backward-compatible API used by RecordActivity/TestActivity.
+ * Reads the whole wav and converts to 16k mono float.
+ */
+fun decodeWaveFile(file: File): FloatArray {
+    val wav = readWavInfo(file)
+    require(wav.totalFrames <= Int.MAX_VALUE.toLong()) { "WAV too large to decode as single array" }
+    return readWavChunkAs16kMonoFloat(file, wav, startFrame = 0, framesToRead = wav.totalFrames.toInt())
+}
+
+fun readWavChunkAs16kMonoFloat(
+    file: File,
+    wav: WavInfo,
+    startFrame: Long,
+    framesToRead: Int
+): FloatArray {
+    val safeFrames = min(framesToRead.toLong(), wav.totalFrames - startFrame).toInt()
+    if (safeFrames <= 0) return floatArrayOf()
+
+    val bytesToRead = safeFrames * wav.bytesPerFrame
+    val raw = ByteArray(bytesToRead)
+
+    RandomAccessFile(file, "r").use { raf ->
+        raf.seek(wav.dataStart + startFrame * wav.bytesPerFrame)
+        raf.readFully(raw)
+    }
+
+    // PCM16 -> mono float
+    val mono = FloatArray(safeFrames)
+    var p = 0
+    for (i in 0 until safeFrames) {
+        var sum = 0f
+        for (ch in 0 until wav.channels) {
+            val lo = raw[p].toInt() and 0xff
+            val hi = raw[p + 1].toInt()
+            val s = (hi shl 8) or lo
+            val sample = s.toShort() / 32768.0f
+            sum += sample
+            p += 2
+        }
+        mono[i] = sum / wav.channels
+    }
+
+    return if (wav.sampleRate == 16000) mono else resampleLinear(mono, wav.sampleRate, 16000)
+}
+
+private fun resampleLinear(input: FloatArray, inRate: Int, outRate: Int): FloatArray {
+    if (input.isEmpty()) return input
+    val outLen = floor(input.size.toDouble() * outRate / inRate).toInt().coerceAtLeast(1)
+    val out = FloatArray(outLen)
+    val scale = inRate.toDouble() / outRate
+    for (i in 0 until outLen) {
+        val srcPos = i * scale
+        val i0 = srcPos.toInt().coerceIn(0, input.lastIndex)
+        val i1 = (i0 + 1).coerceIn(0, input.lastIndex)
+        val t = srcPos - i0
+        out[i] = ((1 - t) * input[i0] + t * input[i1]).toFloat()
+    }
+    return out
+}
+
+private fun readIntLE(raf: RandomAccessFile): Int {
+    val b0 = raf.read()
+    val b1 = raf.read()
+    val b2 = raf.read()
+    val b3 = raf.read()
+    return (b0 and 0xff) or ((b1 and 0xff) shl 8) or ((b2 and 0xff) shl 16) or ((b3 and 0xff) shl 24)
+}
+
+private fun readShortLE(raf: RandomAccessFile): Short {
+    val b0 = raf.read()
+    val b1 = raf.read()
+    return (((b1 and 0xff) shl 8) or (b0 and 0xff)).toShort()
+}
 
 // 给录音的流加上文件头
 @Throws(IOException::class)
@@ -100,7 +240,7 @@ fun getPathFromURI(context: Context, uri: Uri): String? {
         val nameIndex: Int = returnCursor!!.getColumnIndex(OpenableColumns.DISPLAY_NAME)
         returnCursor.moveToFirst()
         val name: String = returnCursor.getString(nameIndex)
-        val file = File(context.getFilesDir(), name)
+        val file = File(context.filesDir, name)
         val inputStream: InputStream? = context.contentResolver.openInputStream(uri)
         val outputStream = FileOutputStream(file)
         var read: Int
@@ -114,7 +254,7 @@ fun getPathFromURI(context: Context, uri: Uri): String? {
         returnCursor.close()
         inputStream.close()
         outputStream.close()
-        return file.getPath()
+        return file.path
     } catch (e: Exception) {
         e.printStackTrace()
     }

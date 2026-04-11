@@ -94,10 +94,12 @@ class TestActivity : AppCompatActivity() {
                 }
             }
             val endTime = System.currentTimeMillis()
+            val avgMs = (endTime - startTime).toFloat() / runNum
+            val rtf = avgMs / dataLen.toFloat()
             showText = "${showText}\n==================================\n" +
                     "测试次数：${runNum}\n" +
-                    "平均识别时间：${(endTime - startTime) / runNum} ms\n" +
-                    "实时率（RTF）为：${(endTime - startTime) / runNum / dataLen}"
+                    "平均识别时间：${avgMs} ms\n" +
+                    "实时率（RTF）为：${rtf}"
             resultTextView!!.text = showText
             Log.d(TAG, showText)
             startBtn!!.isEnabled = true
