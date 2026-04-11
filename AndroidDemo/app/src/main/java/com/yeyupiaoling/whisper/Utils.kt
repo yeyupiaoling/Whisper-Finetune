@@ -2,6 +2,9 @@ package com.yeyupiaoling.whisper
 
 import android.content.Context
 import android.database.Cursor
+import android.media.AudioFormat
+import android.media.MediaCodec
+import android.media.MediaExtractor
 import android.net.Uri
 import android.provider.OpenableColumns
 import java.io.File
@@ -9,6 +12,8 @@ import java.io.FileOutputStream
 import java.io.IOException
 import java.io.InputStream
 import java.io.RandomAccessFile
+import java.nio.ByteBuffer
+import java.nio.ByteOrder
 import kotlin.math.floor
 import kotlin.math.min
 
@@ -38,6 +43,201 @@ fun copyUriToTempFile(context: Context, uri: Uri): File {
         }
     }
     return outFile
+}
+
+/**
+ * 将任意音频（wav/mp3/m4a...）准备成可识别文件：
+ * - PCM16 WAV：直接返回
+ * - 其他格式：自动转成 16k mono PCM16 WAV 后返回
+ */
+fun prepareAudioForWhisper(context: Context, uri: Uri): File {
+    val input = copyUriToTempFile(context, uri)
+    return try {
+        // 如果本身是可解析的 PCM16 WAV，直接使用
+        readWavInfo(input)
+        input
+    } catch (_: Exception) {
+        val outWav = File(context.cacheDir, "audio_${System.currentTimeMillis()}_16k.wav")
+        try {
+            decodeCompressedAudioTo16kMonoWav(input, outWav)
+        } finally {
+            input.delete()
+        }
+        outWav
+    }
+}
+
+private fun decodeCompressedAudioTo16kMonoWav(inputFile: File, outWav: File) {
+    val extractor = MediaExtractor()
+    extractor.setDataSource(inputFile.absolutePath)
+
+    var trackIndex = -1
+    var inputFormat = null as android.media.MediaFormat?
+    for (i in 0 until extractor.trackCount) {
+        val f = extractor.getTrackFormat(i)
+        val mime = f.getString(android.media.MediaFormat.KEY_MIME) ?: continue
+        if (mime.startsWith("audio/")) {
+            trackIndex = i
+            inputFormat = f
+            break
+        }
+    }
+    require(trackIndex >= 0 && inputFormat != null) { "No audio track found" }
+
+    extractor.selectTrack(trackIndex)
+
+    val mime = inputFormat!!.getString(android.media.MediaFormat.KEY_MIME)
+        ?: throw IllegalArgumentException("Missing audio mime")
+    val codec = MediaCodec.createDecoderByType(mime)
+    codec.configure(inputFormat, null, null, 0)
+    codec.start()
+
+    var sampleRate = if (inputFormat!!.containsKey(android.media.MediaFormat.KEY_SAMPLE_RATE)) {
+        inputFormat!!.getInteger(android.media.MediaFormat.KEY_SAMPLE_RATE)
+    } else 16000
+    var channels = if (inputFormat!!.containsKey(android.media.MediaFormat.KEY_CHANNEL_COUNT)) {
+        inputFormat!!.getInteger(android.media.MediaFormat.KEY_CHANNEL_COUNT)
+    } else 1
+    var pcmEncoding = if (inputFormat!!.containsKey(android.media.MediaFormat.KEY_PCM_ENCODING)) {
+        inputFormat!!.getInteger(android.media.MediaFormat.KEY_PCM_ENCODING)
+    } else AudioFormat.ENCODING_PCM_16BIT
+
+    var writtenDataBytes = 0L
+
+    FileOutputStream(outWav).use { fos ->
+        // 占位 header，结束后回填
+        fos.write(ByteArray(44))
+
+        val bufferInfo = MediaCodec.BufferInfo()
+        var inputDone = false
+        var outputDone = false
+
+        while (!outputDone) {
+            if (!inputDone) {
+                val inIndex = codec.dequeueInputBuffer(10_000)
+                if (inIndex >= 0) {
+                    val inBuffer = codec.getInputBuffer(inIndex)!!
+                    val sampleSize = extractor.readSampleData(inBuffer, 0)
+                    if (sampleSize < 0) {
+                        codec.queueInputBuffer(
+                            inIndex,
+                            0,
+                            0,
+                            0L,
+                            MediaCodec.BUFFER_FLAG_END_OF_STREAM
+                        )
+                        inputDone = true
+                    } else {
+                        val sampleTime = extractor.sampleTime
+                        codec.queueInputBuffer(inIndex, 0, sampleSize, sampleTime, 0)
+                        extractor.advance()
+                    }
+                }
+            }
+
+            val outIndex = codec.dequeueOutputBuffer(bufferInfo, 10_000)
+            when {
+                outIndex >= 0 -> {
+                    if (bufferInfo.size > 0) {
+                        val outBuffer = codec.getOutputBuffer(outIndex)!!
+                        outBuffer.position(bufferInfo.offset)
+                        outBuffer.limit(bufferInfo.offset + bufferInfo.size)
+
+                        val mono = pcmBufferToMonoFloat(
+                            outBuffer = outBuffer,
+                            channels = channels,
+                            pcmEncoding = pcmEncoding
+                        )
+                        val out16k = if (sampleRate == 16000) mono else resampleLinear(mono, sampleRate, 16000)
+                        writtenDataBytes += writeFloatPcm16(out16k, fos)
+                    }
+
+                    if ((bufferInfo.flags and MediaCodec.BUFFER_FLAG_END_OF_STREAM) != 0) {
+                        outputDone = true
+                    }
+                    codec.releaseOutputBuffer(outIndex, false)
+                }
+
+                outIndex == MediaCodec.INFO_OUTPUT_FORMAT_CHANGED -> {
+                    val outFormat = codec.outputFormat
+                    if (outFormat.containsKey(android.media.MediaFormat.KEY_SAMPLE_RATE)) {
+                        sampleRate = outFormat.getInteger(android.media.MediaFormat.KEY_SAMPLE_RATE)
+                    }
+                    if (outFormat.containsKey(android.media.MediaFormat.KEY_CHANNEL_COUNT)) {
+                        channels = outFormat.getInteger(android.media.MediaFormat.KEY_CHANNEL_COUNT)
+                    }
+                    if (outFormat.containsKey(android.media.MediaFormat.KEY_PCM_ENCODING)) {
+                        pcmEncoding = outFormat.getInteger(android.media.MediaFormat.KEY_PCM_ENCODING)
+                    }
+                }
+            }
+        }
+    }
+
+    codec.stop()
+    codec.release()
+    extractor.release()
+
+    RandomAccessFile(outWav, "rw").use { raf ->
+        raf.seek(0)
+        raf.write(buildWavHeader(writtenDataBytes, sampleRate = 16000, channels = 1, bitRate = 16))
+    }
+}
+
+private fun pcmBufferToMonoFloat(
+    outBuffer: ByteBuffer,
+    channels: Int,
+    pcmEncoding: Int
+): FloatArray {
+    val safeChannels = channels.coerceAtLeast(1)
+    val dup = outBuffer.slice().order(ByteOrder.LITTLE_ENDIAN)
+
+    return when (pcmEncoding) {
+        AudioFormat.ENCODING_PCM_16BIT -> {
+            val samples = dup.remaining() / 2
+            val frames = samples / safeChannels
+            val mono = FloatArray(frames)
+            for (i in 0 until frames) {
+                var sum = 0f
+                for (ch in 0 until safeChannels) {
+                    val s = dup.short / 32768.0f
+                    sum += s
+                }
+                mono[i] = sum / safeChannels
+            }
+            mono
+        }
+
+        AudioFormat.ENCODING_PCM_FLOAT -> {
+            val samples = dup.remaining() / 4
+            val frames = samples / safeChannels
+            val mono = FloatArray(frames)
+            for (i in 0 until frames) {
+                var sum = 0f
+                for (ch in 0 until safeChannels) {
+                    sum += dup.float
+                }
+                mono[i] = sum / safeChannels
+            }
+            mono
+        }
+
+        else -> throw IllegalArgumentException("Unsupported PCM encoding: $pcmEncoding")
+    }
+}
+
+private fun writeFloatPcm16(data: FloatArray, fos: FileOutputStream): Long {
+    if (data.isEmpty()) return 0L
+    val bytes = ByteArray(data.size * 2)
+    var p = 0
+    for (v in data) {
+        val clamped = v.coerceIn(-1f, 1f)
+        val s = (clamped * 32767.0f).toInt().toShort()
+        bytes[p++] = (s.toInt() and 0xff).toByte()
+        bytes[p++] = ((s.toInt() shr 8) and 0xff).toByte()
+    }
+    fos.write(bytes)
+    return bytes.size.toLong()
 }
 
 fun readWavInfo(file: File): WavInfo {
@@ -160,6 +360,57 @@ private fun resampleLinear(input: FloatArray, inRate: Int, outRate: Int): FloatA
         out[i] = ((1 - t) * input[i0] + t * input[i1]).toFloat()
     }
     return out
+}
+
+private fun buildWavHeader(totalAudioLen: Long, sampleRate: Int, channels: Int, bitRate: Int): ByteArray {
+    val totalDataLen = totalAudioLen + 36
+    val byteRate = bitRate.toLong() * channels * sampleRate / 8
+    val header = ByteArray(44)
+    header[0] = 'R'.code.toByte() // RIFF/WAVE header
+    header[1] = 'I'.code.toByte()
+    header[2] = 'F'.code.toByte()
+    header[3] = 'F'.code.toByte()
+    header[4] = (totalDataLen and 0xffL).toByte()
+    header[5] = (totalDataLen shr 8 and 0xffL).toByte()
+    header[6] = (totalDataLen shr 16 and 0xffL).toByte()
+    header[7] = (totalDataLen shr 24 and 0xffL).toByte()
+    header[8] = 'W'.code.toByte()
+    header[9] = 'A'.code.toByte()
+    header[10] = 'V'.code.toByte()
+    header[11] = 'E'.code.toByte()
+    header[12] = 'f'.code.toByte() // 'fmt ' chunk
+    header[13] = 'm'.code.toByte()
+    header[14] = 't'.code.toByte()
+    header[15] = ' '.code.toByte()
+    header[16] = 16 // 4 bytes: size of 'fmt ' chunk
+    header[17] = 0
+    header[18] = 0
+    header[19] = 0
+    header[20] = 1 // format = 1
+    header[21] = 0
+    header[22] = channels.toByte()
+    header[23] = 0
+    header[24] = (sampleRate and 0xff).toByte()
+    header[25] = (sampleRate shr 8 and 0xff).toByte()
+    header[26] = (sampleRate shr 16 and 0xff).toByte()
+    header[27] = (sampleRate shr 24 and 0xff).toByte()
+    header[28] = (byteRate and 0xffL).toByte()
+    header[29] = (byteRate shr 8 and 0xffL).toByte()
+    header[30] = (byteRate shr 16 and 0xffL).toByte()
+    header[31] = (byteRate shr 24 and 0xffL).toByte()
+    header[32] = (channels * bitRate / 8).toByte()
+    header[33] = 0
+    header[34] = bitRate.toByte()
+    header[35] = 0
+    header[36] = 'd'.code.toByte()
+    header[37] = 'a'.code.toByte()
+    header[38] = 't'.code.toByte()
+    header[39] = 'a'.code.toByte()
+    header[40] = (totalAudioLen and 0xffL).toByte()
+    header[41] = (totalAudioLen shr 8 and 0xffL).toByte()
+    header[42] = (totalAudioLen shr 16 and 0xffL).toByte()
+    header[43] = (totalAudioLen shr 24 and 0xffL).toByte()
+    return header
 }
 
 private fun readIntLE(raf: RandomAccessFile): Int {

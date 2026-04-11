@@ -87,9 +87,9 @@ class AudioFileActivity : AppCompatActivity() {
 
             try {
                 val allText = withContext(Dispatchers.IO) {
-                    val tempFile = copyUriToTempFile(this@AudioFileActivity, uri)
+                    val audioFile = prepareAudioForWhisper(this@AudioFileActivity, uri)
                     try {
-                        val wav = readWavInfo(tempFile)
+                        val wav = readWavInfo(audioFile)
 
                         val chunkSec = 30
                         val overlapSec = 1
@@ -103,7 +103,7 @@ class AudioFileActivity : AppCompatActivity() {
 
                         while (startFrame < wav.totalFrames) {
                             val chunk = readWavChunkAs16kMonoFloat(
-                                file = tempFile,
+                                file = audioFile,
                                 wav = wav,
                                 startFrame = startFrame,
                                 framesToRead = chunkFrames
@@ -126,7 +126,7 @@ class AudioFileActivity : AppCompatActivity() {
 
                         sb.toString().trim()
                     } finally {
-                        tempFile.delete()
+                        audioFile.delete()
                     }
                 }
 
@@ -136,7 +136,7 @@ class AudioFileActivity : AppCompatActivity() {
                 Log.d(TAG, showText)
             } catch (e: Exception) {
                 e.printStackTrace()
-                resultTextView!!.text = "识别失败：${e.message}\n当前仅支持 PCM16 WAV"
+                resultTextView!!.text = "识别失败：${e.message}"
             } finally {
                 selectAudioBtn!!.isEnabled = true
             }
