@@ -38,38 +38,24 @@ class RecordActivity : AppCompatActivity() {
 
     companion object {
         private val TAG = AudioFileActivity::class.java.name
-
-        // 采样率
         const val SAMPLE_RATE = 16000
-
-        // 声道数
         const val CHANNEL = AudioFormat.CHANNEL_IN_MONO
-
-        // 返回的音频数据的格式
         const val AUDIO_FORMAT = AudioFormat.ENCODING_PCM_16BIT
-
-        // assets里面的模型路径
-        private const val modelPath = "models/ggml-model.bin"
     }
 
     @SuppressLint("ClickableViewAccessibility")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_record)
-        // 请求权限
-        if (!hasPermission()) {
-            requestPermission()
-        }
+        if (!hasPermission()) requestPermission()
 
         minBufferSize = AudioRecord.getMinBufferSize(SAMPLE_RATE, CHANNEL, AUDIO_FORMAT)
         resultTextView = findViewById(R.id.result_text)
-        // 录音情况显示器
         audioView = findViewById(R.id.audioView)
-        audioView?.setStyle(
-            AudioView.ShowStyle.STYLE_HOLLOW_LUMP, AudioView.ShowStyle.STYLE_NOTHING
-        )
+        audioView?.setStyle(AudioView.ShowStyle.STYLE_HOLLOW_LUMP, AudioView.ShowStyle.STYLE_NOTHING)
+
         mRecordButton = findViewById(R.id.record_button)
-        mRecordButton!!.setOnTouchListener { v: View?, event: MotionEvent ->
+        mRecordButton!!.setOnTouchListener { _: View?, event: MotionEvent ->
             if (event.action == MotionEvent.ACTION_UP) {
                 mIsRecording = false
                 stopRecording()
@@ -82,23 +68,24 @@ class RecordActivity : AppCompatActivity() {
             true
         }
         mRecordButton!!.isEnabled = false
-        // 启动协程
-        lifecycleScope.launch {
-            loadModel()
-        }
-
+        lifecycleScope.launch { loadModel() }
     }
 
     @SuppressLint("SetTextI18n")
     private suspend fun loadModel() = withContext(Dispatchers.IO) {
-        val showText = "正在加载模型：$modelPath ...\n"
-        // 在 UI 线程中更新 UI
-        withContext(Dispatchers.Main) {
-            resultTextView!!.text = showText
+        val modelFile = ModelManager.getSelectedModelFile(applicationContext)
+        if (modelFile == null) {
+            withContext(Dispatchers.Main) {
+                resultTextView!!.text = "未找到模型，请先返回首页导入或下载模型"
+                Toast.makeText(this@RecordActivity, "请先配置模型", Toast.LENGTH_SHORT).show()
+                finish()
+            }
+            return@withContext
         }
-        whisperContext =
-            WhisperContext.createContextFromAsset(application.assets, modelPath)
-        // 在 UI 线程中更新 UI
+
+        val showText = "正在加载模型：${modelFile.absolutePath} ...\n"
+        withContext(Dispatchers.Main) { resultTextView!!.text = showText }
+        whisperContext = WhisperContext.createContextFromFile(modelFile.absolutePath)
         withContext(Dispatchers.Main) {
             mRecordButton!!.isEnabled = true
             resultTextView!!.text = showText + "模型加载成功"
@@ -106,25 +93,18 @@ class RecordActivity : AppCompatActivity() {
         }
     }
 
-    // 开始录音
     private fun startRecording() {
         try {
-            if (ActivityCompat.checkSelfPermission(
-                    this, Manifest.permission.RECORD_AUDIO
-                ) != PackageManager.PERMISSION_GRANTED
-            ) {
+            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
                 requestPermission()
                 return
             }
             tempFile = File.createTempFile("recording", "wav")
-            // 创建录音器
-            audioRecord = AudioRecord(
-                MediaRecorder.AudioSource.MIC, SAMPLE_RATE, CHANNEL, AUDIO_FORMAT, minBufferSize
-            )
+            audioRecord = AudioRecord(MediaRecorder.AudioSource.MIC, SAMPLE_RATE, CHANNEL, AUDIO_FORMAT, minBufferSize)
         } catch (e: IllegalStateException) {
             e.printStackTrace()
         }
-        // 开启一个线程将录音数据写入文件
+
         val recordingAudioThread = Thread {
             try {
                 writeAudioDataToWavFile(tempFile!!)
@@ -133,32 +113,24 @@ class RecordActivity : AppCompatActivity() {
             }
         }
         recordingAudioThread.start()
-        // 启动录音器
         audioRecord!!.startRecording()
         audioView!!.visibility = View.VISIBLE
     }
 
-    // 停止录音
     private fun stopRecording() {
-        // 停止录音器
         audioRecord!!.stop()
         audioRecord!!.release()
         audioRecord = null
         audioView!!.visibility = View.GONE
-        // 开始识别
         try {
             val startTime = System.currentTimeMillis()
             resultTextView!!.text = "正在识别中..."
             val audioData = decodeWaveFile(tempFile!!)
-            // 启动协程
             lifecycleScope.launch {
                 mRecordButton!!.isEnabled = false
-                // 在协程中调用suspend函数
                 val text = whisperContext?.transcribeData(audioData)
                 val endTime = System.currentTimeMillis()
-                // 在 UI 线程中更新 UI
                 withContext(Dispatchers.Main) {
-                    // 把结果显示在 TextView 中
                     val showText = "识别结果：${text.toString()}\n" +
                             "音频时间：${audioData.size / (16000 / 1000)} ms\n" +
                             "识别时间：${endTime - startTime} ms\n"
@@ -173,7 +145,6 @@ class RecordActivity : AppCompatActivity() {
         }
     }
 
-    // 保存音频
     @Throws(IOException::class)
     private fun writeAudioDataToWavFile(file: File) {
         val fos = FileOutputStream(file)
@@ -196,30 +167,16 @@ class RecordActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
-        if (audioRecord != null) {
-            audioRecord!!.release()
-        }
-        if (lifecycleScope.isActive) {
-            lifecycleScope.cancel()
-        }
-        lifecycleScope.launch {
-            whisperContext!!.release()
-        }
+        if (audioRecord != null) audioRecord!!.release()
+        if (lifecycleScope.isActive) lifecycleScope.cancel()
+        lifecycleScope.launch { whisperContext?.release() }
     }
 
-    // check had permission
     private fun hasPermission(): Boolean {
-        return checkSelfPermission(Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED && checkSelfPermission(
-            Manifest.permission.WRITE_EXTERNAL_STORAGE
-        ) == PackageManager.PERMISSION_GRANTED
+        return checkSelfPermission(Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED
     }
 
-    // request permission
     private fun requestPermission() {
-        requestPermissions(
-            arrayOf(
-                Manifest.permission.RECORD_AUDIO, Manifest.permission.WRITE_EXTERNAL_STORAGE
-            ), 1
-        )
+        requestPermissions(arrayOf(Manifest.permission.RECORD_AUDIO), 1)
     }
 }
