@@ -20,6 +20,18 @@ android {
         }
     }
 
+    signingConfigs {
+        release {
+            storeFile = file("yeyupiaoling.jks")
+            storePassword = "123456789"
+            keyAlias = "yeyupiaoling"
+            keyPassword = "123456789"
+            enableV2Signing true
+            enableV3Signing true
+            enableV4Signing true
+        }
+    }
+
     buildTypes {
         release {
             minifyEnabled false

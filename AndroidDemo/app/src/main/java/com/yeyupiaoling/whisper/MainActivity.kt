@@ -49,12 +49,12 @@ class MainActivity : AppCompatActivity() {
             startActivity(Intent(this@MainActivity, TestActivity::class.java))
         }
 
-        refreshModelStatus()
+        initializeModelStatus()
     }
 
     override fun onResume() {
         super.onResume()
-        refreshModelStatus()
+        initializeModelStatus()
     }
 
     private fun openModelPicker() {
@@ -122,6 +122,21 @@ class MainActivity : AppCompatActivity() {
                 refreshModelStatus()
                 setActionEnabled(true)
             }
+        }
+    }
+
+    private fun initializeModelStatus() {
+        lifecycleScope.launch {
+            // 仅在当前没有可用模型时，尝试自动准备 assets 中的默认模型。
+            if (ModelManager.getSelectedModelFile(this@MainActivity) == null) {
+                setActionEnabled(false)
+                modelStatusText.text = "正在检查默认模型..."
+            }
+            withContext(Dispatchers.IO) {
+                ModelManager.ensureDefaultModelSelected(this@MainActivity)
+            }
+            refreshModelStatus()
+            setActionEnabled(true)
         }
     }
 

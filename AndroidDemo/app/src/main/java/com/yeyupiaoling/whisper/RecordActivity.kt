@@ -73,7 +73,8 @@ class RecordActivity : AppCompatActivity() {
 
     @SuppressLint("SetTextI18n")
     private suspend fun loadModel() = withContext(Dispatchers.IO) {
-        val modelFile = ModelManager.getSelectedModelFile(applicationContext)
+        // 进入页面时优先确保默认模型已准备好，避免首次使用时无模型可加载。
+        val modelFile = ModelManager.ensureDefaultModelSelected(applicationContext)
         if (modelFile == null) {
             withContext(Dispatchers.Main) {
                 resultTextView!!.text = "未找到模型，请先返回首页导入或下载模型"
