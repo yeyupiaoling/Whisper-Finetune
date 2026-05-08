@@ -14,24 +14,6 @@ on:
       - 'AndroidDemo/**'
       - '.github/workflows/android-demo-build.yml'
   workflow_dispatch:
-    inputs:
-      model:
-        description: '内置模型选择（会下载并重命名为 app/src/main/assets/models/ggml-model.bin）'
-        required: true
-        default: tiny
-        type: choice
-        options:
-          - tiny
-          - base
-          - small
-          - medium
-          - large-v3
-          - custom_url
-      custom_model_url:
-        description: '自定义模型 URL（当 model=custom_url 时必填）'
-        required: false
-        default: ''
-        type: string
 
 jobs:
   build-android-demo:
@@ -60,56 +42,13 @@ jobs:
           sdkmanager --install "platform-tools" "platforms;android-33" "build-tools;33.0.2" "ndk;25.2.9519653"
           sdkmanager --licenses || true
 
-      - name: Select model URL
-        id: model
-        shell: bash
-        run: |
-          MODEL_INPUT="${{ github.event.inputs.model }}"
-          CUSTOM_URL="${{ github.event.inputs.custom_model_url }}"
-
-          # 非 workflow_dispatch 触发时，默认 tiny
-          if [ -z "$MODEL_INPUT" ]; then
-            MODEL_INPUT="tiny"
-          fi
-
-          case "$MODEL_INPUT" in
-            tiny)
-              MODEL_URL="https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-tiny.bin"
-              ;;
-            base)
-              MODEL_URL="https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-base.bin"
-              ;;
-            small)
-              MODEL_URL="https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-small.bin"
-              ;;
-            medium)
-              MODEL_URL="https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-medium.bin"
-              ;;
-            large-v3)
-              MODEL_URL="https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-large-v3.bin"
-              ;;
-            custom_url)
-              if [ -z "$CUSTOM_URL" ]; then
-                echo "custom_model_url is required when model=custom_url"
-                exit 1
-              fi
-              MODEL_URL="$CUSTOM_URL"
-              ;;
-            *)
-              echo "Unsupported model input: $MODEL_INPUT"
-              exit 1
-              ;;
-          esac
-
-          echo "model_input=$MODEL_INPUT" >> "$GITHUB_OUTPUT"
-          echo "model_url=$MODEL_URL" >> "$GITHUB_OUTPUT"
-
       - name: Download model to assets
         shell: bash
         run: |
           mkdir -p app/src/main/assets/models
-          echo "Downloading model: ${{ steps.model.outputs.model_url }}"
-          curl -L --fail --retry 3 "${{ steps.model.outputs.model_url }}" -o app/src/main/assets/models/ggml-model.bin
+          MODEL_URL="https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-tiny.bin"
+          echo "Downloading model: $MODEL_URL"
+          curl -L --fail --retry 3 "$MODEL_URL" -o app/src/main/assets/models/ggml-model.bin
           ls -lh app/src/main/assets/models/ggml-model.bin
 
       - name: Build release APK
@@ -120,6 +59,6 @@ jobs:
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
-          name: android-demo-release-${{ steps.model.outputs.model_input }}
+          name: android-demo-release-tiny
           path: |
             AndroidDemo/app/build/outputs/apk/release/*.apk
