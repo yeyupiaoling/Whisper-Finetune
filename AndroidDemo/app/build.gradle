@@ -24,7 +24,7 @@ android {
         release {
             storeFile = file("yeyupiaoling.jks")
             storePassword = "123456789"
-            keyAlias = "yeyupiaoling"
+            keyAlias = "key0"
             keyPassword = "123456789"
             enableV2Signing true
             enableV3Signing true
