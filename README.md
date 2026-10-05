@@ -34,6 +34,26 @@ OpenAI在开源了号称其英文语音辨识能力已达到人类水准的Whisp
  - openai/whisper-large-v3
  - openai/whisper-large-v3-turbo
 
+### 训练时选择模型和数据集
+
+[finetune.py](finetune.py) 支持以下模型与 [utils/reader.py](utils/reader.py) 中的数据集类：
+
+| `--model_type` | 默认基础模型 | `--dataset_type auto` 对应的类 |
+| --- | --- | --- |
+| `whisper`（默认） | `openai/whisper-tiny` | `CustomDataset` |
+| `distill_whisper` | `distil-whisper/distil-small.en` | `DistillWhisperDataset` |
+| `moonshine` | `UsefulSensors/moonshine-tiny` | `MoonshineDataset` |
+
+- `--base_model`：覆盖默认基础模型，支持 Hugging Face 模型 ID 或本地目录；应与 `--model_type` 的架构一致。
+- `--dataset_type`：默认 `auto`；也可指定 `whisper`、`distill_whisper`、`moonshine` 或表中的完整类名。
+- `--train_data`、`--test_data`：分别指定训练集、验证集，沿用现有 JSONL / `.header` 数据格式。
+- Whisper 和 Distill-Whisper 的数据集可互换；Moonshine 模型与数据集必须配套。Moonshine 不支持 `--timestamps True` 或 `--task translate`，不使用 `--language` 控制转录语言。
+- 英文 Distill-Whisper 默认模型建议搭配 `--language English`；语言选项本身不会让英文模型获得多语言识别能力。
+- 保留现有 LoRA/AdaLoRA 训练方式；`--use_adalora False` 选择普通 LoRA，`--use_8bit True` 启用 8 位量化训练。
+- 训练批次会自动选择 Whisper 的 `input_features` 或 Moonshine 的 `input_values`，最终检查点同时保存适配器和完整 processor。
+
+例如，Moonshine 可指定参数 `--model_type moonshine --dataset_type MoonshineDataset`；Distill-Whisper 可指定 `--model_type distill_whisper --language English`。不指定新增参数时仍使用 Whisper 和 `CustomDataset`。上述选择仅适用于训练入口，其它推理、合并及转换脚本不因此自动支持 Moonshine。
+
 **欢迎大家扫码入知识星球（左）或者QQ群（右）讨论，知识星球里面提供项目的模型文件和博主其他相关项目的模型文件，也包括其他一些资源。**
 
 <div align="center">
